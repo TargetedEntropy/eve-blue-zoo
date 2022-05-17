@@ -7,16 +7,19 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
-
+from apps.authentication.esi import EsiAuth
 
 db = SQLAlchemy()
 login_manager = LoginManager()
+
+esi = EsiAuth()
 
 
 def register_extensions(app):
     db.init_app(app)
     login_manager.init_app(app)
-
+    esi.init_app(app)
+    
 
 def register_blueprints(app):
     for module_name in ('authentication', 'home'):

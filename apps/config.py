@@ -17,6 +17,13 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'db.sqlite3')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    ESI_SECRET_KEY = config('ESI_SECRET_KEY')
+    ESI_CLIENT_ID = config('ESI_CLIENT_ID')
+    ESI_CALLBACK = config('ESI_CALLBACK')
+    ESI_USER_AGENT = config('ESI_USER_AGENT')
+    ESI_SWAGGER_JSON = config('ESI_SWAGGER_JSON')    
+
+
 
 class ProductionConfig(Config):
     DEBUG = False
@@ -35,11 +42,14 @@ class ProductionConfig(Config):
         config('DB_PORT', default=5432),
         config('DB_NAME', default='appseed-flask')
     )
+    
 
+
+    
+    
 
 class DebugConfig(Config):
     DEBUG = True
-
 
 # Load all possible configurations
 config_dict = {

@@ -11,9 +11,6 @@
     <div class="col-md-8">
       <div class="card">
 
-        <form role="form" method="post" action="">
-        
-          {{ form.hidden_tag() }} 
 
           <div class="card-header">
             <h5 class="title">Login</h5>
@@ -23,7 +20,7 @@
                   <span class="text-danger">{{ msg | safe }}</span>
                 {% else %}
                 <span>
-                  Add your credentials
+                  Login with your Eve Online credentials
                 </span>
                 {% endif %}  
             </h6>
@@ -35,30 +32,13 @@
 
                 <div class="col-md-3 px-md-1">
                   <div class="form-group">
-                    <label>Username</label>
-                    {{ form.username(class="form-control") }}
-                  </div>
-                </div>
-
-              </div>
-              <div class="row">
-
-                <div class="col-md-3 px-md-1">
-                  <div class="form-group">
-                    <label>Password</label>
-                    {{ form.password(class="form-control", type="password") }}
+                    <a href=/sso/login><img border=0 src=https://web.ccpgamescdn.com/eveonlineassets/developers/eve-sso-login-black-small.png></a>
                   </div>
                 </div>
 
               </div>
               
           </div>
-          <div class="card-footer">
-            <button type="submit" name="login" class="btn btn-fill btn-primary">Login</button>
-            &nbsp; &nbsp;
-            Don't have an account? <a href="{{ url_for('authentication_blueprint.register') }}" class="text-primary">Create</a>
-          </div>
-
         </form>
 
       </div>
