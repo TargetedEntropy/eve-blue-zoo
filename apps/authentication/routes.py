@@ -4,11 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask import render_template, redirect, request, url_for, session
-from flask_login import (
-    current_user,
-    login_user,
-    logout_user
-)
+from flask_login import current_user, login_user, logout_user
 
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
@@ -18,11 +14,15 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 from apps.authentication.util import verify_pass
-import hashlib, hmac, random, esipy
+import hashlib
+import hmac
+import random
+import esipy
 
-@blueprint.route('/')
+
+@blueprint.route("/")
 def route_default():
-    return redirect(url_for('authentication_blueprint.login'))
+    return redirect(url_for("authentication_blueprint.login"))
 
 
 def generate_token():
@@ -31,11 +31,14 @@ def generate_token():
     rand = random.SystemRandom()
     random_string = "".join(rand.choice(chars) for _ in range(40))
     return hmac.new(
-        "jsflksjdfsedfsdfsdf".encode("utf-8"), random_string.encode("utf-8"), hashlib.sha256
+        "jsflksjdfsedfsdfsdf".encode("utf-8"),
+        random_string.encode("utf-8"),
+        hashlib.sha256,
     ).hexdigest()
 
 
 # Login & Registration
+
 
 @blueprint.route("/sso/login")
 def sso_login():
@@ -44,7 +47,7 @@ def sso_login():
     session["token"] = token
     return redirect(
         esi.esisecurity.get_auth_uri(
-            scopes=['esi-wallet.read_character_wallet.v1','publicData'],
+            scopes=["esi-wallet.read_character_wallet.v1", "publicData"],
             state=token,
         )
     )
@@ -100,7 +103,7 @@ def callback():
         login_user(user)
         session.permanent = True
 
-    except:
+    except BaseException:
         db.session.rollback()
         logout_user()
         return "Cannot login the user - uid: %d" % characterID
@@ -108,16 +111,14 @@ def callback():
     return redirect(url_for("home_blueprint.index"))
 
 
-
-
-@blueprint.route('/login', methods=['GET', 'POST'])
+@blueprint.route("/login", methods=["GET", "POST"])
 def login():
     login_form = LoginForm(request.form)
-    if 'login' in request.form:
+    if "login" in request.form:
 
         # read form data
-        username = request.form['username']
-        password = request.form['password']
+        username = request.form["username"]
+        password = request.form["password"]
 
         # Locate user
         user = Users.query.filter_by(username=username).first()
@@ -126,87 +127,98 @@ def login():
         if user and verify_pass(password, user.password):
 
             login_user(user)
-            return redirect(url_for('authentication_blueprint.route_default'))
+            return redirect(url_for("authentication_blueprint.route_default"))
 
         # Something (user or pass) is not ok
-        return render_template('accounts/login.html',
-                               segment = 'login',     
-                               msg='Wrong user or password',
-                               form=login_form)
+        return render_template(
+            "accounts/login.html",
+            segment="login",
+            msg="Wrong user or password",
+            form=login_form,
+        )
 
     if not current_user.is_authenticated:
-        return render_template('accounts/login.html',
-                               segment = 'login', 
-                               form=login_form)
-    return redirect(url_for('home_blueprint.index'))
+        return render_template(
+            "accounts/login.html",
+            segment="login",
+            form=login_form)
+    return redirect(url_for("home_blueprint.index"))
 
 
-@blueprint.route('/register', methods=['GET', 'POST'])
+@blueprint.route("/register", methods=["GET", "POST"])
 def register():
     create_account_form = CreateAccountForm(request.form)
-    if 'register' in request.form:
+    if "register" in request.form:
 
-        username = request.form['username']
-        email = request.form['email']
+        username = request.form["username"]
+        email = request.form["email"]
 
         # Check usename exists
         user = Users.query.filter_by(username=username).first()
         if user:
-            return render_template('accounts/register.html',
-                                   msg='Username already registered',
-                                   segment = 'register',
-                                   success=False,
-                                   form=create_account_form)
+            return render_template(
+                "accounts/register.html",
+                msg="Username already registered",
+                segment="register",
+                success=False,
+                form=create_account_form,
+            )
 
         # Check email exists
         user = Users.query.filter_by(email=email).first()
         if user:
-            return render_template('accounts/register.html',
-                                   msg='Email already registered',
-                                   segment = 'register', 
-                                   success=False,
-                                   form=create_account_form)
+            return render_template(
+                "accounts/register.html",
+                msg="Email already registered",
+                segment="register",
+                success=False,
+                form=create_account_form,
+            )
 
         # else we can create the user
         user = Users(**request.form)
         db.session.add(user)
         db.session.commit()
 
-        return render_template('accounts/register.html',
-                               msg='User created please <a href="/login">login</a>',
-                               segment = 'register', 
-                               success=True,
-                               form=create_account_form)
+        return render_template(
+            "accounts/register.html",
+            msg='User created please <a href="/login">login</a>',
+            segment="register",
+            success=True,
+            form=create_account_form,
+        )
 
     else:
-        return render_template( 'accounts/register.html',
-                                segment = 'register', 
-                                form=create_account_form)
+        return render_template(
+            "accounts/register.html",
+            segment="register",
+            form=create_account_form)
 
 
-@blueprint.route('/logout')
+@blueprint.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for('home_blueprint.index'))
+    return redirect(url_for("home_blueprint.index"))
 
 
 # Errors
 
+
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return render_template('home/page-403.html'), 403
+    return render_template("home/page-403.html"), 403
 
 
 @blueprint.errorhandler(403)
 def access_forbidden(error):
-    return render_template('home/page-403.html'), 403
+    return render_template("home/page-403.html"), 403
 
 
 @blueprint.errorhandler(404)
 def not_found_error(error):
-    return render_template('home/page-404.html'), 404
+    return render_template("home/page-404.html"), 404
 
 
 @blueprint.errorhandler(500)
 def internal_error(error):
-    return render_template('home/page-500.html'), 500
+    return render_template("home/page-500.html"), 500

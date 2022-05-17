@@ -11,9 +11,10 @@ import time
 
 from apps.authentication.util import hash_pass
 
+
 class Users(db.Model, UserMixin):
 
-    __tablename__ = 'Users'
+    __tablename__ = "Users"
 
     # id = db.Column(db.Integer, primary_key=True)
     # username = db.Column(db.String(64), unique=True)
@@ -21,7 +22,7 @@ class Users(db.Model, UserMixin):
     # password = db.Column(db.LargeBinary)
 
     # our ID is the character ID from EVE API
-    character_id = db.Column(db.BigInteger,  primary_key=True)
+    character_id = db.Column(db.BigInteger, primary_key=True)
     character_owner_hash = db.Column(db.String(255), nullable=True)
     character_name = db.Column(db.String(200), nullable=True)
 
@@ -30,18 +31,16 @@ class Users(db.Model, UserMixin):
     access_token_expires = db.Column(db.DateTime(), nullable=True)
     refresh_token = db.Column(db.String(255), nullable=True)
 
-
-
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
             # depending on whether value is an iterable or not, we must
             # unpack it's value (when **kwargs is request.form, some values
             # will be a 1-element list)
-            if hasattr(value, '__iter__') and not isinstance(value, str):
+            if hasattr(value, "__iter__") and not isinstance(value, str):
                 # the ,= unpack of a singleton fails PEP8 (travis flake8 test)
                 value = value[0]
 
-            if property == 'password':
+            if property == "password":
                 value = hash_pass(value)  # we need bytes here (not plain str)
 
             setattr(self, property, value)
@@ -72,6 +71,7 @@ class Users(db.Model, UserMixin):
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
 
+
 @login_manager.user_loader
 def user_loader(character_id):
     return Users.query.filter_by(character_id=character_id).first()
@@ -79,6 +79,6 @@ def user_loader(character_id):
 
 @login_manager.request_loader
 def request_loader(request):
-    character_name = request.form.get('character_name')
+    character_name = request.form.get("character_name")
     user = Users.query.filter_by(character_name=character_name).first()
     return user if user else None
