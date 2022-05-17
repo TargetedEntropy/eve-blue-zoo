@@ -44,7 +44,7 @@ def sso_login():
     session["token"] = token
     return redirect(
         esi.esisecurity.get_auth_uri(
-            scopes=["publicData"],
+            scopes=['esi-wallet.read_character_wallet.v1','publicData'],
             state=token,
         )
     )
