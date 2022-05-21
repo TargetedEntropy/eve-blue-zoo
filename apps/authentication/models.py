@@ -13,6 +13,24 @@ import time
 from apps.authentication.util import hash_pass
 
 
+class Transactions(db.Model):
+    __tablename__ = "Transactions"
+
+    character_id = db.Column(db.BigInteger, primary_key=True)
+    amount = db.Column(db.Double, nullable=True)
+    balance = db.Column(db.Double, nullable=True)
+    context_id = db.Column(db.BigInteger, nullable=True)
+    context_id_type = db.Column(db.String(4096), nullable=True)
+    date = db.Column(db.DateTime(), nullable=True)
+    description = db.Column(db.String(4096), nullable=True)
+    first_party_id = db.Column(db.BigInteger, nullable=True)
+    reason = db.Column(db.String(4096), nullable=True)
+    ref_type = db.Column(db.String(4096), nullable=True)
+    second_party_id = db.Column(db.BigInteger, nullable=True)
+    tax = db.Column(db.Double, nullable=True)
+    tax_receiver_id = db.Column(db.BigInteger, nullable=True)
+
+
 class Characters(db.Model):
     __tablename__ = "Characters"
     character_id = db.Column(db.BigInteger, primary_key=True)
@@ -33,7 +51,6 @@ class Characters(db.Model):
         """Required for flask-login"""
         return self.master_character_id
 
-
     def get_sso_data(self):
         """Little "helper" function to get formated data for esipy security"""
         return {
@@ -41,7 +58,7 @@ class Characters(db.Model):
             "refresh_token": self.refresh_token,
             "expires_in": (
                 self.access_token_expires - datetime.utcnow()
-            ).total_seconds()
+            ).total_seconds(),
         }
 
     def update_token(self, token_response):
@@ -52,7 +69,7 @@ class Characters(db.Model):
         )
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
-            
+
 
 class Users(db.Model, UserMixin):
 
