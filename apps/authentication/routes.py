@@ -9,7 +9,7 @@ from flask_login import current_user, login_user, logout_user
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
-from apps.authentication.models import Users
+from apps.authentication.models import Users, Characters
 from sqlalchemy.orm.exc import NoResultFound
 
 from cryptography.fernet import Fernet
@@ -114,35 +114,34 @@ def callback():
         token = token.encode()
         decMessage = cipher_suite.decrypt(token)
         json_data = json.loads(decMessage)
-        return f"You belong to {json_data['salt']}"
+        master_character_id =  json_data['salt']
 
-        # # This is a logged out user, check in database, if the user exists
-        # characterID = cdata["sub"].split(":")[2]
-        # try:
-        #     user = Users.query.filter(
-        #         Users.character_id == characterID,
-        #     ).one()
+        # This is a logged out user, check in database, if the user exists
+        characterID = cdata["sub"].split(":")[2]
+        try:
+            character = Characters.query.filter(
+                Characters.character_id == characterID,
+            ).one()
 
-        # except NoResultFound:
-        #     user = Users()
-        #     user.character_id = characterID
+        except NoResultFound:
+            character = Characters()
+            character.character_id = characterID
+            character.master_character_id = master_character_id
 
-        # user.character_owner_hash = cdata["owner"]
-        # user.character_name = cdata["name"]
-        # user.update_token(auth_response)
+        character.character_owner_hash = cdata["owner"]
+        character.character_name = cdata["name"]
+        character.update_token(auth_response)
 
-        # # now the user is ready, so update/create it and log the user
-        # try:
-        #     db.session.merge(user)
-        #     db.session.commit()
+        # now the character is ready, so update/create it and log the character
+        try:
+            db.session.merge(character)
+            db.session.commit()
 
-        #     login_user(user)
-        #     session.permanent = True
-
-        # except BaseException:
-        #     db.session.rollback()
-        #     logout_user()
-        #     return "Cannot login the user - uid: %d" % characterID
+        except BaseException:
+            db.session.rollback()
+            return "Cannot add the user - uid: %d" % characterID
+        
+        return redirect(url_for("home_blueprint.index"))
     
     else:
 
