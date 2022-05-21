@@ -9,7 +9,8 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
 
 > Features
 
-- An incomplete Feature list
+- registration via Eve SSO
+- Associate multiple characters to primary login
 
 <br />
 
