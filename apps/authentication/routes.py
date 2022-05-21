@@ -3,23 +3,20 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-import esipy
 import random
 import hmac
 import hashlib
-from apps.authentication.util import verify_pass
 import urllib.parse
 import json
-from urllib.parse import urlencode, quote_plus
+import esipy
+from apps.authentication.util import verify_pass
 from flask import render_template, redirect, request, url_for, session
 from flask_login import current_user, login_user, logout_user
-
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users, Characters
 from sqlalchemy.orm.exc import NoResultFound
-
 from cryptography.fernet import Fernet
 
 fen_key = Fernet.generate_key()
