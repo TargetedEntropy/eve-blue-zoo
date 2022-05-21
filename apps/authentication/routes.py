@@ -99,14 +99,7 @@ def callback():
         return "Login EVE Online SSO failed: Session Token is Empty", 403
 
 
-    # if sess_token is None or token is None or token != sess_token:
-    #     return "Login EVE Online SSO failed: Session Token Mismatch", 403
-    if current_user.is_authenticated:
-        token = token.encode()
-        decMessage = cipher_suite.decrypt(token)
-        return f"You belong to {decMessage}"
-
-    # now we try to get tokens
+    # try to get tokens
     try:
         auth_response = esi.esisecurity.auth(code)
     except esipy.APIException as e:
@@ -114,42 +107,74 @@ def callback():
 
     # we get the character informations
     cdata = esi.esisecurity.verify()
-    print(cdata)
-    # if the user is already authed, we log him out
+
+    # if sess_token is None or token is None or token != sess_token:
+    #     return "Login EVE Online SSO failed: Session Token Mismatch", 403
     if current_user.is_authenticated:
-        logout_user()
+        token = token.encode()
+        decMessage = cipher_suite.decrypt(token)
+        json_data = json.loads(decMessage)
+        return f"You belong to {json_data['salt']}"
 
-    # now we check in database, if the user exists
-    # actually we'd have to also check with character_owner_hash, to be
-    # sure the owner is still the same, but that's an example only...
-    characterID = cdata["sub"].split(":")[2]
-    try:
-        user = Users.query.filter(
-            Users.character_id == characterID,
-        ).one()
+        # # This is a logged out user, check in database, if the user exists
+        # characterID = cdata["sub"].split(":")[2]
+        # try:
+        #     user = Users.query.filter(
+        #         Users.character_id == characterID,
+        #     ).one()
 
-    except NoResultFound:
-        user = Users()
-        user.character_id = characterID
+        # except NoResultFound:
+        #     user = Users()
+        #     user.character_id = characterID
 
-    user.character_owner_hash = cdata["owner"]
-    user.character_name = cdata["name"]
-    user.update_token(auth_response)
+        # user.character_owner_hash = cdata["owner"]
+        # user.character_name = cdata["name"]
+        # user.update_token(auth_response)
 
-    # now the user is ready, so update/create it and log the user
-    try:
-        db.session.merge(user)
-        db.session.commit()
+        # # now the user is ready, so update/create it and log the user
+        # try:
+        #     db.session.merge(user)
+        #     db.session.commit()
 
-        login_user(user)
-        session.permanent = True
+        #     login_user(user)
+        #     session.permanent = True
 
-    except BaseException:
-        db.session.rollback()
-        logout_user()
-        return "Cannot login the user - uid: %d" % characterID
+        # except BaseException:
+        #     db.session.rollback()
+        #     logout_user()
+        #     return "Cannot login the user - uid: %d" % characterID
+    
+    else:
 
-    return redirect(url_for("home_blueprint.index"))
+        # This is a logged out user, check in database, if the user exists
+        characterID = cdata["sub"].split(":")[2]
+        try:
+            user = Users.query.filter(
+                Users.character_id == characterID,
+            ).one()
+
+        except NoResultFound:
+            user = Users()
+            user.character_id = characterID
+
+        user.character_owner_hash = cdata["owner"]
+        user.character_name = cdata["name"]
+        user.update_token(auth_response)
+
+        # now the user is ready, so update/create it and log the user
+        try:
+            db.session.merge(user)
+            db.session.commit()
+
+            login_user(user)
+            session.permanent = True
+
+        except BaseException:
+            db.session.rollback()
+            logout_user()
+            return "Cannot login the user - uid: %d" % characterID
+
+        return redirect(url_for("home_blueprint.index"))
 
 
 @blueprint.route("/login", methods=["GET", "POST"])
