@@ -15,8 +15,8 @@ from apps.authentication.util import hash_pass
 
 class Characters(db.Model):
     __tablename__ = "Characters"
-    character_id = db.Column(db.BigInteger, primary_key=True),
-    master_character_id = db.Column(db.BigInteger),
+    character_id = db.Column(db.BigInteger, primary_key=True)
+    master_character_id = db.Column(db.BigInteger)
     character_owner_hash = db.Column(db.String(255), nullable=True)
     character_name = db.Column(db.String(200), nullable=True)
 
@@ -41,14 +41,14 @@ class Characters(db.Model):
             "refresh_token": self.refresh_token,
             "expires_in": (
                 self.access_token_expires - datetime.utcnow()
-            ).total_seconds(),
+            ).total_seconds()
         }
 
     def update_token(self, token_response):
         """helper function to update token data from SSO response"""
         self.access_token = token_response["access_token"]
         self.access_token_expires = datetime.fromtimestamp(
-            time.time() + token_response["expires_in"],
+            time.time() + token_response["expires_in"]
         )
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]

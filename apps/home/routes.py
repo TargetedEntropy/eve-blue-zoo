@@ -8,6 +8,9 @@ from flask import render_template, request
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from apps import esi
+from sqlalchemy.orm.exc import NoResultFound
+
+from apps.authentication.models import Characters
 
 
 @blueprint.route("/index")
@@ -37,6 +40,22 @@ def route_template(template):
 
     except BaseException:
         return render_template("home/page-500.html"), 500
+    
+    
+
+@blueprint.route("/page-user.html")
+@login_required
+def page_user():
+    # Detect the current page
+    segment = get_segment(request)
+    
+    try:
+        characters = Characters.query.filter(Characters.master_character_id == current_user.character_id)
+    except NoResultFound:
+        characters = []
+        
+    # Serve the file (if exists) from app/templates/home/FILE.html
+    return render_template("home/page-user.html", segment=segment, characters=characters)
 
 
 # Helper - Extract current page name from request

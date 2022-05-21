@@ -12,6 +12,15 @@ from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
 from sqlalchemy.orm.exc import NoResultFound
 
+from cryptography.fernet import Fernet
+fen_key = Fernet.generate_key()
+cipher_suite = Fernet(fen_key)
+
+from urllib.parse import urlencode, quote_plus
+
+import json
+import urllib.parse
+
 
 from apps.authentication.util import verify_pass
 import hashlib
@@ -25,26 +34,46 @@ def route_default():
     return redirect(url_for("authentication_blueprint.login"))
 
 
-def generate_token():
+def Encrypt(text_f):
+    encrypted = fen_key.encrypt(bytes(text_f.get(), 'utf-8'))
+    print("[*] Encrypted: {}".format(encrypted))
+    return encrypted
+
+def Decrypt(text_f):
+    plain = fen_key.decrypt(bytes(text_f.get(), 'utf-8'))
+    print("[*] Plain: {}".format(plain))
+    return plain
+
+def generate_token(salt="None"):
     """Generates a non-guessable OAuth token"""
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     rand = random.SystemRandom()
     random_string = "".join(rand.choice(chars) for _ in range(40))
-    return hmac.new(
+    hmac_string =  hmac.new(
         "jsflksjdfsedfsdfsdf".encode("utf-8"),
         random_string.encode("utf-8"),
         hashlib.sha256,
     ).hexdigest()
 
+    # Generate encrypted string with master_character_id
+    obj = {'salt': salt}
+    j = json.dumps(obj)
+
+    encMessage = urllib.parse.quote_plus(cipher_suite.encrypt(j.encode()))
+
+    return encMessage
 
 # Login & Registration
-
-
 @blueprint.route("/sso/login")
 def sso_login():
     """this redirects the user to the EVE SSO login"""
-    token = generate_token()
-    session["token"] = token
+    if current_user.is_authenticated:
+        token = generate_token(current_user.character_id)
+    else:
+        token = generate_token()
+
+    session["token"] = urllib.parse.unquote_plus(token)
+
     return redirect(
         esi.esisecurity.get_auth_uri(
             scopes=["esi-wallet.read_character_wallet.v1", "publicData"],
@@ -56,14 +85,26 @@ def sso_login():
 @blueprint.route("/sso/callback")
 def callback():
     """This is where the user comes after he logged in SSO"""
+
     # get the code from the login process
     code = request.args.get("code")
     token = request.args.get("state")
-
     # compare the state with the saved token for CSRF check
-    sess_token = session.pop("token", None)
-    if sess_token is None or token is None or token != sess_token:
+    sess_token = session.pop("token", "")
+
+    if token != str(sess_token):
         return "Login EVE Online SSO failed: Session Token Mismatch", 403
+
+    if sess_token is "" or token is None:
+        return "Login EVE Online SSO failed: Session Token is Empty", 403
+
+
+    # if sess_token is None or token is None or token != sess_token:
+    #     return "Login EVE Online SSO failed: Session Token Mismatch", 403
+    if current_user.is_authenticated:
+        token = token.encode()
+        decMessage = cipher_suite.decrypt(token)
+        return f"You belong to {decMessage}"
 
     # now we try to get tokens
     try:
