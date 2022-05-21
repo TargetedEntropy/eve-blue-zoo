@@ -5,6 +5,8 @@ will qualify if they run or not based on their own schedule. Meaning, ome update
 frequently than others.
 """
 
+from api import EsiTasks
+
 
 class MainTasks:
     """The Main tasks driving class.
