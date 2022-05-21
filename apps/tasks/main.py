@@ -7,30 +7,27 @@ frequently than others.
 
 
 class MainTasks:
-    """The Main tasks driving class.  
-    
+    """The Main tasks driving class.
+
     We intialize, control and execute our tasks here.
     """
+
     def __init__(self):
-        """Run internal class intialization functions
-        """        
+        """Run internal class intialization functions"""
         self.load_tasks()
-    
 
     def run_tasks(self):
         """Execute all of our tasks.
-        
+
         This will run all the tasks. They could be API updates,
         notifications or clean up jobs.
-        """        
+        """
         pass
-    
+
     def load_tasks(self):
-        """Run any potential initilization tasks
-        """        
+        """Run any potential initilization tasks"""
         pass
-    
+
     def purge_tasks(self):
-        """Purge all tasks in the queue
-        """        
+        """Purge all tasks in the queue"""
         pass
