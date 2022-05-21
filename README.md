@@ -14,6 +14,13 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
 
 <br />
 
+> Dependencies
+ - SQL Dumps: https://www.fuzzwork.co.uk/dump/latest/
+    - invItems.sql.bz2 
+    
+
+<br />
+
 > Links
 
 - 👉 [Eve Online Swagger](https://esi.evetech.net/)

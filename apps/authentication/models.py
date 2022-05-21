@@ -17,8 +17,8 @@ class Transactions(db.Model):
     __tablename__ = "Transactions"
 
     character_id = db.Column(db.BigInteger, primary_key=True)
-    amount = db.Column(db.Double, nullable=True)
-    balance = db.Column(db.Double, nullable=True)
+    amount = db.Column(db.Float, nullable=True)
+    balance = db.Column(db.Float, nullable=True)
     context_id = db.Column(db.BigInteger, nullable=True)
     context_id_type = db.Column(db.String(4096), nullable=True)
     date = db.Column(db.DateTime(), nullable=True)
@@ -27,9 +27,17 @@ class Transactions(db.Model):
     reason = db.Column(db.String(4096), nullable=True)
     ref_type = db.Column(db.String(4096), nullable=True)
     second_party_id = db.Column(db.BigInteger, nullable=True)
-    tax = db.Column(db.Double, nullable=True)
+    tax = db.Column(db.Float, nullable=True)
     tax_receiver_id = db.Column(db.BigInteger, nullable=True)
 
+
+class MiningLedger(db.Model):
+    __tablename__ = "MiningLedger"
+    character_id = db.Column(db.BigInteger, primary_key=True)
+    date = db.Column(db.DateTime(), nullable=True)
+    quantity = db.Column(db.BigInteger)
+    solar_system_id = db.Column(db.BigInteger)
+    type_id = db.Column(db.BigInteger)
 
 class Characters(db.Model):
     __tablename__ = "Characters"
