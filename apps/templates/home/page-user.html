@@ -11,23 +11,31 @@
   <div class="col-md-8">
     <div class="card">
       <div class="card-header">
-        <h5 class="title">Edit Profile</h5>
+        <h5 class="title">Profile</h5>
       </div>
       <div class="card-body">
         <form>
           <div class="row">
             <div class="col-md-3 px-md-1">
               <div class="form-group">
-                <label>Username</label>
-                <input type="text" class="form-control" disabled="" value="{{ current_user.character_name }}">
+                <label>User: </label>
+                <strong>{{ current_user.character_name }}</strong>
               </div>
             </div>
             <div class="col-md-5 pr-md-1">
               <div class="form-group">
-                <label>CharacterID (disabled)</label>
-                <input type="text" class="form-control" disabled="" value="{{ current_user.character_id }}">
+                <label>Characters:</label>
+                <ul>
+                  {% for character in characters %}
+                    <li>{{character.character_name}}</li>
+                  {% endfor %}
+                    <li><a href=/sso/login>Add Character</a>
+                </ul>
+
+
               </div>
             </div>
+            
         </form>
       </div>
     </div>
