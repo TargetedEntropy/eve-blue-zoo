@@ -18,6 +18,8 @@ from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users, Characters
 from sqlalchemy.orm.exc import NoResultFound
 from cryptography.fernet import Fernet
+from esipy.exceptions import APIException
+
 
 fen_key = Fernet.generate_key()
 cipher_suite = Fernet(fen_key)
@@ -41,15 +43,12 @@ def Decrypt(text_f):
 
 
 def generate_token(salt="None"):
-    """Generates a non-guessable OAuth token"""
-    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    rand = random.SystemRandom()
-    random_string = "".join(rand.choice(chars) for _ in range(40))
-    hmac_string = hmac.new(
-        "jsflksjdfsedfsdfsdf".encode("utf-8"),
-        random_string.encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
+    """Generates a non-guessable OAuth token
+    
+    Generate encrypted string to be used as OAuth token.  Use the
+    current_user.master_character_id if user already logged in. This
+    allows characters to be associated to the original login.
+    """
 
     # Generate encrypted string with master_character_id
     obj = {"salt": salt}
@@ -73,7 +72,7 @@ def sso_login():
 
     return redirect(
         esi.esisecurity.get_auth_uri(
-            scopes=["esi-wallet.read_character_wallet.v1", "esi-industry.read_character_mining.v1", "publicData"],
+            scopes=['esi-wallet.read_character_wallet.v1', 'esi-industry.read_character_mining.v1', 'publicData'],
             state=token,
         )
     )
@@ -98,7 +97,7 @@ def callback():
     # try to get tokens
     try:
         auth_response = esi.esisecurity.auth(code)
-    except esipy.APIException as e:
+    except APIException as e:
         return "Login EVE Online SSO failed: %s" % e, 403
 
     # we get the character informations

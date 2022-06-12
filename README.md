@@ -17,6 +17,7 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
 > Dependencies
  - SQL Dumps: https://www.fuzzwork.co.uk/dump/latest/
     - invItems.sql.bz2 
+    - invTypes.sql.bz2
     
 
 <br />
