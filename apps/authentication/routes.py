@@ -3,30 +3,26 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+import random
+import hmac
+import hashlib
+import urllib.parse
+import json
+import esipy
+from apps.authentication.util import verify_pass
 from flask import render_template, redirect, request, url_for, session
 from flask_login import current_user, login_user, logout_user
-
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users, Characters
 from sqlalchemy.orm.exc import NoResultFound
-
 from cryptography.fernet import Fernet
+from esipy.exceptions import APIException
+
+
 fen_key = Fernet.generate_key()
 cipher_suite = Fernet(fen_key)
-
-from urllib.parse import urlencode, quote_plus
-
-import json
-import urllib.parse
-
-
-from apps.authentication.util import verify_pass
-import hashlib
-import hmac
-import random
-import esipy
 
 
 @blueprint.route("/")
@@ -35,33 +31,33 @@ def route_default():
 
 
 def Encrypt(text_f):
-    encrypted = fen_key.encrypt(bytes(text_f.get(), 'utf-8'))
+    encrypted = fen_key.encrypt(bytes(text_f.get(), "utf-8"))
     print("[*] Encrypted: {}".format(encrypted))
     return encrypted
 
+
 def Decrypt(text_f):
-    plain = fen_key.decrypt(bytes(text_f.get(), 'utf-8'))
+    plain = fen_key.decrypt(bytes(text_f.get(), "utf-8"))
     print("[*] Plain: {}".format(plain))
     return plain
 
+
 def generate_token(salt="None"):
-    """Generates a non-guessable OAuth token"""
-    chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    rand = random.SystemRandom()
-    random_string = "".join(rand.choice(chars) for _ in range(40))
-    hmac_string =  hmac.new(
-        "jsflksjdfsedfsdfsdf".encode("utf-8"),
-        random_string.encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
+    """Generates a non-guessable OAuth token
+    
+    Generate encrypted string to be used as OAuth token.  Use the
+    current_user.master_character_id if user already logged in. This
+    allows characters to be associated to the original login.
+    """
 
     # Generate encrypted string with master_character_id
-    obj = {'salt': salt}
+    obj = {"salt": salt}
     j = json.dumps(obj)
 
     encMessage = urllib.parse.quote_plus(cipher_suite.encrypt(j.encode()))
 
     return encMessage
+
 
 # Login & Registration
 @blueprint.route("/sso/login")
@@ -76,7 +72,7 @@ def sso_login():
 
     return redirect(
         esi.esisecurity.get_auth_uri(
-            scopes=["esi-wallet.read_character_wallet.v1", "publicData"],
+            scopes=['esi-wallet.read_character_wallet.v1', 'esi-industry.read_character_mining.v1', 'publicData'],
             state=token,
         )
     )
@@ -98,11 +94,10 @@ def callback():
     if sess_token is "" or token is None:
         return "Login EVE Online SSO failed: Session Token is Empty", 403
 
-
     # try to get tokens
     try:
         auth_response = esi.esisecurity.auth(code)
-    except esipy.APIException as e:
+    except APIException as e:
         return "Login EVE Online SSO failed: %s" % e, 403
 
     # we get the character informations
@@ -114,7 +109,7 @@ def callback():
         token = token.encode()
         decMessage = cipher_suite.decrypt(token)
         json_data = json.loads(decMessage)
-        master_character_id =  json_data['salt']
+        master_character_id = json_data["salt"]
 
         # This is a logged out user, check in database, if the user exists
         characterID = cdata["sub"].split(":")[2]
@@ -140,9 +135,9 @@ def callback():
         except BaseException:
             db.session.rollback()
             return "Cannot add the user - uid: %d" % characterID
-        
+
         return redirect(url_for("home_blueprint.index"))
-    
+
     else:
 
         # This is a logged out user, check in database, if the user exists
