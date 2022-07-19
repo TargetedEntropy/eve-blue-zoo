@@ -1,0 +1,51 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Maps {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card card-plain">
+      <div class="card-header">
+        Mining Ledger
+      </div>
+      <div class="card-body">
+        <table id="ledger" class="display" style="width:100%">
+        {% for row in data %}
+          <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
+          </tr>
+        {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+<script type="text/javascript">
+  $(document).ready( function () {
+      $('table.display').DataTable( {
+         "pageLength": 15
+      });
+  } );
+</script>
+
+
+  
+{% endblock javascripts %}
