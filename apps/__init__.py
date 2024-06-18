@@ -8,6 +8,8 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
 from apps.authentication.esi import EsiAuth
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -37,6 +39,19 @@ def configure_database(app):
     def shutdown_session(exception=None):
         db.session.remove()
 
+def configure_scheduler(app):
+    # Setup the scheduler to refresh coures, assignments and submissions
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=update_all_children, trigger="interval", seconds=3600)
+    scheduler.start()
+
+    # Shut down the scheduler when exiting the app
+    atexit.register(lambda: scheduler.shutdown())
+
+
+
+    # Goodbye
+    
 
 def create_app(config):
     app = Flask(__name__)
