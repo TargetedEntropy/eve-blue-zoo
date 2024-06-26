@@ -14,9 +14,9 @@ class MainTasks:
     We intialize, control and execute our tasks here.
     """
 
-    def __init__(self):
+    def __init__(self, tasks=None):
         """Run internal class intialization functions"""
-        self.load_tasks()
+        tasks = self.load_tasks()
 
     def run_tasks(self, tasks:list) -> None:
         """Execute all of our tasks.
@@ -28,9 +28,10 @@ class MainTasks:
             if hasattr(self, task) and callable(func := getattr(self, task)):
                 func()
 
-    def load_tasks(self):
-        """Run any potential initilization tasks"""
-        pass
+    def load_tasks(self) -> list:
+        """Get list of Tasks"""
+        
+        return []
 
     def purge_tasks(self):
         """Purge all tasks in the queue"""
