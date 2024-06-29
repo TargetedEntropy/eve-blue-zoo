@@ -4,9 +4,8 @@ Here we will have a root function which is called on a schedule, that will then 
 will qualify if they run or not based on their own schedule. Meaning, some updates will happen more
 frequently than others.
 """
-
-from api import EsiTasks
-
+import os
+from .modules.mining_ledger import MiningLedgerTasks
 
 class MainTasks:
     """The Main tasks driving class.
@@ -16,23 +15,31 @@ class MainTasks:
 
     def __init__(self, tasks=None):
         """Run internal class intialization functions"""
-        tasks = self.load_tasks()
+        self.tasks = ['mining_ledger']
+        print(self.tasks)
+        
+    def task_mining_ledger(self):
+        MiningLedger = MiningLedgerTasks()
+        print("Mining Ledger Done")
 
-    def run_tasks(self, tasks:list) -> None:
+    def run_tasks(self) -> None:
         """Execute all of our tasks.
 
         This will run all the tasks.
         """
-        for task_name in tasks:
+        for task_name in self.tasks:
             task = f"task_{task_name}"
             if hasattr(self, task) and callable(func := getattr(self, task)):
                 func()
 
-    def load_tasks(self) -> list:
-        """Get list of Tasks"""
-        
-        return []
+    # def load_tasks(self) -> list:
+    #     """Get list of Tasks"""
 
-    def purge_tasks(self):
-        """Purge all tasks in the queue"""
-        pass
+    #     task_list = []
+    #     modules = os.scandir("./apps/tasks/modules")
+    #     for module in modules:
+    #         if module.is_file():
+    #             print(module.name)
+    #             task_list.append(module.name)
+    #     return task_list
+

@@ -6,7 +6,8 @@ Copyright (c) 2019 - present AppSeed.us
 from flask_login import UserMixin
 from sqlalchemy import BigInteger
 
-from apps import db, login_manager
+from apps.database import db
+from apps.login_manager import login_manager
 from datetime import datetime
 import time
 

@@ -4,15 +4,16 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask import Flask
-from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
+
 from importlib import import_module
 from apps.authentication.esi import EsiAuth
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+from apps.database import db
+from apps.tasks.task_main import MainTasks
+from apps.login_manager import login_manager
 
-db = SQLAlchemy()
-login_manager = LoginManager()
+
 
 esi = EsiAuth()
 
@@ -42,15 +43,17 @@ def configure_database(app):
 def configure_scheduler(app):
     # Setup the scheduler to refresh coures, assignments and submissions
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=update_all_children, trigger="interval", seconds=3600)
+    scheduler.add_job(func=execute_scheduled_tasks, trigger="interval", seconds=10)
     scheduler.start()
 
     # Shut down the scheduler when exiting the app
     atexit.register(lambda: scheduler.shutdown())
 
+def execute_scheduled_tasks():
+    task_master = MainTasks()
+    task_master.run_tasks()
 
 
-    # Goodbye
     
 
 def create_app(config):
@@ -59,4 +62,5 @@ def create_app(config):
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
+    # configure_scheduler(app)
     return app
