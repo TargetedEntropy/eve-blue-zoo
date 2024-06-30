@@ -40,7 +40,23 @@ mining_ledger = Table(
     Column('type_id', BigInteger)
 )
 
-#metadata_obj.create_all(engine)
+
+blueprints_table = Table(
+    'Blueprints', metadata_obj,
+    Column('item_id', BigInteger,  primary_key=True),
+    Column('character_id', BigInteger),    
+    Column('location_flag', String(64)),
+    Column('location_id', BigInteger),
+    Column('material_efficiency', Integer),
+    Column('quantity', Integer),
+    Column('runs', Integer),
+    Column('time_efficiency', Integer),
+    Column('type_id', BigInteger)
+)
+
+
+
+metadata_obj.create_all(engine)
 
 # create the app
 print("Creating App")
@@ -102,16 +118,40 @@ def get_mining_ledger(character_id):
     ledger_req = esiclient.request(esi_req)
     return ledger_req.data
 
-def does_row_exist(ledger_data):
-    """Check if a contract has been stored
+def get_blueprints(character_id):
+    """Get blueprint data for a character_id
 
     Args:
-        contract_id (Integer): Contract identifier
+        character_id (_type_): an individual character's id
+        
+    Returns:
+        string: blueprint json structure        
+    """
+    esi_req = esiapp.op["get_characters_character_id_blueprints"](character_id=character_id)
+    esi_resp = esiclient.request(esi_req)
+    return esi_resp.data
+
+def does_ledger_row_exist(ledger_data):
+    """Check if a contract has been stored
 
     Returns:
         boolean: Does it exist or not
     """ 
     query = f"select id from MiningLedger where character_id = {ledger_data['character_id']} and date = '{ledger_data['date']}' and quantity = {ledger_data['quantity']} and solar_system_id = {ledger_data['solar_system_id']} and type_id = {ledger_data['type_id']}"   
+    cursor = connection.execute(query)
+    data = cursor.fetchone()
+    if data:
+        return True
+    else:
+        return False
+
+def does_bp_row_exist(bp_data):
+    """Check if a blueprint has been stored
+
+    Returns:
+        boolean: Does it exist or not
+    """ 
+    query = f"select item_id from Blueprints where character_id = {bp_data['character_id']} and item_id = '{bp_data['item_id']}'"   
     cursor = connection.execute(query)
     data = cursor.fetchone()
     if data:
@@ -136,9 +176,9 @@ for character in characters:
     ledger_data = get_mining_ledger(character_id)
     for ld in ledger_data:
         ld['character_id'] = character_id
-        if does_row_exist(ld): continue
+        if does_ledger_row_exist(ld): continue
         ledger_query = mining_ledger.insert().values(
-            character_id = character_id,
+            character_id = ld['character_id'],
             date = ld['date'],
             quantity = ld['quantity'],
             solar_system_id = ld['solar_system_id'],
@@ -146,3 +186,24 @@ for character in characters:
         )
         result = connection.execute(ledger_query)
     
+    print("Getting Blueprint Details")
+    blueprint_data = get_blueprints(character_id)
+    
+    for bp in blueprint_data:
+        
+        bp['character_id'] = character_id
+        if does_bp_row_exist(bp): continue
+        print(bp)
+        bp_query = blueprints_table.insert().values(
+            item_id = bp['item_id'],
+            character_id = character_id,
+            location_flag = bp['location_flag'],
+            location_id = bp['location_id'],
+            material_efficiency = bp['material_efficiency'],
+            quantity = bp['quantity'],
+            runs = bp['runs'],
+            time_efficiency = bp['time_efficiency'],
+            type_id = bp['type_id']
+        )
+        print(bp_query)
+        result = connection.execute(bp_query)
