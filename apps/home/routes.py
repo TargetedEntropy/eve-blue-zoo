@@ -87,7 +87,7 @@ def page_miningledger():
 
     data = []
     try:
-        cursor = connection.execute("select distinct(date) from MiningLedger")
+        cursor = connection.execute("select distinct(date) from MiningLedger order by date desc")
         all_dates = cursor.fetchall()
 
         for ledger_date in all_dates:
@@ -104,7 +104,7 @@ def page_miningledger():
             for ledger_row in ledger_data:
                 character_name, typeId, typeName, quantity, solar_system_name = ledger_row
                 
-                value = get_price(typeId, quantity)
+                value = 0 # get_price(typeId, quantity)
 
                 # print(f"{character_name}:{typeName}:{solar_system_name}:{quantity}:{value}")
                 if date_count >= 1:
