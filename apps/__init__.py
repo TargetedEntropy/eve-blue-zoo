@@ -4,18 +4,21 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask import Flask
-
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
 from apps.authentication.esi import EsiAuth
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
-from apps.database import db
-from apps.tasks.task_main import MainTasks
-from apps.login_manager import login_manager
 
+# from apps.tasks.task_main import MainTasks
+
+db = SQLAlchemy()
+login_manager = LoginManager()
 
 
 esi = EsiAuth()
+login_manager = LoginManager()
 
 
 def register_extensions(app):
