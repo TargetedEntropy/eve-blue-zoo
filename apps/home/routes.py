@@ -143,13 +143,13 @@ def page_blueprints():
     # Get all the Blueprints they own
     all_blueprints = []
     for character in characters:
-        print(f"checking: {character.character_id}")
         blueprints = Blueprints.query.filter(
             Blueprints.character_id == character.character_id
         ).all()
 
         for bp in blueprints:
             item_name = InvType.query.filter(InvType.typeID == bp.type_id).first()
+            bp.characterName = character.character_name
             bp.itemName = item_name.typeName
             all_blueprints.append(bp)        
 
