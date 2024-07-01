@@ -1,6 +1,10 @@
 """ESI Contract searches
 """
 # -*- encoding: utf-8 -*-
+import hashlib
+import ast
+import json
+from datetime import datetime
 from esipy import EsiApp
 from dotenv import dotenv_values
 from genericpath import exists
@@ -10,6 +14,10 @@ from requests import request
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, BigInteger, String, Float, DateTime, Text, Boolean
 from esipy import EsiClient, EsiSecurity
 
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 # logger stuff
 logger = logging.getLogger(__name__)
@@ -27,7 +35,7 @@ config = dotenv_values(".env")
 
 # metadata_obj = MetaData()
 
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, create_engine
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, create_engine, BigInteger, func
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
@@ -38,15 +46,45 @@ class MarketOrder(Base):
     duration = Column(Integer, nullable=False)
     is_buy_order = Column(Boolean, nullable=False)
     issued = Column(DateTime, nullable=False)
-    location_id = Column(Integer, nullable=False)
+    location_id = Column(BigInteger, nullable=False)
     min_volume = Column(Integer, nullable=False)
-    order_id = Column(Integer, primary_key=True)
+    order_id = Column(BigInteger, primary_key=True)
     price = Column(Float, nullable=False)
     range = Column(String(16), nullable=False)
-    system_id = Column(Integer, nullable=False)
-    type_id = Column(Integer, nullable=False)
-    volume_remain = Column(Integer, nullable=False)
-    volume_total = Column(Integer, nullable=False)
+    system_id = Column(BigInteger, nullable=False)
+    type_id = Column(BigInteger, nullable=False)
+    volume_remain = Column(BigInteger, nullable=False)
+    volume_total = Column(BigInteger, nullable=False)
+
+class MarketHashes(Base):
+    __tablename__ = 'MarketHashes'
+    
+    id = Column(Integer, primary_key=True)
+    hash_value = Column(String(255))
+
+class MarketUpdates(Base):
+    __tablename__ = 'MarketUpdates'
+    
+    regionID = Column(BigInteger, primary_key=True, nullable=False)
+    updated_data = Column(DateTime, nullable=False, default=func.now())
+
+class MapRegion(Base):
+    __tablename__ = 'mapRegions'
+    
+    regionID = Column(Integer, primary_key=True, nullable=False)
+    regionName = Column(String(100), nullable=True)
+    x = Column(Float, nullable=True)
+    y = Column(Float, nullable=True)
+    z = Column(Float, nullable=True)
+    xMin = Column(Float, nullable=True)
+    xMax = Column(Float, nullable=True)
+    yMin = Column(Float, nullable=True)
+    yMax = Column(Float, nullable=True)
+    zMin = Column(Float, nullable=True)
+    zMax = Column(Float, nullable=True)
+    factionID = Column(Integer, nullable=True)
+    nebula = Column(Integer, nullable=True)
+    radius = Column(Float, nullable=True)
 
 
 engine = create_engine(config["SQLALCHEMY_DATABASE_URI"])
@@ -54,6 +92,15 @@ engine = create_engine(config["SQLALCHEMY_DATABASE_URI"])
 connection = engine.connect()
 
 Base.metadata.create_all(engine)
+
+
+
+# Create a configured "Session" class
+Session = sessionmaker(bind=engine)
+
+# Create a session
+session = Session()
+
 
 # create the app
 print("Creating App")
@@ -78,25 +125,24 @@ esiclient = EsiClient(security=esisecurity, cache=None, headers={
     "User-Agent": config['ESI_USER_AGENT']})
 
 
-def get_all_regions():
-    cursor = connection.execute(
-        f"select distinct(regionID) from mapRegions"
-    )
+def get_region_id_by_date():
+    result = session.query(MarketUpdates.regionID).order_by(MarketUpdates.updated_data.asc()).first()
+    return result[0]
 
-    region_list = cursor.fetchall()
-    return region_list
-
+def get_region_name(region_id):
+    result = session.query(MapRegion.regionName).filter_by(regionID=region_id).first()
+    return result[0]
 
 def get_market_data(region_id):
 
     # we want to know how much pages there are for The Forge
     # so we make a HEAD request first
-    op = app.op['get_markets_region_id_orders'](
+    op = esiapp.op['get_markets_region_id_orders'](
         region_id=region_id,
         page=1,
         order_type='all',
     )
-    res = client.head(op)
+    res = esiclient.head(op)
 
     # if we have HTTP 200 OK, then we continue
     if res.status == 200:
@@ -106,81 +152,116 @@ def get_market_data(region_id):
         operations = []
         for page in range(1, number_of_page+1):
             operations.append(
-                app.op['get_markets_region_id_orders'](
+                esiapp.op['get_markets_region_id_orders'](
                     region_id=region_id,
                     page=page,
                     order_type='all',
                 )
             )
 
-        results = client.multi_request(operations)
+        results = esiclient.multi_request(operations)
         return results
     else:
         return []
 
-def does_market_row_exist(market_data):
+def save_market_data(response_data):
+
+    # Create a new MarketOrder instance
+    new_order = MarketOrder(
+        duration=response_data.duration,
+        is_buy_order=response_data.is_buy_order,
+        issued=response_data.issued,
+        location_id=response_data.location_id,
+        min_volume=response_data.min_volume,
+        order_id=response_data.order_id,
+        price=response_data.price,
+        range=response_data.range,
+        system_id=response_data.system_id,
+        type_id=response_data.type_id,
+        volume_remain=response_data.volume_remain,
+        volume_total=response_data.volume_total
+    )
+
+    
+    # Add the new order to the session & Commit
+    session.merge(new_order)
+    session.commit()
+
+def save_market_hash(hex_hash):
+    new_hash = MarketHashes(
+        hash_value=hex_hash
+    )
+    session.add(new_hash)
+    session.commit()    
+
+
+def update_region_timestamp(regionID):
+
+    # Query the row to update
+    update_row = session.query(MarketUpdates).filter_by(regionID=regionID).first()
+
+    if update_row:
+        # Update the updated_data field to the current timestamp
+        update_row.updated_data = datetime.now()
+
+        # Commit the transaction to persist the update
+        session.commit()
+    else:
+        new_region = MarketUpdates(regionID=regionID)
+        session.add(new_region)
+        session.commit()
+        
+def get_hex_hash(response_data):
+    
+    try:
+        json_data = json.dumps(response_data, default=str)
+        hash_obj = hashlib.sha256(str(json_data).encode())
+        hex_hash = hash_obj.hexdigest()    
+        
+        return hex_hash
+    except Exception as error:
+        print(f"Error getting hash, error: {error}")
+
+
+
+def does_market_row_exist(hex_hash):
     """Check if market data has been stored
 
     Returns:
         boolean: Does it exist or not
     """
-    exists = db.session.query(User.id).filter_by(name='davidism').first() is not None
-    return exists
-#    query = f"bool(User.query.filter_by(name='John Smith').first())"
-#    select id from MiningLedger where character_id = {ledger_data['character_id']} and date = '{ledger_data['date']}' and quantity = {ledger_data['quantity']} and solar_system_id = {ledger_data['solar_system_id']} and type_id = {ledger_data['type_id']}"
-#    cursor = connection.execute(query)
-#    data = cursor.fetchone()
-#    if data:
-#        return True
-#    else:
-#        return False
+    return session.query(MarketHashes.id).filter_by(hash_value=hex_hash).first() is not None
 
 
-# print("Getting characters")
-# regions = get_all_regions()
-# for region in regions:
-#     # character_id = character_id[0]
-#     character_id, character_name, refresh_token = character
-#     print(character_id)
-#     print(character_name)
+def get_orders_for_region(region_id):
+    order_count, insert_count = 0, 0
+    print(f"Getting orders for region, {get_region_name(region_id)}")
 
-#     print("Refreshing the token")
-#     token = refresh_esi_token(refresh_token)
+    market_datas = get_market_data(region_id)
+    for market_data in market_datas:
+        request, response = market_data
+        for response_data in response.data:
+            order_count += 1
+            # Get Hex hash
+            hex_hash = get_hex_hash(response_data)
 
-#     print("Getting ledger details")
-#     ledger_data = get_mining_ledger(character_id)
-#     for ld in ledger_data:
-#         ld['character_id'] = character_id
-#         if does_ledger_row_exist(ld):
-#             continue
-#         ledger_query = mining_ledger.insert().values(
-#             character_id=ld['character_id'],
-#             date=ld['date'],
-#             quantity=ld['quantity'],
-#             solar_system_id=ld['solar_system_id'],
-#             type_id=ld['type_id']
-#         )
-#         result = connection.execute(ledger_query)
+            # Check if row exits
+            if does_market_row_exist(hex_hash): continue
 
-#     print("Getting Blueprint Details")
-#     blueprint_data = get_blueprints(character_id)
+            # Save Market Data
+            save_market_data(response_data)
 
-#     for bp in blueprint_data:
+            # Save the Hash
+            save_market_hash(hex_hash)
+            
+            insert_count += 1
+    region_count += 1        
+    
+    update_region_timestamp(region_id)
+        
+    print(f"toal_order_count:{order_count}, total_insert_count:{insert_count}")
+    
 
-#         bp['character_id'] = character_id
-#         if does_bp_row_exist(bp):
-#             continue
-#         print(bp)
-#         bp_query = blueprints_table.insert().values(
-#             item_id=bp['item_id'],
-#             character_id=character_id,
-#             location_flag=bp['location_flag'],
-#             location_id=bp['location_id'],
-#             material_efficiency=bp['material_efficiency'],
-#             quantity=bp['quantity'],
-#             runs=bp['runs'],
-#             time_efficiency=bp['time_efficiency'],
-#             type_id=bp['type_id']
-#         )
-#         print(bp_query)
-#         result = connection.execute(bp_query)
+if __name__ == "__main__":
+    region_id = get_region_id_by_date()
+    get_orders_for_region(region_id)
