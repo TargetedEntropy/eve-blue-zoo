@@ -243,7 +243,7 @@ def does_market_row_exist(hex_hash):
 
 
 def get_orders_for_region(region_id):
-    order_count, insert_count = 0, 0
+    order_count, insert_count = [0, 0]
     print(f"Getting orders for region, {get_region_name(region_id)}")
 
     market_datas = get_market_data(region_id)
@@ -265,7 +265,6 @@ def get_orders_for_region(region_id):
             save_market_hash(hex_hash)
 
             insert_count += 1
-    region_count += 1
 
     update_region_timestamp(region_id)
 
