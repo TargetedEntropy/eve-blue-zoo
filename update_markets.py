@@ -1,4 +1,4 @@
-"""ESI Contract searches
+"""ESI Market Data
 """
 # -*- encoding: utf-8 -*-
 import hashlib
