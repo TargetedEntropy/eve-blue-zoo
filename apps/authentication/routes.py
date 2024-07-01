@@ -72,7 +72,7 @@ def sso_login():
 
     return redirect(
         esi.esisecurity.get_auth_uri(
-            scopes=['esi-wallet.read_character_wallet.v1', 'esi-industry.read_character_mining.v1', 'publicData'],
+            scopes=['esi-wallet.read_character_wallet.v1', 'esi-industry.read_character_mining.v1', 'esi-characters.read_blueprints.v1', 'esi-markets.structure_markets.v1', 'publicData'],
             state=token,
         )
     )
