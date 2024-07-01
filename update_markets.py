@@ -1,48 +1,50 @@
 """ESI Market Data
 """
+
 # -*- encoding: utf-8 -*-
 import hashlib
 import ast
 import json
 from datetime import datetime
 from esipy import EsiApp
+from esipy import EsiClient, EsiSecurity
 from dotenv import dotenv_values
 from genericpath import exists
 import logging
 from xmlrpc.client import Boolean
 from requests import request
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, BigInteger, String, Float, DateTime, Text, Boolean
-from esipy import EsiClient, EsiSecurity
-
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import (
+    create_engine,
+    MetaData,
+    Table,
+    Column,
+    Integer,
+    BigInteger,
+    String,
+    Float,
+    DateTime,
+    Text,
+    Boolean,
+    func,
+)
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 # logger stuff
 logger = logging.getLogger(__name__)
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG)
 console.setFormatter(formatter)
 logger.addHandler(console)
 
 config = dotenv_values(".env")
-
-
-
-
-# metadata_obj = MetaData()
-
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, create_engine, BigInteger, func
-from sqlalchemy.ext.declarative import declarative_base
-
 Base = declarative_base()
 
+
 class MarketOrder(Base):
-    __tablename__ = 'MarketOrders'
-    
+    __tablename__ = "MarketOrders"
+
     duration = Column(Integer, nullable=False)
     is_buy_order = Column(Boolean, nullable=False)
     issued = Column(DateTime, nullable=False)
@@ -56,21 +58,24 @@ class MarketOrder(Base):
     volume_remain = Column(BigInteger, nullable=False)
     volume_total = Column(BigInteger, nullable=False)
 
+
 class MarketHashes(Base):
-    __tablename__ = 'MarketHashes'
-    
+    __tablename__ = "MarketHashes"
+
     id = Column(Integer, primary_key=True)
     hash_value = Column(String(255))
 
+
 class MarketUpdates(Base):
-    __tablename__ = 'MarketUpdates'
-    
+    __tablename__ = "MarketUpdates"
+
     regionID = Column(BigInteger, primary_key=True, nullable=False)
     updated_data = Column(DateTime, nullable=False, default=func.now())
 
+
 class MapRegion(Base):
-    __tablename__ = 'mapRegions'
-    
+    __tablename__ = "mapRegions"
+
     regionID = Column(Integer, primary_key=True, nullable=False)
     regionName = Column(String(100), nullable=True)
     x = Column(Float, nullable=True)
@@ -88,17 +93,12 @@ class MapRegion(Base):
 
 
 engine = create_engine(config["SQLALCHEMY_DATABASE_URI"])
-
 connection = engine.connect()
-
 Base.metadata.create_all(engine)
 
 
-
-# Create a configured "Session" class
+# Create a configured "Session" class & create Session
 Session = sessionmaker(bind=engine)
-
-# Create a session
 session = Session()
 
 
@@ -113,49 +113,56 @@ esiapp = esi_app.get_latest_swagger
 print("Creating esisecurity object")
 esisecurity = EsiSecurity(
     #    app=esiapp,
-    redirect_uri=config['ESI_CALLBACK'],
-    client_id=config['ESI_CLIENT_ID'],
-    secret_key=config['ESI_SECRET_KEY'],
+    redirect_uri=config["ESI_CALLBACK"],
+    client_id=config["ESI_CLIENT_ID"],
+    secret_key=config["ESI_SECRET_KEY"],
     headers={"User-Agent": "merriam@gmail.com"},
 )
 
 # init the client
 print("Initialize EsiClient")
-esiclient = EsiClient(security=esisecurity, cache=None, headers={
-    "User-Agent": config['ESI_USER_AGENT']})
+esiclient = EsiClient(
+    security=esisecurity, cache=None, headers={"User-Agent": config["ESI_USER_AGENT"]}
+)
 
 
 def get_region_id_by_date():
-    result = session.query(MarketUpdates.regionID).order_by(MarketUpdates.updated_data.asc()).first()
+    result = (
+        session.query(MarketUpdates.regionID)
+        .order_by(MarketUpdates.updated_data.asc())
+        .first()
+    )
     return result[0]
+
 
 def get_region_name(region_id):
     result = session.query(MapRegion.regionName).filter_by(regionID=region_id).first()
     return result[0]
 
+
 def get_market_data(region_id):
 
     # we want to know how much pages there are for The Forge
     # so we make a HEAD request first
-    op = esiapp.op['get_markets_region_id_orders'](
+    op = esiapp.op["get_markets_region_id_orders"](
         region_id=region_id,
         page=1,
-        order_type='all',
+        order_type="all",
     )
     res = esiclient.head(op)
 
     # if we have HTTP 200 OK, then we continue
     if res.status == 200:
-        number_of_page = res.header['X-Pages'][0]
+        number_of_page = res.header["X-Pages"][0]
 
         # now we know how many pages we want, let's prepare all the requests
         operations = []
-        for page in range(1, number_of_page+1):
+        for page in range(1, number_of_page + 1):
             operations.append(
-                esiapp.op['get_markets_region_id_orders'](
+                esiapp.op["get_markets_region_id_orders"](
                     region_id=region_id,
                     page=page,
-                    order_type='all',
+                    order_type="all",
                 )
             )
 
@@ -163,6 +170,7 @@ def get_market_data(region_id):
         return results
     else:
         return []
+
 
 def save_market_data(response_data):
 
@@ -179,20 +187,18 @@ def save_market_data(response_data):
         system_id=response_data.system_id,
         type_id=response_data.type_id,
         volume_remain=response_data.volume_remain,
-        volume_total=response_data.volume_total
+        volume_total=response_data.volume_total,
     )
 
-    
     # Add the new order to the session & Commit
     session.merge(new_order)
     session.commit()
 
+
 def save_market_hash(hex_hash):
-    new_hash = MarketHashes(
-        hash_value=hex_hash
-    )
+    new_hash = MarketHashes(hash_value=hex_hash)
     session.add(new_hash)
-    session.commit()    
+    session.commit()
 
 
 def update_region_timestamp(regionID):
@@ -210,18 +216,18 @@ def update_region_timestamp(regionID):
         new_region = MarketUpdates(regionID=regionID)
         session.add(new_region)
         session.commit()
-        
+
+
 def get_hex_hash(response_data):
-    
+
     try:
         json_data = json.dumps(response_data, default=str)
         hash_obj = hashlib.sha256(str(json_data).encode())
-        hex_hash = hash_obj.hexdigest()    
-        
+        hex_hash = hash_obj.hexdigest()
+
         return hex_hash
     except Exception as error:
         print(f"Error getting hash, error: {error}")
-
 
 
 def does_market_row_exist(hex_hash):
@@ -230,7 +236,10 @@ def does_market_row_exist(hex_hash):
     Returns:
         boolean: Does it exist or not
     """
-    return session.query(MarketHashes.id).filter_by(hash_value=hex_hash).first() is not None
+    return (
+        session.query(MarketHashes.id).filter_by(hash_value=hex_hash).first()
+        is not None
+    )
 
 
 def get_orders_for_region(region_id):
@@ -246,21 +255,22 @@ def get_orders_for_region(region_id):
             hex_hash = get_hex_hash(response_data)
 
             # Check if row exits
-            if does_market_row_exist(hex_hash): continue
+            if does_market_row_exist(hex_hash):
+                continue
 
             # Save Market Data
             save_market_data(response_data)
 
             # Save the Hash
             save_market_hash(hex_hash)
-            
+
             insert_count += 1
-    region_count += 1        
-    
+    region_count += 1
+
     update_region_timestamp(region_id)
-        
+
     print(f"toal_order_count:{order_count}, total_insert_count:{insert_count}")
-    
+
 
 if __name__ == "__main__":
     region_id = get_region_id_by_date()

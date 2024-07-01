@@ -19,6 +19,7 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
     - invItems.sql.bz2 
     - invTypes.sql.bz2
     - invGroups.sql.bz2
+    - industryBlueprints.sql.bz2
 
 <br />
 

@@ -1,5 +1,6 @@
 """ESI Contract searches
 """
+
 # -*- encoding: utf-8 -*-
 from esipy import EsiApp
 from dotenv import dotenv_values
@@ -7,14 +8,25 @@ from genericpath import exists
 import logging
 from xmlrpc.client import Boolean
 from requests import request
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, BigInteger, String, Float, DateTime, Text, Boolean
+from sqlalchemy import (
+    create_engine,
+    MetaData,
+    Table,
+    Column,
+    Integer,
+    BigInteger,
+    String,
+    Float,
+    DateTime,
+    Text,
+    Boolean,
+)
 from esipy import EsiClient, EsiSecurity
 
 
 # logger stuff
 logger = logging.getLogger(__name__)
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 console = logging.StreamHandler()
 console.setLevel(logging.DEBUG)
 console.setFormatter(formatter)
@@ -30,28 +42,29 @@ connection = engine.connect()
 metadata_obj = MetaData()
 
 mining_ledger = Table(
-    'MiningLedger',
+    "MiningLedger",
     metadata_obj,
-    Column('id', BigInteger, primary_key=True),
-    Column('character_id', BigInteger),
-    Column('date', DateTime),
-    Column('quantity', BigInteger),
-    Column('solar_system_id', BigInteger),
-    Column('type_id', BigInteger)
+    Column("id", BigInteger, primary_key=True),
+    Column("character_id", BigInteger),
+    Column("date", DateTime),
+    Column("quantity", BigInteger),
+    Column("solar_system_id", BigInteger),
+    Column("type_id", BigInteger),
 )
 
 
 blueprints_table = Table(
-    'Blueprints', metadata_obj,
-    Column('item_id', BigInteger, primary_key=True),
-    Column('character_id', BigInteger),
-    Column('location_flag', String(64)),
-    Column('location_id', BigInteger),
-    Column('material_efficiency', Integer),
-    Column('quantity', Integer),
-    Column('runs', Integer),
-    Column('time_efficiency', Integer),
-    Column('type_id', BigInteger)
+    "Blueprints",
+    metadata_obj,
+    Column("item_id", BigInteger, primary_key=True),
+    Column("character_id", BigInteger),
+    Column("location_flag", String(64)),
+    Column("location_id", BigInteger),
+    Column("material_efficiency", Integer),
+    Column("quantity", Integer),
+    Column("runs", Integer),
+    Column("time_efficiency", Integer),
+    Column("type_id", BigInteger),
 )
 
 
@@ -68,16 +81,17 @@ esiapp = esi_app.get_latest_swagger
 print("Creating esisecurity object")
 esisecurity = EsiSecurity(
     #    app=esiapp,
-    redirect_uri=config['ESI_CALLBACK'],
-    client_id=config['ESI_CLIENT_ID'],
-    secret_key=config['ESI_SECRET_KEY'],
+    redirect_uri=config["ESI_CALLBACK"],
+    client_id=config["ESI_CLIENT_ID"],
+    secret_key=config["ESI_SECRET_KEY"],
     headers={"User-Agent": "merriam@gmail.com"},
 )
 
 # init the client
 print("Initialize EsiClient")
-esiclient = EsiClient(security=esisecurity, cache=None, headers={
-    "User-Agent": config['ESI_USER_AGENT']})
+esiclient = EsiClient(
+    security=esisecurity, cache=None, headers={"User-Agent": config["ESI_USER_AGENT"]}
+)
 
 
 def get_all_users():
@@ -115,8 +129,7 @@ def get_mining_ledger(character_id):
     Returns:
         string: contract data json structure
     """
-    esi_req = esiapp.op["get_characters_character_id_mining"](
-        character_id=character_id)
+    esi_req = esiapp.op["get_characters_character_id_mining"](character_id=character_id)
     ledger_req = esiclient.request(esi_req)
     return ledger_req.data
 
@@ -131,7 +144,8 @@ def get_blueprints(character_id):
         string: blueprint json structure
     """
     esi_req = esiapp.op["get_characters_character_id_blueprints"](
-        character_id=character_id)
+        character_id=character_id
+    )
     esi_resp = esiclient.request(esi_req)
     return esi_resp.data
 
@@ -180,15 +194,15 @@ for character in characters:
     print("Getting ledger details")
     ledger_data = get_mining_ledger(character_id)
     for ld in ledger_data:
-        ld['character_id'] = character_id
+        ld["character_id"] = character_id
         if does_ledger_row_exist(ld):
             continue
         ledger_query = mining_ledger.insert().values(
-            character_id=ld['character_id'],
-            date=ld['date'],
-            quantity=ld['quantity'],
-            solar_system_id=ld['solar_system_id'],
-            type_id=ld['type_id']
+            character_id=ld["character_id"],
+            date=ld["date"],
+            quantity=ld["quantity"],
+            solar_system_id=ld["solar_system_id"],
+            type_id=ld["type_id"],
         )
         result = connection.execute(ledger_query)
 
@@ -197,20 +211,20 @@ for character in characters:
 
     for bp in blueprint_data:
 
-        bp['character_id'] = character_id
+        bp["character_id"] = character_id
         if does_bp_row_exist(bp):
             continue
         print(bp)
         bp_query = blueprints_table.insert().values(
-            item_id=bp['item_id'],
+            item_id=bp["item_id"],
             character_id=character_id,
-            location_flag=bp['location_flag'],
-            location_id=bp['location_id'],
-            material_efficiency=bp['material_efficiency'],
-            quantity=bp['quantity'],
-            runs=bp['runs'],
-            time_efficiency=bp['time_efficiency'],
-            type_id=bp['type_id']
+            location_flag=bp["location_flag"],
+            location_id=bp["location_id"],
+            material_efficiency=bp["material_efficiency"],
+            quantity=bp["quantity"],
+            runs=bp["runs"],
+            time_efficiency=bp["time_efficiency"],
+            type_id=bp["type_id"],
         )
         print(bp_query)
         result = connection.execute(bp_query)
