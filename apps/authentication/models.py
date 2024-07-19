@@ -119,11 +119,6 @@ class Users(db.Model, UserMixin):
 
     __tablename__ = "Users"
 
-    # id = db.Column(db.Integer, primary_key=True)
-    # username = db.Column(db.String(64), unique=True)
-    # email = db.Column(db.String(64), unique=True)
-    # password = db.Column(db.LargeBinary)
-
     # our ID is the character ID from EVE API
     character_id = db.Column(db.BigInteger, primary_key=True)
     character_owner_hash = db.Column(db.Text, nullable=True)
