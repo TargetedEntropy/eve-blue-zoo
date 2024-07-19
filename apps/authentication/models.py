@@ -14,6 +14,40 @@ import time
 from apps.authentication.util import hash_pass
 
 
+class InvType(db.Model):
+    __tablename__ = 'invTypes'
+    
+    typeID = db.Column(db.BigInteger, primary_key=True)
+    groupID = db.Column(db.BigInteger, index=True)
+    typeName = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    mass = db.Column(db.Float)
+    volume = db.Column(db.Float)
+    capacity = db.Column(db.Float)
+    portionSize = db.Column(db.BigInteger)
+    raceID = db.Column(db.BigInteger)
+    basePrice = db.Column(db.DECIMAL(19, 4))
+    published = db.Column(db.Boolean)
+    marketGroupID = db.Column(db.BigInteger)
+    iconID = db.Column(db.BigInteger)
+    soundID = db.Column(db.BigInteger)
+    graphicID = db.Column(db.BigInteger)
+
+
+class Blueprints(db.Model):
+    __tablename__ = 'Blueprints'
+    
+    item_id = db.Column(db.BigInteger, primary_key=True)
+    character_id = db.Column(db.BigInteger)
+    location_flag = db.Column(db.String(64))
+    location_id = db.Column(db.BigInteger)
+    material_efficiency = db.Column(db.Integer)
+    quantity = db.Column(db.Integer)
+    runs = db.Column(db.Integer)
+    time_efficiency = db.Column(db.Integer)
+    type_id = db.Column(db.BigInteger)
+
+
 class Transactions(db.Model):
     __tablename__ = "Transactions"
 
@@ -84,11 +118,6 @@ class Characters(db.Model):
 class Users(db.Model, UserMixin):
 
     __tablename__ = "Users"
-
-    # id = db.Column(db.Integer, primary_key=True)
-    # username = db.Column(db.String(64), unique=True)
-    # email = db.Column(db.String(64), unique=True)
-    # password = db.Column(db.LargeBinary)
 
     # our ID is the character ID from EVE API
     character_id = db.Column(db.BigInteger, primary_key=True)

@@ -10,7 +10,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import create_engine
 from apps import esi
 from apps.home import blueprint
-from apps.authentication.models import Characters
+from apps.authentication.models import Characters, Blueprints, InvType
 
 from dotenv import dotenv_values
 config = dotenv_values(".env")
@@ -125,6 +125,40 @@ def page_miningledger():
         "home/ui-miningledger.html", segment=segment, data=data
     )
 
+
+@blueprint.route("/ui-blueprints.html")
+@login_required
+def page_blueprints():
+    # Detect the current page
+    segment = get_segment(request)
+    
+    # Get All of the users' Characters
+    try:
+        characters = Characters.query.filter(
+            Characters.master_character_id == current_user.character_id
+        ).all()
+    except NoResultFound:
+        characters = []
+    
+    # Get all the Blueprints they own
+    all_blueprints = []
+    for character in characters:
+        blueprints = Blueprints.query.filter(
+            Blueprints.character_id == character.character_id
+        ).all()
+
+        for bp in blueprints:
+            item_name = InvType.query.filter(InvType.typeID == bp.type_id).first()
+            bp.characterName = character.character_name
+            bp.itemName = item_name.typeName
+            all_blueprints.append(bp)        
+
+    # Serve the file (if exists) from app/templates/home/FILE.html
+    return render_template(
+        "home/ui-blueprints.html", segment=segment, data=all_blueprints
+    )
+
+# select invTypes.typeName from industryBlueprints JOIN invTypes on invTypes.typeID = industryBlueprints.typeID
 
 # Helper - Extract current page name from request
 def get_segment(request):
