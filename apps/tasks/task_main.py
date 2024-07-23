@@ -24,12 +24,12 @@ class MainTasks:
         # self.tasks = self.load_tasks()
         self.scheduler = self.configure_scheduler(self.app)
 
+        self.load_scheduled_tasks()
     
     def configure_scheduler(self, app):
         # Setup the scheduler to refresh coures, assignments and submissions
         scheduler = APScheduler()
         scheduler.init_app(app)
-        scheduler.add_job(func=self.execute_scheduled_tasks, id='execute_scheduled_tasks', trigger="interval", seconds=10)
         scheduler.start()
 
         # Shut down the scheduler when exiting the app
@@ -38,13 +38,12 @@ class MainTasks:
 
     def task_mining_ledger(self):
         mining_ledger = MiningLedgerTasks(self.scheduler)
-        mining_ledger.main()
         print("Mining Ledger Done")
             
-    def execute_scheduled_tasks(self) -> None:
-        """Execute all of our tasks.
+    def load_scheduled_tasks(self) -> None:
+        """Load all of our tasks.
 
-        This will run all the tasks.
+        This will run initialize the tasks.
         """
         print(f"Running {len(self.tasks)} tasks")
         
@@ -52,17 +51,4 @@ class MainTasks:
             task = f"task_{task_name}"
             if hasattr(self, task) and callable(func := getattr(self, task)):
                 func()
-
-    def load_tasks(self) -> list:
-        """Get list of Tasks"""
-
-        task_list = []
-        modules = os.scandir("./tasks/modules")
-        for module in modules:
-            if module.is_file():
-                module_name, _ = os.path.splitext(module.name)
-                if module_name in  ["__init__", "__pycache__"]: continue
-                print(f"module_name: {module_name}")
-                task_list.append(module_name)
-        return task_list
 
