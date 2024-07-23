@@ -8,18 +8,20 @@ class MiningLedgerTasks:
     """Tasks related to the Mining Ledger"""
 
     def __init__(self, scheduler):
-    
+
         self.scheduler = scheduler
         self.characters = self.get_all_users()
-        
-        self.schedule_tasks()
-        
-    def schedule_tasks(self) -> None:
-        """Setup task execution schedule"""        
-        self.scheduler.add_job(func=self.main, id='mining_ledger_main', trigger="interval", seconds=300)
 
-    def get_all_users(self) ->list:
-        """Gets all characters"""        
+        self.schedule_tasks()
+
+    def schedule_tasks(self) -> None:
+        """Setup task execution schedule"""
+        self.scheduler.add_job(
+            func=self.main, id="mining_ledger_main", trigger="interval", seconds=300
+        )
+
+    def get_all_users(self) -> list:
+        """Gets all characters"""
         with self.scheduler.app.app_context():
             character_list = Characters.query.all()
             print(f"characters: {character_list}")
@@ -36,7 +38,7 @@ class MiningLedgerTasks:
             ledger_data = esi.get_esi(
                 character, "get_characters_character_id_mining", **esi_params
             )
-            
+
             # Save Data
             for ld in ledger_data.data:
                 ld["character_id"] = character.character_id
@@ -53,4 +55,3 @@ class MiningLedgerTasks:
                 with self.scheduler.app.app_context():
                     db.session.merge(mining_row)
                     db.session.commit()
-
