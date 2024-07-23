@@ -10,8 +10,6 @@ from decouple import config
 from apps.config import config_dict
 from apps import create_app, db
 
-from tasks.task_main import MainTasks
-
 # WARNING: Don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
@@ -35,6 +33,5 @@ if DEBUG:
     app.logger.info('DBMS        = ' + app_config.SQLALCHEMY_DATABASE_URI)
 
 if __name__ == "__main__":
-    MainTasks(app)
     app.run()
     

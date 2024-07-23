@@ -9,9 +9,7 @@ from importlib import import_module
 from flask_apscheduler import APScheduler
 import atexit
 
-from apps.authentication.models import Characters
-
-from tasks.modules.mining_ledger import MiningLedgerTasks
+from apps.tasks.modules.mining_ledger import MiningLedgerTasks
 
 class MainTasks:
     """The Main tasks driving class.
@@ -40,6 +38,7 @@ class MainTasks:
 
     def task_mining_ledger(self):
         mining_ledger = MiningLedgerTasks(self.scheduler)
+        mining_ledger.main()
         print("Mining Ledger Done")
             
     def execute_scheduled_tasks(self) -> None:
