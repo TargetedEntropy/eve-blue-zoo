@@ -6,8 +6,12 @@ frequently than others.
 """
 import os
 from importlib import import_module
+from flask_apscheduler import APScheduler
+import atexit
 
 from apps.authentication.models import Characters
+
+from tasks.modules.mining_ledger import MiningLedgerTasks
 
 class MainTasks:
     """The Main tasks driving class.
@@ -15,21 +19,37 @@ class MainTasks:
     We intialize, control and execute our tasks here.
     """
 
-    def __init__(self, tasks=None):
+    def __init__(self, app:object, tasks=None):
         """Run internal class intialization functions"""
         #self.tasks = ['mining_ledger']
+        self.app = app
         self.tasks = self.load_tasks()
-        self.character_list = Characters.query.all()
-        
+        self.scheduler = self.configure_scheduler(self.app)
+
+    
+    def configure_scheduler(self, app):
+        # Setup the scheduler to refresh coures, assignments and submissions
+        scheduler = APScheduler()
+        scheduler.init_app(app)
+        scheduler.add_job(func=self.execute_scheduled_tasks, id='execute_scheduled_tasks', trigger="interval", seconds=10)
+        scheduler.start()
+
+        # Shut down the scheduler when exiting the app
+        atexit.register(lambda: scheduler.shutdown())
+        return scheduler
+
     def task_mining_ledger(self):
         print("Mining Ledger Done")
-
-    def run_tasks(self) -> None:
+        with self.scheduler.app.app_context():
+            character_list = Characters.query.all()
+            print(f"characters: {character_list}")
+            
+    def execute_scheduled_tasks(self) -> None:
         """Execute all of our tasks.
 
         This will run all the tasks.
         """
-        print("running tasks")
+        print(f"Running {len(self.tasks)} tasks")
         
         for task_name in self.tasks:
             task = f"task_{task_name}"
@@ -40,12 +60,12 @@ class MainTasks:
         """Get list of Tasks"""
 
         task_list = []
-        modules = os.scandir("./apps/tasks/modules")
+        modules = os.scandir("./tasks/modules")
         for module in modules:
-            if not module.is_file():
+            if module.is_file():
                 module_name, _ = os.path.splitext(module.name)
-                if module_name == "__init__": continue
-                print(module_name)
+                if module_name in  ["__init__", "__pycache__"]: continue
+                print(f"module_name: {module_name}")
                 task_list.append(module_name)
         return task_list
 
