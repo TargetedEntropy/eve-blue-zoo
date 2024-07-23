@@ -5,7 +5,9 @@ will qualify if they run or not based on their own schedule. Meaning, some updat
 frequently than others.
 """
 import os
-from .modules.mining_ledger import MiningLedgerTasks
+from importlib import import_module
+
+from apps.authentication.models import Characters
 
 class MainTasks:
     """The Main tasks driving class.
@@ -15,11 +17,11 @@ class MainTasks:
 
     def __init__(self, tasks=None):
         """Run internal class intialization functions"""
-        self.tasks = ['mining_ledger']
-        print(self.tasks)
+        #self.tasks = ['mining_ledger']
+        self.tasks = self.load_tasks()
+        self.character_list = Characters.query.all()
         
     def task_mining_ledger(self):
-        MiningLedger = MiningLedgerTasks()
         print("Mining Ledger Done")
 
     def run_tasks(self) -> None:
@@ -27,19 +29,23 @@ class MainTasks:
 
         This will run all the tasks.
         """
+        print("running tasks")
+        
         for task_name in self.tasks:
             task = f"task_{task_name}"
             if hasattr(self, task) and callable(func := getattr(self, task)):
                 func()
 
-    # def load_tasks(self) -> list:
-    #     """Get list of Tasks"""
+    def load_tasks(self) -> list:
+        """Get list of Tasks"""
 
-    #     task_list = []
-    #     modules = os.scandir("./apps/tasks/modules")
-    #     for module in modules:
-    #         if module.is_file():
-    #             print(module.name)
-    #             task_list.append(module.name)
-    #     return task_list
+        task_list = []
+        modules = os.scandir("./apps/tasks/modules")
+        for module in modules:
+            if not module.is_file():
+                module_name, _ = os.path.splitext(module.name)
+                if module_name == "__init__": continue
+                print(module_name)
+                task_list.append(module_name)
+        return task_list
 

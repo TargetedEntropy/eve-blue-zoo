@@ -53,8 +53,14 @@ def configure_scheduler(app):
     atexit.register(lambda: scheduler.shutdown())
 
 def execute_scheduled_tasks():
-    task_master = MainTasks()
-    task_master.run_tasks()
+    # Run Tasks
+    module = import_module('apps.tasks.task_main')
+    try: 
+        task_master = module.MainTasks()
+        task_master.run_tasks()
+    except Exception as error:
+        print(f"Failed to execute scheduled task, error: {error}")
+    
 
 
     
@@ -65,5 +71,5 @@ def create_app(config):
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
-    # configure_scheduler(app)
+    configure_scheduler(app)
     return app

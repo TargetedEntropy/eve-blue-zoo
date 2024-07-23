@@ -50,6 +50,7 @@ class MiningLedgerTasks:
     
     
     def main(self):
+        print("Running Mining Ledger Main")
         for character in self.characters:
             #character_id = character_id[0]
 
