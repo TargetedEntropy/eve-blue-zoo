@@ -19,7 +19,7 @@ class BlueprintTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=30,
+            seconds=3600,
             id="blueprint_main",
             name="blueprint_main",
             replace_existing=True,

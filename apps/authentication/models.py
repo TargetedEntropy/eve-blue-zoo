@@ -4,7 +4,9 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask_login import UserMixin
-from sqlalchemy import BigInteger
+from sqlalchemy import BigInteger, Column, Integer, ForeignKey
+from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.ext.declarative import declared_attr
 
 from apps import db, login_manager
 
@@ -12,6 +14,27 @@ from datetime import datetime
 import time
 
 from apps.authentication.util import hash_pass
+
+# class Skill(db.Model):
+#     __tablename__ = 'skills'
+    
+#     id = db.Column(db.Integer, primary_key=True)
+#     active_skill_level = db.Column(db.Integer, nullable=False)
+#     skill_id = db.Column(db.Integer, nullable=False, unique=True)
+#     skillpoints_in_skill = db.Column(db.Integer, nullable=False)
+#     trained_skill_level = db.Column(db.Integer, nullable=False)
+#     skillset_id = db.Column(db.Integer, ForeignKey('skillsets.id'), nullable=False)
+
+class SkillSet(db.Model):
+    __tablename__ = 'skillsets'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)
+    total_sp = db.Column(db.Integer, nullable=False)
+    unallocated_sp = db.Column(db.Integer, nullable=False)
+    
+#    skills = relationship('Skill', backref='skillset', cascade='all, delete-orphan')
+
 
 
 class InvType(db.Model):

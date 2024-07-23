@@ -91,7 +91,7 @@ def callback():
     if token != str(sess_token):
         return "Login EVE Online SSO failed: Session Token Mismatch", 403
 
-    if sess_token is "" or token is None:
+    if sess_token == "" or token == None:
         return "Login EVE Online SSO failed: Session Token is Empty", 403
 
     # try to get tokens

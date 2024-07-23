@@ -8,9 +8,9 @@ from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy import create_engine
-from apps import esi
+from apps import esi, db
 from apps.home import blueprint
-from apps.authentication.models import Characters, Blueprints, InvType
+from apps.authentication.models import Characters, Blueprints, InvType, SkillSet
 
 from dotenv import dotenv_values
 config = dotenv_values(".env")
@@ -20,8 +20,22 @@ config = dotenv_values(".env")
 @blueprint.route("/index")
 @login_required
 def index():
+    # Get Master Wallet
     wallet = esi.get_wallet(current_user)
-    return render_template("home/index.html", segment="index", wallet=wallet)
+    
+    # Get Characters
+    characters = db.session.query(
+        Characters.character_name,
+        Characters.character_id,        
+        SkillSet.total_sp,
+        SkillSet.unallocated_sp
+    ).join(
+        SkillSet, Characters.character_id == SkillSet.character_id
+    ).filter(
+        Characters.master_character_id == current_user.character_id
+    ).all()
+    
+    return render_template("home/index.html", segment="index", wallet=wallet, characters=characters)
 
 
 @blueprint.route("/<template>")

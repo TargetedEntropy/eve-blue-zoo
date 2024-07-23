@@ -12,6 +12,7 @@ import atexit
 
 from apps.tasks.modules.mining_ledger import MiningLedgerTasks
 from apps.tasks.modules.blueprints import BlueprintTasks
+from apps.tasks.modules.skills import SkillTasks
 
 
 class MainTasks:
@@ -22,7 +23,7 @@ class MainTasks:
 
     def __init__(self, app: object, tasks=None):
         """Run internal class intialization functions"""
-        self.tasks = ["mining_ledger", "blueprints"]
+        self.tasks = ["mining_ledger", "blueprints", "skills"]
         self.app = app
 
         self.scheduler = self.configure_scheduler(self.app)
@@ -46,6 +47,10 @@ class MainTasks:
         blueprints = BlueprintTasks(self.scheduler)
         print("Blueprint Tasks Loaded")
 
+    def task_skills(self):
+        skills = SkillTasks(self.scheduler)
+        print("Skill Tasks Loaded")
+
 
     def load_scheduled_tasks(self) -> None:
         """Load all of our tasks.
@@ -56,6 +61,8 @@ class MainTasks:
 
         self.task_mining_ledger()
         self.task_blueprints()
+        self.task_skills()
+        
         # for task_name in self.tasks:
         #     task = f"task_{task_name}"
         #     if hasattr(self, task) and callable(func := getattr(self, task)):
