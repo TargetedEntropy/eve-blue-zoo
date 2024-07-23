@@ -38,7 +38,7 @@ class MainTasks:
 
     def task_mining_ledger(self):
         mining_ledger = MiningLedgerTasks(self.scheduler)
-        print("Mining Ledger Done")
+        print("Mining Ledger Loaded")
             
     def load_scheduled_tasks(self) -> None:
         """Load all of our tasks.
