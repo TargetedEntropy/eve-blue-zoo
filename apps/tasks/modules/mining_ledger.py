@@ -17,7 +17,12 @@ class MiningLedgerTasks:
     def schedule_tasks(self) -> None:
         """Setup task execution schedule"""
         self.scheduler.add_job(
-            func=self.main, id="mining_ledger_main", trigger="interval", seconds=300
+            func=self.main,
+            trigger="interval",
+            seconds=300,
+            id="mining_ledger_main",
+            name="mining_ledger_main",
+            replace_existing=True,
         )
 
     def get_all_users(self) -> list:
@@ -33,25 +38,32 @@ class MiningLedgerTasks:
         for character in self.characters:
             print(f"Checking: {character.character_name}")
 
-            # Get Data
-            esi_params = {"character_id": character.character_id}
-            ledger_data = esi.get_esi(
-                character, "get_characters_character_id_mining", **esi_params
-            )
+            from datetime import datetime
 
-            # Save Data
-            for ld in ledger_data.data:
-                ld["character_id"] = character.character_id
-                print(f"ld: {ld}")
+            # datetime object containing current date and time
+            now = datetime.now()
+            
+            print("now =", now)
 
-                mining_row = MiningLedger(
-                    character_id=character.character_id,
-                    date=ld["date"],
-                    quantity=ld["quantity"],
-                    solar_system_id=ld["solar_system_id"],
-                    type_id=ld["type_id"],
-                )
+            # # Get Data
+            # esi_params = {"character_id": character.character_id}
+            # ledger_data = esi.get_esi(
+            #     character, "get_characters_character_id_mining", **esi_params
+            # )
 
-                with self.scheduler.app.app_context():
-                    db.session.merge(mining_row)
-                    db.session.commit()
+            # # Save Data
+            # for ld in ledger_data.data:
+            #     ld["character_id"] = character.character_id
+            #     print(f"ld: {ld}")
+
+            #     mining_row = MiningLedger(
+            #         character_id=character.character_id,
+            #         date=ld["date"],
+            #         quantity=ld["quantity"],
+            #         solar_system_id=ld["solar_system_id"],
+            #         type_id=ld["type_id"],
+            #     )
+
+            #     with self.scheduler.app.app_context():
+            #         db.session.merge(mining_row)
+            #         db.session.commit()

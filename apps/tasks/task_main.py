@@ -23,9 +23,8 @@ class MainTasks:
         """Run internal class intialization functions"""
         self.tasks = ["mining_ledger"]
         self.app = app
-        # self.tasks = self.load_tasks()
-        self.scheduler = self.configure_scheduler(self.app)
 
+        self.scheduler = self.configure_scheduler(self.app)
         self.load_scheduled_tasks()
 
     def configure_scheduler(self, app):
@@ -49,7 +48,8 @@ class MainTasks:
         """
         print(f"Running {len(self.tasks)} tasks")
 
-        for task_name in self.tasks:
-            task = f"task_{task_name}"
-            if hasattr(self, task) and callable(func := getattr(self, task)):
-                func()
+        self.task_mining_ledger()
+        # for task_name in self.tasks:
+        #     task = f"task_{task_name}"
+        #     if hasattr(self, task) and callable(func := getattr(self, task)):
+        #         func()
