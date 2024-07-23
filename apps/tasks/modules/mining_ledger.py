@@ -1,7 +1,7 @@
 """ Mining Ledger Tasks """
 
-from apps.authentication.models import Characters
-from apps import esi
+from apps.authentication.models import Characters, MiningLedger
+from apps import esi, db
 
 class MiningLedgerTasks:
     """ Tasks related to the Mining Ledger """
@@ -50,11 +50,9 @@ class MiningLedgerTasks:
     
     def main(self):
         print("Running Mining Ledger Main")
-        # self.init_app(self.scheduler.app)
-        for character in self.characters:
-            #character_id = character_id[0]
 
-            #character_id, character_name, refresh_token = character
+        for character in self.characters:
+
             print(f"Checking: {character.character_name}")
 
 
@@ -67,17 +65,19 @@ class MiningLedgerTasks:
             for ld in ledger_data.data:
                 ld['character_id'] = character.character_id
                 print(f"ld: {ld}")
-#                if does_row_exist(ld): continue
-            #     ledger_query = mining_ledger.insert().values(
-            #         character_id = character_id,
-            #         date = ld['date'],
-            #         quantity = ld['quantity'],
-            #         solar_system_id = ld['solar_system_id'],
-            #         type_id = ld['type_id']
-            #     )
-            #     result = connection.execute(ledger_query)
-                break
+                
+                mining_row = MiningLedger(
+                    character_id = character.character_id,
+                    date = ld['date'],
+                    quantity = ld['quantity'],
+                    solar_system_id = ld['solar_system_id'],
+                    type_id = ld['type_id']
+                )
+                
+                with self.scheduler.app.app_context():
+                    db.session.merge(mining_row)
+                    db.session.commit()
 
-            # print(f"esi_data: {esi_data}")
+                break
             
             break
