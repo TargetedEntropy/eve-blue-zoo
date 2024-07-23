@@ -191,6 +191,37 @@ class Users(db.Model, UserMixin):
         )
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
+            
+            
+class MapSolarSystems(db.Model):
+    __tablename__ = 'mapSolarSystems'
+
+    regionID = db.Column(db.Integer, nullable=True, index=True)
+    constellationID = db.Column(db.Integer, nullable=True, index=True)
+    solarSystemID = db.Column(db.Integer, primary_key=True)
+    solarSystemName = db.Column(db.String(100), nullable=True)
+    x = db.Column(db.Float, nullable=True)
+    y = db.Column(db.Float, nullable=True)
+    z = db.Column(db.Float, nullable=True)
+    xMin = db.Column(db.Float, nullable=True)
+    xMax = db.Column(db.Float, nullable=True)
+    yMin = db.Column(db.Float, nullable=True)
+    yMax = db.Column(db.Float, nullable=True)
+    zMin = db.Column(db.Float, nullable=True)
+    zMax = db.Column(db.Float, nullable=True)
+    luminosity = db.Column(db.Float, nullable=True)
+    border = db.Column(db.Boolean, nullable=True)
+    fringe = db.Column(db.Boolean, nullable=True)
+    corridor = db.Column(db.Boolean, nullable=True)
+    hub = db.Column(db.Boolean, nullable=True)
+    international = db.Column(db.Boolean, nullable=True)
+    regional = db.Column(db.Boolean, nullable=True)
+    constellation = db.Column(db.Boolean, nullable=True)
+    security = db.Column(db.Float, nullable=True, index=True)
+    factionID = db.Column(db.Integer, nullable=True)
+    radius = db.Column(db.Float, nullable=True)
+    sunTypeID = db.Column(db.Integer, nullable=True)
+    securityClass = db.Column(db.String(2), nullable=True)            
 
 
 @login_manager.user_loader
