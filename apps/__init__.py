@@ -8,14 +8,9 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from importlib import import_module
 from apps.authentication.esi import EsiAuth
-from apscheduler.schedulers.background import BackgroundScheduler
-import atexit
-
-# from apps.tasks.task_main import MainTasks
 
 db = SQLAlchemy()
 login_manager = LoginManager()
-
 
 esi = EsiAuth()
 login_manager = LoginManager()
@@ -25,11 +20,11 @@ def register_extensions(app):
     db.init_app(app)
     login_manager.init_app(app)
     esi.init_app(app)
-    
+
 
 def register_blueprints(app):
-    for module_name in ('authentication', 'home'):
-        module = import_module('apps.{}.routes'.format(module_name))
+    for module_name in ("authentication", "home"):
+        module = import_module("apps.{}.routes".format(module_name))
         app.register_blueprint(module.blueprint)
 
 
@@ -43,21 +38,11 @@ def configure_database(app):
     def shutdown_session(exception=None):
         db.session.remove()
 
-def configure_scheduler(app):
-    # Setup the scheduler to refresh coures, assignments and submissions
-    scheduler = BackgroundScheduler()
-    scheduler.add_job(func=execute_scheduled_tasks, trigger="interval", seconds=10)
-    scheduler.start()
 
-    # Shut down the scheduler when exiting the app
-    atexit.register(lambda: scheduler.shutdown())
+def configure_tasks(app):
+    task_master = import_module("apps.tasks.task_main")
+    task_master.MainTasks(app)
 
-def execute_scheduled_tasks():
-    task_master = MainTasks()
-    task_master.run_tasks()
-
-
-    
 
 def create_app(config):
     app = Flask(__name__)
@@ -65,5 +50,5 @@ def create_app(config):
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
-    # configure_scheduler(app)
+    configure_tasks(app)
     return app
