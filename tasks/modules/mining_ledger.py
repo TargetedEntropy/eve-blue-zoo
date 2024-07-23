@@ -5,17 +5,16 @@ from apps.authentication.models import Characters
 class MiningLedgerTasks:
     """ Tasks related to the Mining Ledger """
     
-    def __init__(self):
+    def __init__(self, scheduler):
+        self.scheduler = scheduler
         self.characters = self.get_all_users()
-        
+       
 
     def get_all_users(self):
-        character_list = Characters.query.all()
-        # cursor = connection.execute(
-        #     f"select character_id,character_name,refresh_token from Characters"
-        # )
+        with self.scheduler.app.app_context():
+            character_list = Characters.query.all()
+            print(f"characters: {character_list}")
 
-        # character_list = cursor.fetchall()
         return character_list
 
     def get_mining_ledger(character_id):

@@ -21,9 +21,9 @@ class MainTasks:
 
     def __init__(self, app:object, tasks=None):
         """Run internal class intialization functions"""
-        #self.tasks = ['mining_ledger']
+        self.tasks = ['mining_ledger']
         self.app = app
-        self.tasks = self.load_tasks()
+        # self.tasks = self.load_tasks()
         self.scheduler = self.configure_scheduler(self.app)
 
     
@@ -39,10 +39,8 @@ class MainTasks:
         return scheduler
 
     def task_mining_ledger(self):
+        mining_ledger = MiningLedgerTasks(self.scheduler)
         print("Mining Ledger Done")
-        with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
-            print(f"characters: {character_list}")
             
     def execute_scheduled_tasks(self) -> None:
         """Execute all of our tasks.
