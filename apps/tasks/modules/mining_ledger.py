@@ -2,7 +2,7 @@
 
 from apps.authentication.models import Characters
 from apps import esi
-import esipy
+# import esipy
 
 class MiningLedgerTasks:
     """ Tasks related to the Mining Ledger """
@@ -10,48 +10,48 @@ class MiningLedgerTasks:
     def __init__(self, scheduler):
         self.scheduler = scheduler
         self.characters = self.get_all_users()
-        self.esisecurity = None
-        self.esiclient = None
-        self.esiapp = None
+    #     self.esisecurity = None
+    #     self.esiclient = None
+    #     self.esiapp = None
 
-    def init_app(self, app):
-        """Initialize the ESI App with the Flask App
+    # def init_app(self, app):
+    #     """Initialize the ESI App with the Flask App
 
-        Args:
-            app (obj): The Flask App object
-        """
-        # init our ESI App
-        self.esiapp = esipy.App.create(app.config["ESI_SWAGGER_JSON"])
+    #     Args:
+    #         app (obj): The Flask App object
+    #     """
+    #     # init our ESI App
+    #     self.esiapp = esipy.App.create(app.config["ESI_SWAGGER_JSON"])
 
-        # init the security object
-        self.esisecurity = esipy.EsiSecurity(
-            app=self.esiapp,
-            redirect_uri=app.config["ESI_CALLBACK"],
-            client_id=app.config["ESI_CLIENT_ID"],
-            secret_key=app.config["ESI_SECRET_KEY"],
-            headers={"User-Agent": "merriam@gmail.com"},
-        )
+    #     # init the security object
+    #     self.esisecurity = esipy.EsiSecurity(
+    #         app=self.esiapp,
+    #         redirect_uri=app.config["ESI_CALLBACK"],
+    #         client_id=app.config["ESI_CLIENT_ID"],
+    #         secret_key=app.config["ESI_SECRET_KEY"],
+    #         headers={"User-Agent": "merriam@gmail.com"},
+    #     )
 
-        # init the client
-        self.esiclient = esipy.EsiClient(
-            security=self.esisecurity,
-            cache=None,
-            headers={"User-Agent": app.config["ESI_USER_AGENT"]},
-        )       
+    #     # init the client
+    #     self.esiclient = esipy.EsiClient(
+    #         security=self.esisecurity,
+    #         cache=None,
+    #         headers={"User-Agent": app.config["ESI_USER_AGENT"]},
+    #     )       
 
-    def refresh_esi_token(self, refresh_token):
+    # def refresh_esi_token(self, refresh_token):
 
-        print("Update token")
-        self.esisecurity.update_token(
-            {
-                "access_token": "",  # leave this empty
-                "expires_in": -1,  # seconds until expiry, so we force refresh anyway
-                "refresh_token": refresh_token,
-            }
-        )
+    #     print("Update token")
+    #     self.esisecurity.update_token(
+    #         {
+    #             "access_token": "",  # leave this empty
+    #             "expires_in": -1,  # seconds until expiry, so we force refresh anyway
+    #             "refresh_token": refresh_token,
+    #         }
+    #     )
 
-        print("Refresh token")
-        return self.esisecurity.refresh()
+    #     print("Refresh token")
+    #     return self.esisecurity.refresh()
 
 
     def get_all_users(self):
@@ -94,17 +94,14 @@ class MiningLedgerTasks:
     
     def main(self):
         print("Running Mining Ledger Main")
-        self.init_app(self.scheduler.app)
+        # self.init_app(self.scheduler.app)
         for character in self.characters:
             #character_id = character_id[0]
 
             #character_id, character_name, refresh_token = character
             print(f"Checking: {character.character_name}")
 
-            # print("Refreshing the token")
-            token = self.refresh_esi_token(character.refresh_token)
-            
-            print("Getting ledger details")
+            # print("Getting ledger details")
             # ledger_data = self.get_mining_ledger(character.character_id)
             # for ld in ledger_data:
             #     ld['character_id'] = character_id
@@ -117,4 +114,12 @@ class MiningLedgerTasks:
             #         type_id = ld['type_id']
             #     )
             #     result = connection.execute(ledger_query)
-                
+           
+            esi_params = {
+                'character_id': character.character_id
+            }            
+            esi_data = esi.get_esi(character, "get_characters_character_id_mining", **esi_params)
+            
+            print(f"esi_data: {esi_data}")
+            
+            break

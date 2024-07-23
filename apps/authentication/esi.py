@@ -51,3 +51,17 @@ class EsiAuth:
             character_id=current_user.character_id
         )
         return self.esiclient.request(request)
+
+    def get_esi(self, character, schema, **kwargs):
+        """Get ESI Data with token refresh
+
+        Args:
+            character (UsersModel): the current user from the Users login_manager Model
+
+        Returns:
+            string: json of response from ESI
+        """
+        self.esisecurity.update_token(character.get_sso_data())
+
+        request = self.esiapp.op[schema](**kwargs)
+        return self.esiclient.request(request)
