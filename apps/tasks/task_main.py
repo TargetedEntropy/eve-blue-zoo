@@ -11,6 +11,7 @@ from flask_apscheduler import APScheduler
 import atexit
 
 from apps.tasks.modules.mining_ledger import MiningLedgerTasks
+from apps.tasks.modules.blueprints import BlueprintTasks
 
 
 class MainTasks:
@@ -21,7 +22,7 @@ class MainTasks:
 
     def __init__(self, app: object, tasks=None):
         """Run internal class intialization functions"""
-        self.tasks = ["mining_ledger"]
+        self.tasks = ["mining_ledger", "blueprints"]
         self.app = app
 
         self.scheduler = self.configure_scheduler(self.app)
@@ -39,7 +40,12 @@ class MainTasks:
 
     def task_mining_ledger(self):
         mining_ledger = MiningLedgerTasks(self.scheduler)
-        print("Mining Ledger Loaded")
+        print("Mining Ledger Tasks Loaded")
+
+    def task_blueprints(self):
+        blueprints = BlueprintTasks(self.scheduler)
+        print("Blueprint Tasks Loaded")
+
 
     def load_scheduled_tasks(self) -> None:
         """Load all of our tasks.
@@ -49,6 +55,7 @@ class MainTasks:
         print(f"Running {len(self.tasks)} tasks")
 
         self.task_mining_ledger()
+        self.task_blueprints()
         # for task_name in self.tasks:
         #     task = f"task_{task_name}"
         #     if hasattr(self, task) and callable(func := getattr(self, task)):
