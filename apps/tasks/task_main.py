@@ -58,12 +58,8 @@ class MainTasks:
         This will run initialize the tasks.
         """
         print(f"Running {len(self.tasks)} tasks")
-
-        self.task_mining_ledger()
-        self.task_blueprints()
-        self.task_skills()
         
-        # for task_name in self.tasks:
-        #     task = f"task_{task_name}"
-        #     if hasattr(self, task) and callable(func := getattr(self, task)):
-        #         func()
+        for task_name in self.tasks:
+            task = f"task_{task_name}"
+            if hasattr(self, task) and callable(func := getattr(self, task)):
+                func()
