@@ -8,10 +8,7 @@ class BlueprintTasks:
     """Tasks related to Blueprints"""
 
     def __init__(self, scheduler):
-
         self.scheduler = scheduler
-        self.characters = self.get_all_users()
-
         self.schedule_tasks()
 
     def schedule_tasks(self) -> None:
@@ -39,7 +36,9 @@ class BlueprintTasks:
         from datetime import datetime
         print(f"now = {datetime.now()}")
 
-        for character in self.characters:
+        characters = self.get_all_users()
+
+        for character in characters:
             print(f"Checking: {character.character_name}")
 
             # Get Data
@@ -50,9 +49,6 @@ class BlueprintTasks:
 
             # Save Data
             for ld in blueprint_data.data:
-                ld["character_id"] = character.character_id
-                print(f"ld: {ld}")
-
                 blueprint_row = Blueprints(
                     character_id = character.character_id,
                     location_flag = ld["location_flag"],

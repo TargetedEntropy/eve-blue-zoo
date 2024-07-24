@@ -8,10 +8,7 @@ class SkillTasks:
     """Tasks related to Skills"""
 
     def __init__(self, scheduler):
-
         self.scheduler = scheduler
-        self.characters = self.get_all_users()
-
         self.schedule_tasks()
 
     def schedule_tasks(self) -> None:
@@ -29,7 +26,6 @@ class SkillTasks:
         """Gets all characters"""
         with self.scheduler.app.app_context():
             character_list = Characters.query.all()
-            print(f"characters: {character_list}")
 
         return character_list
 
@@ -39,7 +35,9 @@ class SkillTasks:
         from datetime import datetime
         print(f"now = {datetime.now()}")
 
-        for character in self.characters:
+        characters = self.get_all_users()
+
+        for character in characters:
             print(f"Checking: {character.character_name}")
 
             # Get Data

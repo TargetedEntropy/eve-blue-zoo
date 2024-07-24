@@ -83,7 +83,6 @@ def page_miningledger():
     # Detect the current page
     segment = get_segment(request)
 
-    data = []
     try:
         # Define the query
         query = db.session.query(distinct(MiningLedger.date)).order_by(desc(MiningLedger.date))
@@ -91,7 +90,12 @@ def page_miningledger():
         # Execute the query and fetch all results
         all_dates = query.all()
 
+        date_list = []
+        
         for ledger_date in all_dates:
+            
+            daily_totals = []
+            
             ledger_date = ledger_date[0]
             date_str = ledger_date.strftime('%Y-%m-%d')
 
@@ -123,17 +127,31 @@ def page_miningledger():
 
             ledger_data = ledger_query.all()
 
+            data_builder = []
             for ledger_row in ledger_data:
                 character_name, typeId, typeName, quantity, solar_system_name = ledger_row
-                data.append([ledger_date,character_name, typeName, quantity, solar_system_name])
+
+                manual = 1
+                for daily_total in daily_totals:
+                    if daily_total[4] == typeId and daily_total[3] == solar_system_name:
+                        daily_total[2] += quantity
+                        manual = 0
+                        
+                if manual == 1:
+                    daily_totals.append([ledger_date, typeName, quantity, solar_system_name, typeId])
+                
+            for dt in daily_totals:
+                data_builder.append(dt)
+                
+            date_list.append(data_builder) 
                
     except Exception as e:
-        print(e)
+        print(f"error: {e}")
         data = []
 
     # Serve the file (if exists) from app/templates/home/FILE.html
     return render_template(
-        "home/ui-miningledger.html", segment=segment, data=data
+        "home/ui-miningledger.html", segment=segment, date_list=date_list
     )
 
 
