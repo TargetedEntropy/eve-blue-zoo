@@ -77,6 +77,47 @@ def page_user():
         "home/page-user.html", segment=segment, characters=characters
     )
 
+@blueprint.route("/page-character.html")
+@login_required
+def page_character():
+    # Detect the current page
+    segment = get_segment(request)
+    print(f"request:{request.query_string}")
+    character_id = request.args.get('character_id')
+    print(f"character_id:{character_id}")
+
+    try:
+        if not character_id.isnumeric():
+            return render_template("home/page-404.html"), 404
+    except Exception as error:
+        print(f"Login page failed, error: {error}")
+        return render_template("home/page-404.html"), 404
+
+    try:
+        # Get Characters
+        character = db.session.query(
+            Characters.character_name,
+            Characters.character_id,        
+            SkillSet.total_sp,
+            SkillSet.unallocated_sp
+        ).join(
+            SkillSet, Characters.character_id == SkillSet.character_id
+        ).filter(
+            Characters.character_id == character_id 
+        ).one()       
+        
+        # character = Characters.query.filter(
+        #     Characters.character_id == character_id 
+        # ).one()
+    except NoResultFound:
+        characters = []
+        return render_template("home/page-404.html"), 404
+
+    # Serve the file (if exists) from app/templates/home/FILE.html
+    return render_template(
+        "home/page-character.html", segment=segment, character=character
+    )
+
 @blueprint.route("/ui-miningledger.html")
 @login_required
 def page_miningledger():
