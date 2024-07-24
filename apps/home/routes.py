@@ -7,6 +7,7 @@ from flask import render_template, request
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import aliased
 from sqlalchemy import create_engine, distinct, desc
 from apps import esi, db
 from apps.home import blueprint
@@ -82,9 +83,8 @@ def page_user():
 def page_character():
     # Detect the current page
     segment = get_segment(request)
-    print(f"request:{request.query_string}")
+
     character_id = request.args.get('character_id')
-    print(f"character_id:{character_id}")
 
     try:
         if not character_id.isnumeric():
@@ -105,10 +105,7 @@ def page_character():
         ).filter(
             Characters.character_id == character_id 
         ).one()       
-        
-        # character = Characters.query.filter(
-        #     Characters.character_id == character_id 
-        # ).one()
+
     except NoResultFound:
         characters = []
         return render_template("home/page-404.html"), 404
@@ -125,11 +122,22 @@ def page_miningledger():
     segment = get_segment(request)
 
     try:
-        # Define the query
-        query = db.session.query(distinct(MiningLedger.date)).order_by(desc(MiningLedger.date))
+        # # Define the query
+        # query = db.session.query(distinct(MiningLedger.date)).order_by(desc(MiningLedger.date))
+
+
+        # Aliasing the Characters table for the join
+        CharactersAlias = aliased(Characters)
+
+        # Updating the query
+        query = db.session.query(distinct(MiningLedger.date))\
+            .join(Characters, MiningLedger.character_id == Characters.character_id)\
+            .filter(Characters.master_character_id == current_user.character_id)\
+            .order_by(desc(MiningLedger.date))
 
         # Execute the query and fetch all results
         all_dates = query.all()
+        
 
         date_list = []
         
@@ -138,6 +146,7 @@ def page_miningledger():
             daily_totals = []
             
             ledger_date = ledger_date[0]
+            
             date_str = ledger_date.strftime('%Y-%m-%d')
 
             # Define the query
@@ -167,7 +176,7 @@ def page_miningledger():
             )           
 
             ledger_data = ledger_query.all()
-
+            
             data_builder = []
             for ledger_row in ledger_data:
                 character_name, typeId, typeName, quantity, solar_system_name = ledger_row
