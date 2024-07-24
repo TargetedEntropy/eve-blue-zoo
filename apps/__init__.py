@@ -49,5 +49,5 @@ def create_app(config):
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
-    configure_tasks(app)
+    # configure_tasks(app)
     return app

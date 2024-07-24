@@ -91,6 +91,8 @@ def page_miningledger():
         # Execute the query and fetch all results
         all_dates = query.all()
 
+        date_list = []
+        
         for ledger_date in all_dates:
             ledger_date = ledger_date[0]
             date_str = ledger_date.strftime('%Y-%m-%d')
@@ -123,17 +125,28 @@ def page_miningledger():
 
             ledger_data = ledger_query.all()
 
+            data_builder = []
             for ledger_row in ledger_data:
                 character_name, typeId, typeName, quantity, solar_system_name = ledger_row
-                data.append([ledger_date,character_name, typeName, quantity, solar_system_name])
+                data.append([ledger_date,character_name, typeName, quantity, solar_system_name, typeId])
+                data_builder.append([ledger_date,character_name, typeName, quantity, solar_system_name, typeId])
+                
+            date_list.append(data_builder) #{
+            #     "ledger_date": ledger_date,
+            #     "character_name": character_name, 
+            #     "typeName": typeName, 
+            #     "quantity": quantity, 
+            #     "solar_system_name": solar_system_name,
+            #     "typeId": typeId
+            #     })
                
     except Exception as e:
-        print(e)
+        print(f"error: {e}")
         data = []
 
     # Serve the file (if exists) from app/templates/home/FILE.html
     return render_template(
-        "home/ui-miningledger.html", segment=segment, data=data
+        "home/ui-miningledger.html", segment=segment, data=data, date_list=date_list
     )
 
 

@@ -15,16 +15,30 @@
       </div>
       <div class="card-body">
         <table id="ledger" class="display" style="width:100%">
-        {% for row in data %}
-          <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td>{{ row[4] }}</td>
-          </tr>
+
+        {% for date_group in date_list %}
+          {{ date_group[0][0]}}
+          <div class="row">
+            {% for date_results in date_group %}
+            <div class="font-icon-list col-lg-2 col-md-3 col-sm-4 col-xs-6 col-xs-6">
+              <div class="font-icon-detail">
+                <img src="https://images.evetech.net/types/{{date_results[5]}}/icon">
+                <div class="text-center">
+                  <h2 class="card-title">{{date_results[2]}}</h2>
+                </div>
+                {{date_results[3]}}
+                <p>{{date_results[4]}}</p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>  
         {% endfor %}
+
+
+
         </table>
+
+        
       </div>
     </div>
   </div>

@@ -49,9 +49,6 @@ class MiningLedgerTasks:
 
             # Save Data
             for ld in ledger_data.data:
-                ld["character_id"] = character.character_id
-                print(f"ld: {ld}")
-
                 mining_row = MiningLedger(
                     character_id=character.character_id,
                     date=ld["date"],

@@ -49,9 +49,6 @@ class BlueprintTasks:
 
             # Save Data
             for ld in blueprint_data.data:
-                ld["character_id"] = character.character_id
-                print(f"ld: {ld}")
-
                 blueprint_row = Blueprints(
                     character_id = character.character_id,
                     location_flag = ld["location_flag"],
