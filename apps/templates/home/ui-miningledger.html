@@ -22,12 +22,12 @@
             {% for date_results in date_group %}
             <div class="font-icon-list col-lg-2 col-md-3 col-sm-4 col-xs-6 col-xs-6">
               <div class="font-icon-detail">
-                <img src="https://images.evetech.net/types/{{date_results[5]}}/icon">
+                <img src="https://images.evetech.net/types/{{date_results[4]}}/icon">
                 <div class="text-center">
-                  <h2 class="card-title">{{date_results[2]}}</h2>
+                  <h2 class="card-title">{{date_results[1]}}</h2>
                 </div>
+                <p>{{"{:,}".format(date_results[2])}}</p>
                 {{date_results[3]}}
-                <p>{{date_results[4]}}</p>
               </div>
             </div>
             {% endfor %}
