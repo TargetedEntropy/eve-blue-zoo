@@ -8,10 +8,7 @@ class MiningLedgerTasks:
     """Tasks related to the Mining Ledger"""
 
     def __init__(self, scheduler):
-
         self.scheduler = scheduler
-        self.characters = self.get_all_users()
-
         self.schedule_tasks()
 
     def schedule_tasks(self) -> None:
@@ -39,7 +36,9 @@ class MiningLedgerTasks:
         from datetime import datetime
         print(f"now = {datetime.now()}")
 
-        for character in self.characters:
+        characters = self.get_all_users()
+
+        for character in characters:
             print(f"Checking: {character.character_name}")
 
             # Get Data

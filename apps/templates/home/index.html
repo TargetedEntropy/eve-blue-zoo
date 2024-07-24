@@ -23,18 +23,30 @@
               Your wallet is currently full of <strong>{{ "$%.2f"|format(wallet.data) }}</strong> ISKs
             
             <div class="row">
-              {% for character in characters %}
-                <div class="font-icon-list col-lg-2 col-md-3 col-sm-4 col-xs-6 col-xs-6">
-                  <div class="font-icon-detail">
-                    <img src="https://images.evetech.net/characters/{{ character[1] }}/portrait?tenant=tranquility&size=64" alt="Profile Photo">
-                    <br>
-                    <div class="text-center">
-                      <h2 class="card-title">{{ character[0] }}</h2>
+              {% if characters is defined and characters|length > 0 %}
+
+                {% for character in characters %}
+                  <div class="font-icon-list col-lg-2 col-md-3 col-sm-4 col-xs-6 col-xs-6">
+                    <div class="font-icon-detail">
+                      <img src="https://images.evetech.net/characters/{{ character[1] }}/portrait?tenant=tranquility&size=64" alt="Profile Photo">
+                      <br>
+                      <div class="text-center">
+                        <h2 class="card-title">{{ character[0] }}</h2>
+                      </div>
+                      SP:<strong>{{ "{:,}".format(character[2]) }}</strong>
                     </div>
-                    SP:<strong>{{ "{:,}".format(character[2]) }}</strong>
+                  </div>
+                {% endfor %}    
+              
+              {% else %}
+              <div class="font-icon-list col-lg-2 col-md-3 col-sm-4 col-xs-6 col-xs-6">
+                <div class="font-icon-detail">
+                  <div class="text-center">
+                    <h2 class="card-title">Select User Profile -> Add Chacter</h2>
                   </div>
                 </div>
-              {% endfor %}              
+              </div>
+              {% endif %}
             </div>            
           </div>
         </div>

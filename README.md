@@ -6,8 +6,11 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
 
 > Features
 
-- registration via Eve SSO
+- Registration via Eve SSO
 - Associate multiple characters to primary login
+- Dashboard view of all associated added Characters
+- Display Blueprints owned across all Characters
+- Display Mining Ledger details
 
 <br />
 
@@ -17,6 +20,8 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
     - invTypes.sql.bz2
     - invGroups.sql.bz2
     - industryBlueprints.sql.bz2
+    - mapSolarSystems.sql.bz2
+    - mapRegions.sql.bz2
 
 <br />
 
@@ -32,7 +37,7 @@ This is a basic template to implement Eve Online SSO and basic ESI calls into th
 
 ```bash
 $ git clone https://github.com/TargetedEntropy/eve-blue-zoo.git
-$ cd flask-black-dashboard
+$ cd eve-blue-zoo
 ```
 
 > Start the app in Docker
@@ -42,10 +47,6 @@ $ docker-compose up --build
 ```
 
 Visit `http://localhost:85` in your browser. The app should be up & running.
-
-<br />
-
-![Flask Dashboard - Black Design, dashboard screen.](https://user-images.githubusercontent.com/51070104/140599334-00bd0b9a-b2aa-4163-893a-fedd8c5f1afc.gif)
 
 <br />
 
