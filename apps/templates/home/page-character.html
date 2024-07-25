@@ -1,0 +1,71 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User Profile {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+  <div class="content">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="title">Character Profile</h5>
+          </div>
+
+          <div class="card-body">
+    
+
+            <h2 class="h5 mb-4">Alerts & Notifications</h2>
+            <ul class="list-group list-group-flush">
+                <li class="">
+                  <div>
+                      <h3 class="h6 mb-1">SP Farm Updates</h3>
+                      <p class="small pe-4">Get Notification when this character reaches over 5.5mSP</p>
+                  </div>
+                  <div>
+                      <div class="">
+                          <input class="" type="checkbox" id="user-notification-1">
+                          <label class="" for="user-notification-1"></label>
+                      </div>
+                  </div>
+              </li>
+            </ul>            
+          </div>
+          <div class="card-footer">
+            <button type="submit" class="btn btn-fill btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-user">
+          <div class="card-body">
+            <p class="card-text">
+              <div class="author">
+                <div class="block block-one"></div>
+                <div class="block block-two"></div>
+                <div class="block block-three"></div>
+                <div class="block block-four"></div>
+                <a href="javascript:void(0)">
+                  <img class="avatar" src="https://images.evetech.net/characters/{{ character.character_id }}/portrait?tenant=tranquility&size=64" alt="...">
+                  <h5 class="title">{{character.character_name}}</h5>
+                </a>
+                <p class="description">
+                  {{ "{:,}".format(character.total_sp) }}sp
+                </p>
+              </div>
+            </p>
+          </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

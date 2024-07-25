@@ -35,7 +35,11 @@ class SkillSet(db.Model):
     
 #    skills = relationship('Skill', backref='skillset', cascade='all, delete-orphan')
 
-
+class Notifications(db.Model):
+    __tablename__ = 'notifications'
+    id = db.Column(db.Integer, primary_key=True)
+    master_character_id = db.Column(db.BigInteger)
+    
 
 class InvType(db.Model):
     __tablename__ = 'invTypes'
