@@ -38,7 +38,6 @@ class NotificationTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}")
 
             # Get Data
             esi_params = {"character_id": character.character_id}
