@@ -17,7 +17,7 @@ from apps.authentication.util import hash_pass
 
 # class Skill(db.Model):
 #     __tablename__ = 'skills'
-    
+
 #     id = db.Column(db.Integer, primary_key=True)
 #     active_skill_level = db.Column(db.Integer, nullable=False)
 #     skill_id = db.Column(db.Integer, nullable=False, unique=True)
@@ -25,25 +25,30 @@ from apps.authentication.util import hash_pass
 #     trained_skill_level = db.Column(db.Integer, nullable=False)
 #     skillset_id = db.Column(db.Integer, ForeignKey('skillsets.id'), nullable=False)
 
+
 class SkillSet(db.Model):
-    __tablename__ = 'skillsets'
-    
+    __tablename__ = "skillsets"
+
     id = db.Column(db.Integer, primary_key=True)
     character_id = db.Column(db.Integer, nullable=False)
     total_sp = db.Column(db.Integer, nullable=False)
     unallocated_sp = db.Column(db.Integer, nullable=False)
-    
+
+
 #    skills = relationship('Skill', backref='skillset', cascade='all, delete-orphan')
 
-class Notifications(db.Model):
-    __tablename__ = 'notifications'
+
+class CharacterNotifications(db.Model):
+    __tablename__ = "character_notifications"
     id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)
     master_character_id = db.Column(db.BigInteger)
-    
+    enabled_notifications = db.Column(db.Text)
+
 
 class InvType(db.Model):
-    __tablename__ = 'invTypes'
-    
+    __tablename__ = "invTypes"
+
     typeID = db.Column(db.BigInteger, primary_key=True)
     groupID = db.Column(db.BigInteger, index=True)
     typeName = db.Column(db.String(100))
@@ -62,8 +67,8 @@ class InvType(db.Model):
 
 
 class Blueprints(db.Model):
-    __tablename__ = 'Blueprints'
-    
+    __tablename__ = "Blueprints"
+
     item_id = db.Column(db.BigInteger, primary_key=True)
     character_id = db.Column(db.BigInteger)
     location_flag = db.Column(db.String(64))
@@ -101,6 +106,7 @@ class MiningLedger(db.Model):
     quantity = db.Column(db.BigInteger)
     solar_system_id = db.Column(db.BigInteger)
     type_id = db.Column(db.BigInteger)
+
 
 class Characters(db.Model):
     __tablename__ = "Characters"
@@ -195,10 +201,10 @@ class Users(db.Model, UserMixin):
         )
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
-            
-            
+
+
 class MapSolarSystems(db.Model):
-    __tablename__ = 'mapSolarSystems'
+    __tablename__ = "mapSolarSystems"
 
     regionID = db.Column(db.Integer, nullable=True, index=True)
     constellationID = db.Column(db.Integer, nullable=True, index=True)
@@ -225,7 +231,7 @@ class MapSolarSystems(db.Model):
     factionID = db.Column(db.Integer, nullable=True)
     radius = db.Column(db.Float, nullable=True)
     sunTypeID = db.Column(db.Integer, nullable=True)
-    securityClass = db.Column(db.String(2), nullable=True)            
+    securityClass = db.Column(db.String(2), nullable=True)
 
 
 @login_manager.user_loader

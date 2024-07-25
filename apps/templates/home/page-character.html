@@ -11,12 +11,13 @@
     <div class="row">
       <div class="col-md-8">
         <div class="card">
+          <form action="{{url_for('home_blueprint.page_character_post')}}" method="POST">          
           <div class="card-header">
             <h5 class="title">Character Profile</h5>
           </div>
-
+          
           <div class="card-body">
-    
+          
 
             <h2 class="h5 mb-4">Alerts & Notifications</h2>
             <ul class="list-group list-group-flush">
@@ -27,7 +28,9 @@
                   </div>
                   <div>
                       <div class="">
-                          <input class="" type="checkbox" id="user-notification-1">
+                          <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
+                          <input class="" type="checkbox" name="preferences" value="sp-farm-notification"
+                          {% if 'sp-farm-notification' in notifications.split(',') %} checked {% endif %}>
                           <label class="" for="user-notification-1"></label>
                       </div>
                   </div>
@@ -37,6 +40,7 @@
           <div class="card-footer">
             <button type="submit" class="btn btn-fill btn-primary">Save</button>
           </div>
+        </form>
         </div>
       </div>
       <div class="col-md-4">

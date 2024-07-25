@@ -44,7 +44,7 @@ def Decrypt(text_f):
 
 def generate_token(salt="None"):
     """Generates a non-guessable OAuth token
-    
+
     Generate encrypted string to be used as OAuth token.  Use the
     current_user.master_character_id if user already logged in. This
     allows characters to be associated to the original login.
@@ -72,7 +72,14 @@ def sso_login():
 
     return redirect(
         esi.esisecurity.get_auth_uri(
-            scopes=['esi-wallet.read_character_wallet.v1', 'esi-industry.read_character_mining.v1', 'esi-characters.read_blueprints.v1', 'esi-markets.structure_markets.v1', 'publicData', 'esi-skills.read_skills.v1'],
+            scopes=[
+                "esi-wallet.read_character_wallet.v1",
+                "esi-industry.read_character_mining.v1",
+                "esi-characters.read_blueprints.v1",
+                "esi-markets.structure_markets.v1",
+                "publicData",
+                "esi-skills.read_skills.v1",
+            ],
             state=token,
         )
     )
@@ -198,10 +205,7 @@ def login():
         )
 
     if not current_user.is_authenticated:
-        return render_template(
-            "accounts/login.html",
-            segment="login",
-            form=login_form)
+        return render_template("accounts/login.html", segment="login", form=login_form)
     return redirect(url_for("home_blueprint.index"))
 
 
@@ -250,9 +254,8 @@ def register():
 
     else:
         return render_template(
-            "accounts/register.html",
-            segment="register",
-            form=create_account_form)
+            "accounts/register.html", segment="register", form=create_account_form
+        )
 
 
 @blueprint.route("/logout")
