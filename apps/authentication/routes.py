@@ -272,12 +272,34 @@ from flask_discord import requires_authorization
 @blueprint.route("/discord/login")
 @login_required
 def discord_login():
-    return discord_client.create_session()
+    return discord_client.create_session(scope=["identify"])
     
 @blueprint.route("/discord/callback/")
 def discord_callback():
     discord_client.callback()
-    return redirect(url_for(".me"))
+    user = discord_client.fetch_user()
+    
+    if user:
+        user_data = Users.query.filter(
+            Users.character_id == current_user.character_id,
+        ).one()
+
+        user_data.discord_user_id = user.id
+
+        db.session.merge(user_data)
+        db.session.commit()
+    else:
+        print("user not found")
+    welcome_user(user)    
+    return redirect(url_for("home_blueprint.index"))
+
+
+def welcome_user(user):
+    print("sending welcome")
+    dm_channel = discord_client.bot_request("/users/@me/channels", "POST", json={"recipient_id": user.id})
+    return discord_client.bot_request(
+        f"/channels/{dm_channel['id']}/messages", "POST", json={"content": "Thanks for authorizing the app!"}
+    )
 
 @blueprint.route("/me/")
 @requires_authorization

@@ -12,6 +12,7 @@ from sqlalchemy import create_engine, distinct, desc
 from apps import esi, db
 from apps.home import blueprint
 from apps.authentication.models import (
+    Users,
     Characters,
     Blueprints,
     InvType,
@@ -83,10 +84,22 @@ def page_user():
         )
     except NoResultFound:
         characters = []
+        
+    discord_id = None
+    
+    try:
+        user = Users.query.filter(
+            Users.character_id == current_user.character_id
+        ).first()
+        discord_id = user.discord_user_id
+    except NoResultFound:
+        user = []
+
+    
 
     # Serve the file (if exists) from app/templates/home/FILE.html
     return render_template(
-        "home/page-user.html", segment=segment, characters=characters
+        "home/page-user.html", segment=segment, characters=characters, discord_id=discord_id
     )
 
 
