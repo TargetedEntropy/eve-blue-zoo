@@ -22,7 +22,7 @@
                 <strong>{{ current_user.character_name }}</strong>
               </div>
               <div class="text-left">
-                {% if discord_id is defined %}
+                {% if discord_id is not none %}
                   <h5 class="card-title">Discord Linked</h5>
                 {% else %}
                   <h3 class="card-title">Discord Not Linked</h3>
