@@ -1,8 +1,7 @@
 """ Notification Tasks """
 
-from apps.authentication.models import Characters, Notifications, SkillSet
+from apps.authentication.models import Characters, CharacterNotifications
 from apps import esi, db
-
 
 class NotificationTasks:
     """Tasks related to Notifications"""
@@ -10,6 +9,7 @@ class NotificationTasks:
     def __init__(self, scheduler):
         self.scheduler = scheduler
         self.schedule_tasks()
+        # self.discord = DiscordOAuth2Session(app)
 
     def schedule_tasks(self) -> None:
         """Setup task execution schedule"""
@@ -48,7 +48,7 @@ class NotificationTasks:
             ld = notification_data.data
 
             with self.scheduler.app.app_context():
-                notification = db.session.query(NotificationSet).filter_by(character_id=character.character_id).first()
+                notification = db.session.query(CharacterNotifications).filter_by(character_id=character.character_id).first()
 
             if notification:
                 # Update the fields
@@ -60,7 +60,7 @@ class NotificationTasks:
                     db.session.commit()
                 print(f"Updated NotificationSet for character, {character.character_name}")
             else:
-                notification_row = NotificationSet(
+                notification_row = CharacterNotifications(
                     character_id=character.character_id,
                     total_sp=ld["total_sp"],
                     unallocated_sp=ld["unallocated_sp"]

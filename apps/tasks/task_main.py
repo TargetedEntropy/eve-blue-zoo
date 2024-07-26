@@ -13,7 +13,7 @@ import atexit
 from apps.tasks.modules.mining_ledger import MiningLedgerTasks
 from apps.tasks.modules.blueprints import BlueprintTasks
 from apps.tasks.modules.skills import SkillTasks
-
+from apps.tasks.modules.notifications import NotificationTasks
 
 class MainTasks:
     """The Main tasks driving class.
@@ -50,6 +50,10 @@ class MainTasks:
     def task_skills(self):
         skills = SkillTasks(self.scheduler)
         print("Skill Tasks Loaded")
+        
+    def task_notifications(self):
+        notifications = NotificationTasks(self.scheduler)
+        print("Notifications Loaded")
 
 
     def load_scheduled_tasks(self) -> None:

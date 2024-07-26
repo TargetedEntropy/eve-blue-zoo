@@ -3,7 +3,6 @@
 from apps.authentication.models import Characters, SkillSet#, Skill
 from apps import esi, db
 
-
 class SkillTasks:
     """Tasks related to Skills"""
 

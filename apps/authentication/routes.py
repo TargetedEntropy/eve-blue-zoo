@@ -11,7 +11,7 @@ import json
 import esipy
 from apps.authentication.util import verify_pass
 from flask import render_template, redirect, request, url_for, session
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
@@ -262,6 +262,36 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for("home_blueprint.index"))
+
+
+# Discord
+
+from apps import discord_client
+from flask_discord import requires_authorization
+
+@blueprint.route("/discord/login")
+@login_required
+def discord_login():
+    return discord_client.create_session()
+    
+@blueprint.route("/discord/callback/")
+def discord_callback():
+    discord_client.callback()
+    return redirect(url_for(".me"))
+
+@blueprint.route("/me/")
+@requires_authorization
+def me():
+    user = discord_client.fetch_user()
+    return f"""
+    <html>
+        <head>
+            <title>{user.name}</title>
+        </head>
+        <body>
+            <img src='{user.avatar_url}' />
+        </body>
+    </html>"""
 
 
 # Errors
