@@ -4,3 +4,7 @@ ESI_SECRET_KEY=MoreMagicNumbers
 ESI_CALLBACK=http://localhost:5000/sso/callback 
 ESI_USER_AGENT=
 ESI_SWAGGER_JSON=https://esi.evetech.net/latest/swagger.json
+DISCORD_CLIENT_ID= 
+DISCORD_CLIENT_SECRET=
+DISCORD_REDIRECT_URI=
+DISCORD_BOT_TOKEN=
