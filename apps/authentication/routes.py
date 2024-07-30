@@ -20,6 +20,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from cryptography.fernet import Fernet
 from esipy.exceptions import APIException
 
+from apps import discord_client
+from flask_discord import requires_authorization
 
 fen_key = Fernet.generate_key()
 cipher_suite = Fernet(fen_key)
@@ -265,9 +267,6 @@ def logout():
 
 
 # Discord
-
-from apps import discord_client
-from flask_discord import requires_authorization
 
 @blueprint.route("/discord/login")
 @login_required
