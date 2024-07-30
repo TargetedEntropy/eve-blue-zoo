@@ -1,11 +1,13 @@
 """Eve Online ESI(API) Interface
 
 """
+
 import esipy
 
+
 class EsiAuth:
-    """Access to Eve Online's API, called ESI for SSO and calls
-    """
+    """Access to Eve Online's API, called ESI for SSO and calls"""
+
     def __init__(self):
         self.esisecurity = None
         self.esiclient = None
@@ -61,7 +63,8 @@ class EsiAuth:
         Returns:
             string: json of response from ESI
         """
-        self.esisecurity.update_token(character.get_sso_data())
+        if character is not None:
+            self.esisecurity.update_token(character.get_sso_data())
 
         request = self.esiapp.op[schema](**kwargs)
         return self.esiclient.request(request)
