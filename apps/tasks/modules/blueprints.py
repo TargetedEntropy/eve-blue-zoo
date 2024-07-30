@@ -33,6 +33,7 @@ class BlueprintTasks:
         print("Running Blueprint Main")
 
         from datetime import datetime
+
         print(f"now = {datetime.now()}")
 
         characters = self.get_all_users()
@@ -48,14 +49,14 @@ class BlueprintTasks:
             # Save Data
             for ld in blueprint_data.data:
                 blueprint_row = Blueprints(
-                    character_id = character.character_id,
-                    location_flag = ld["location_flag"],
-                    location_id = ld["location_id"],
-                    material_efficiency = ld["material_efficiency"], 
-                    quantity = ld["quantity"],
-                    runs = ld["runs"],
-                    time_efficiency = ld["time_efficiency"],
-                    type_id = ld["type_id"]
+                    character_id=character.character_id,
+                    location_flag=ld["location_flag"],
+                    location_id=ld["location_id"],
+                    material_efficiency=ld["material_efficiency"],
+                    quantity=ld["quantity"],
+                    runs=ld["runs"],
+                    time_efficiency=ld["time_efficiency"],
+                    type_id=ld["type_id"],
                 )
 
                 with self.scheduler.app.app_context():

@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 from flask_login import UserMixin
-from sqlalchemy import BigInteger, Column, Integer, ForeignKey
+from sqlalchemy import BigInteger, Column, Integer, ForeignKey, func
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.ext.declarative import declared_attr
 
@@ -14,16 +14,6 @@ from datetime import datetime
 import time
 
 from apps.authentication.util import hash_pass
-
-# class Skill(db.Model):
-#     __tablename__ = 'skills'
-
-#     id = db.Column(db.Integer, primary_key=True)
-#     active_skill_level = db.Column(db.Integer, nullable=False)
-#     skill_id = db.Column(db.Integer, nullable=False, unique=True)
-#     skillpoints_in_skill = db.Column(db.Integer, nullable=False)
-#     trained_skill_level = db.Column(db.Integer, nullable=False)
-#     skillset_id = db.Column(db.Integer, ForeignKey('skillsets.id'), nullable=False)
 
 
 class SkillSet(db.Model):
@@ -35,15 +25,13 @@ class SkillSet(db.Model):
     unallocated_sp = db.Column(db.Integer, nullable=False)
 
 
-#    skills = relationship('Skill', backref='skillset', cascade='all, delete-orphan')
-
-
 class CharacterNotifications(db.Model):
     __tablename__ = "character_notifications"
     id = db.Column(db.Integer, primary_key=True)
     character_id = db.Column(db.Integer, nullable=False)
     master_character_id = db.Column(db.BigInteger)
     enabled_notifications = db.Column(db.Text)
+
 
 class SentNotifications(db.Model):
     __tablename__ = "sent_notifications"
@@ -53,6 +41,20 @@ class SentNotifications(db.Model):
     total_sp = db.Column(db.Integer, nullable=False)
     notification_cleared = db.Column(db.Boolean, nullable=False, default=False)
 
+
+class MarketHistory(db.Model):
+    __tablename__ = "market_history"
+
+    id = Column(db.Integer, primary_key=True, autoincrement=True)
+    typeID = db.Column(db.BigInteger)
+    regionID = db.Column(db.Integer, nullable=False)
+    average = db.Column(db.Float, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    highest = db.Column(db.Float, nullable=False)
+    lowest = db.Column(db.Float, nullable=False)
+    order_count = db.Column(db.Integer, nullable=False)
+    volume = db.Column(db.Integer, nullable=False)
+    updated_date = db.Column(db.DateTime, nullable=False, default=func.now())
 
 
 class InvType(db.Model):
@@ -244,6 +246,25 @@ class MapSolarSystems(db.Model):
     radius = db.Column(db.Float, nullable=True)
     sunTypeID = db.Column(db.Integer, nullable=True)
     securityClass = db.Column(db.String(2), nullable=True)
+
+
+class MapRegion(db.Model):
+    __tablename__ = "mapRegions"
+
+    regionID = db.Column(db.Integer, primary_key=True, nullable=False)
+    regionName = db.Column(db.String(100), nullable=True)
+    x = db.Column(db.Float, nullable=True)
+    y = db.Column(db.Float, nullable=True)
+    z = db.Column(db.Float, nullable=True)
+    xMin = db.Column(db.Float, nullable=True)
+    xMax = db.Column(db.Float, nullable=True)
+    yMin = db.Column(db.Float, nullable=True)
+    yMax = db.Column(db.Float, nullable=True)
+    zMin = db.Column(db.Float, nullable=True)
+    zMax = db.Column(db.Float, nullable=True)
+    factionID = db.Column(db.Integer, nullable=True)
+    nebula = db.Column(db.Integer, nullable=True)
+    radius = db.Column(db.Float, nullable=True)
 
 
 @login_manager.user_loader
