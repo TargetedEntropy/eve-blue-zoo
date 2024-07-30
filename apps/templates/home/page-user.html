@@ -35,7 +35,7 @@
                 <label>Characters:</label>
                 <ul>
                   {% for character in characters %}
-                    <li>{{character.character_name}}</li>
+                    <li><a href="{{ url_for('home_blueprint.page_character_get') }}?character_id={{character.character_id}}">{{ character.character_name }}</a></li>
                   {% endfor %}
                     <li><a href=/sso/login>Add Character</a>
                 </ul>
