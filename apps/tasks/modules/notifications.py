@@ -16,7 +16,7 @@ class NotificationTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=15,
+            seconds=3600,
             id="notification_main",
             name="notification_main",
             replace_existing=True,
@@ -82,7 +82,7 @@ class NotificationTasks:
                 
                 for notification_history in notification_histories:
                     if notification_history.total_sp == skill_info.total_sp: continue
-                    if notification_history.total_sp != skill_info.total_sp:
+                    if skill_info.total_sp < 5500000:
                         notification_history.notification_cleared = True
 
                         with self.scheduler.app.app_context():                        
