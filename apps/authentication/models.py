@@ -45,6 +45,15 @@ class CharacterNotifications(db.Model):
     master_character_id = db.Column(db.BigInteger)
     enabled_notifications = db.Column(db.Text)
 
+class SentNotifications(db.Model):
+    __tablename__ = "sent_notifications"
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)
+    master_character_id = db.Column(db.BigInteger)
+    total_sp = db.Column(db.Integer, nullable=False)
+    notification_cleared = db.Column(db.Boolean, nullable=False, default=False)
+
+
 
 class InvType(db.Model):
     __tablename__ = "invTypes"
@@ -162,6 +171,9 @@ class Users(db.Model, UserMixin):
     access_token_expires = db.Column(db.DateTime(), nullable=True)
     refresh_token = db.Column(db.Text, nullable=True)
 
+    # Discord
+    discord_user_id = db.Column(db.String(64), nullable=True)
+
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
             # depending on whether value is an iterable or not, we must
@@ -177,7 +189,7 @@ class Users(db.Model, UserMixin):
             setattr(self, property, value)
 
     def __repr__(self):
-        return str(self.username)
+        return str(self.character_id)
 
     def get_id(self):
         """Required for flask-login"""

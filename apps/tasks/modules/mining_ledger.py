@@ -26,7 +26,6 @@ class MiningLedgerTasks:
         """Gets all characters"""
         with self.scheduler.app.app_context():
             character_list = Characters.query.all()
-            print(f"characters: {character_list}")
 
         return character_list
 
@@ -39,7 +38,6 @@ class MiningLedgerTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}")
 
             # Get Data
             esi_params = {"character_id": character.character_id}

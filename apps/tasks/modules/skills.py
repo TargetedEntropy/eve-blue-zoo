@@ -3,7 +3,6 @@
 from apps.authentication.models import Characters, SkillSet#, Skill
 from apps import esi, db
 
-
 class SkillTasks:
     """Tasks related to Skills"""
 
@@ -38,7 +37,6 @@ class SkillTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}")
 
             # Get Data
             esi_params = {"character_id": character.character_id}
@@ -59,7 +57,7 @@ class SkillTasks:
                 # Commit the changes
                 with self.scheduler.app.app_context():
                     db.session.commit()
-                print(f"Updated SkillSet for character, {character.character_name}")
+
             else:
                 skill_row = SkillSet(
                     character_id=character.character_id,

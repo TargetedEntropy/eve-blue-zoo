@@ -15,12 +15,12 @@ login_manager = LoginManager()
 esi = EsiAuth()
 login_manager = LoginManager()
 
+discord_client = None
 
 def register_extensions(app):
     db.init_app(app)
     login_manager.init_app(app)
     esi.init_app(app)
-
 
 def register_blueprints(app):
     for module_name in ("authentication", "home"):
@@ -42,10 +42,18 @@ def configure_tasks(app):
     task_master = import_module("apps.tasks.task_main")
     task_master.MainTasks(app)
 
+from flask_discord import DiscordOAuth2Session
+
+def configure_discord(app):
+    global discord_client
+    discord_client = DiscordOAuth2Session(app)
+
+
 
 def create_app(config):
     app = Flask(__name__)
     app.config.from_object(config)
+    configure_discord(app)
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)

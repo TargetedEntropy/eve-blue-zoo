@@ -11,7 +11,7 @@ import json
 import esipy
 from apps.authentication.util import verify_pass
 from flask import render_template, redirect, request, url_for, session
-from flask_login import current_user, login_user, logout_user
+from flask_login import current_user, login_user, logout_user, login_required
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
@@ -20,6 +20,8 @@ from sqlalchemy.orm.exc import NoResultFound
 from cryptography.fernet import Fernet
 from esipy.exceptions import APIException
 
+from apps import discord_client
+from flask_discord import requires_authorization
 
 fen_key = Fernet.generate_key()
 cipher_suite = Fernet(fen_key)
@@ -262,6 +264,55 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for("home_blueprint.index"))
+
+
+# Discord
+
+@blueprint.route("/discord/login")
+@login_required
+def discord_login():
+    return discord_client.create_session(scope=["identify"])
+    
+@blueprint.route("/discord/callback/")
+def discord_callback():
+    discord_client.callback()
+    user = discord_client.fetch_user()
+    
+    if user:
+        user_data = Users.query.filter(
+            Users.character_id == current_user.character_id,
+        ).one()
+
+        user_data.discord_user_id = user.id
+
+        db.session.merge(user_data)
+        db.session.commit()
+    else:
+        print("user not found")
+    welcome_user(user)    
+    return redirect(url_for("home_blueprint.index"))
+
+
+def welcome_user(user):
+    print("sending welcome")
+    dm_channel = discord_client.bot_request("/users/@me/channels", "POST", json={"recipient_id": user.id})
+    return discord_client.bot_request(
+        f"/channels/{dm_channel['id']}/messages", "POST", json={"content": "Thanks for authorizing the app!"}
+    )
+
+@blueprint.route("/me/")
+@requires_authorization
+def me():
+    user = discord_client.fetch_user()
+    return f"""
+    <html>
+        <head>
+            <title>{user.name}</title>
+        </head>
+        <body>
+            <img src='{user.avatar_url}' />
+        </body>
+    </html>"""
 
 
 # Errors
