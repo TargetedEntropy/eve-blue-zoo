@@ -82,7 +82,7 @@ class NotificationTasks:
                 
                 for notification_history in notification_histories:
                     if notification_history.total_sp == skill_info.total_sp: continue
-                    if skill_info.total_sp < 5500000:
+                    if notification_history.total_sp > skill_info.total_sp:
                         notification_history.notification_cleared = True
 
                         with self.scheduler.app.app_context():                        
