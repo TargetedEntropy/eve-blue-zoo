@@ -12,7 +12,7 @@ class Config(object):
     basedir = os.path.abspath(os.path.dirname(__file__))
 
     # Set up the App SECRET_KEY
-    SECRET_KEY = config("SECRET_KEY", default="S#perS3crEt_007")
+    SECRET_KEY = config("SECRET_KEY")
 
     SQLALCHEMY_DATABASE_URI = config("SQLALCHEMY_DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
