@@ -14,6 +14,7 @@ from apps.tasks.modules.mining_ledger import MiningLedgerTasks
 from apps.tasks.modules.blueprints import BlueprintTasks
 from apps.tasks.modules.skills import SkillTasks
 from apps.tasks.modules.notifications import NotificationTasks
+from apps.tasks.modules.market_history import MarketHistoryTasks
 
 class MainTasks:
     """The Main tasks driving class.
@@ -50,11 +51,14 @@ class MainTasks:
     def task_skills(self):
         skills = SkillTasks(self.scheduler)
         print("Skill Tasks Loaded")
-        
+
     def task_notifications(self):
         notifications = NotificationTasks(self.scheduler)
         print("Notifications Loaded")
-
+        
+    def task_market_history(self):
+        market_history = MarketHistoryTasks(self.scheduler)
+        print("Market History Loaded")        
 
     def load_scheduled_tasks(self) -> None:
         """Load all of our tasks.
@@ -62,7 +66,7 @@ class MainTasks:
         This will run initialize the tasks.
         """
         print(f"Running {len(self.tasks)} tasks")
-        
+
         for task_name in self.tasks:
             task = f"task_{task_name}"
             if hasattr(self, task) and callable(func := getattr(self, task)):

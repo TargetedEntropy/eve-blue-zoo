@@ -84,9 +84,9 @@ def page_user():
         )
     except NoResultFound:
         characters = []
-        
+
     discord_id = None
-    
+
     try:
         user = Users.query.filter(
             Users.character_id == current_user.character_id
@@ -95,11 +95,12 @@ def page_user():
     except NoResultFound:
         user = []
 
-    
-
     # Serve the file (if exists) from app/templates/home/FILE.html
     return render_template(
-        "home/page-user.html", segment=segment, characters=characters, discord_id=discord_id
+        "home/page-user.html",
+        segment=segment,
+        characters=characters,
+        discord_id=discord_id,
     )
 
 

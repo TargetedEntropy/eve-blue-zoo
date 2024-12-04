@@ -1,7 +1,8 @@
 """ Skill Tasks """
 
-from apps.authentication.models import Characters, SkillSet#, Skill
+from apps.authentication.models import Characters, SkillSet
 from apps import esi, db
+
 
 class SkillTasks:
     """Tasks related to Skills"""
@@ -32,6 +33,7 @@ class SkillTasks:
         print("Running Skill Main")
 
         from datetime import datetime
+
         print(f"now = {datetime.now()}")
 
         characters = self.get_all_users()
@@ -47,13 +49,17 @@ class SkillTasks:
             ld = skill_data.data
 
             with self.scheduler.app.app_context():
-                skillset = db.session.query(SkillSet).filter_by(character_id=character.character_id).first()
+                skillset = (
+                    db.session.query(SkillSet)
+                    .filter_by(character_id=character.character_id)
+                    .first()
+                )
 
             if skillset:
                 # Update the fields
                 skillset.total_sp = ld["total_sp"]
                 skillset.unallocated_sp = ld["unallocated_sp"]
-                
+
                 # Commit the changes
                 with self.scheduler.app.app_context():
                     db.session.commit()
@@ -62,10 +68,9 @@ class SkillTasks:
                 skill_row = SkillSet(
                     character_id=character.character_id,
                     total_sp=ld["total_sp"],
-                    unallocated_sp=ld["unallocated_sp"]
-                    )
-
+                    unallocated_sp=ld["unallocated_sp"],
+                )
 
                 with self.scheduler.app.app_context():
                     db.session.merge(skill_row)
-                    db.session.commit()                
+                    db.session.commit()
