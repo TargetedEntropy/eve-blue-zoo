@@ -64,7 +64,12 @@ class EsiAuth:
             string: json of response from ESI
         """
         if character is not None:
-            self.esisecurity.update_token(character.get_sso_data())
+        
+            try:
+                self.esisecurity.update_token(character.get_sso_data())
+            except Exception as error:
+                print(f"Error refreshing token for {character.character_name}, error: {error}")
+                raise
 
         request = self.esiapp.op[schema](**kwargs)
         return self.esiclient.request(request)
