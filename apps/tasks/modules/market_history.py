@@ -17,7 +17,7 @@ class MarketHistoryTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=43200,
             id="market_history_main",
             name="market_history_main",
             replace_existing=False,
