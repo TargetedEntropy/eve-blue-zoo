@@ -15,7 +15,18 @@ import time
 
 from apps.authentication.util import hash_pass
 
+class Features(db.Model):
+    __tablename__ = "features"
 
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.BigInteger, db.ForeignKey("Characters.character_id"), nullable=False, unique=True)
+    
+    # Store feature names and their enabled status as a JSON object
+    features = db.Column(db.JSON, default={})
+
+    character = db.relationship("Characters", backref=db.backref("features", uselist=False))
+    
+    
 class SkillSet(db.Model):
     __tablename__ = "skillsets"
 

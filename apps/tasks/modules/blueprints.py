@@ -2,6 +2,7 @@
 
 from apps.authentication.models import Characters, Blueprints
 from apps import esi, db
+from ..common import is_feature_enabled
 
 
 class BlueprintTasks:
@@ -19,7 +20,7 @@ class BlueprintTasks:
             seconds=3600,
             id="blueprint_main",
             name="blueprint_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_users(self) -> list:
@@ -39,6 +40,10 @@ class BlueprintTasks:
         characters = self.get_all_users()
 
         for character in characters:
+
+            if not is_feature_enabled(self.scheduler.app, character.character_id, "mining_ledger"):
+                print(f"Blueprints feature not enabled for: {character.character_name}")
+                continue
 
             # Get Data
             esi_params = {"character_id": character.character_id}

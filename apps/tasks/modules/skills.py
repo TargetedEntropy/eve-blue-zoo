@@ -2,7 +2,7 @@
 
 from apps.authentication.models import Characters, SkillSet
 from apps import esi, db
-
+from ..common import is_feature_enabled
 
 class SkillTasks:
     """Tasks related to Skills"""
@@ -16,10 +16,10 @@ class SkillTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=10,
             id="skill_main",
             name="skill_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_users(self) -> list:
@@ -40,6 +40,10 @@ class SkillTasks:
 
         for character in characters:
 
+            if not is_feature_enabled(self.scheduler.app, character.character_id, "skills"):
+                print(f"Skill feature not enabled for: {character.character_name}")
+                continue
+            
             # Get Data
             esi_params = {"character_id": character.character_id}
             skill_data = esi.get_esi(
