@@ -20,7 +20,7 @@ class MarketHistoryTasks:
             seconds=3600,
             id="market_history_main",
             name="market_history_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_regions(self) -> list:
