@@ -23,7 +23,7 @@ class NotificationTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=30,
             id="notification_main",
             name="notification_main",
             replace_existing=False,
@@ -76,10 +76,6 @@ class NotificationTasks:
         characters = self.get_all_users()
 
         for character in characters:
-
-            if not is_feature_enabled(self.scheduler.app, character.character_id, "notifications"):
-                print(f"Notifications feature not enabled for: {character.character_name}")
-                continue
 
             # Make sure there's something here
             if not character.enabled_notifications:

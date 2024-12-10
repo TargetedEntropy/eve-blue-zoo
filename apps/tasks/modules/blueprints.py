@@ -34,6 +34,7 @@ class BlueprintTasks:
         characters = self.get_all_users()
 
         for character in characters:
+            print(f"Checking: {character.character_name}", end='')
 
             # Get Data
             esi_params = {"character_id": character.character_id}
@@ -57,3 +58,5 @@ class BlueprintTasks:
                 with self.scheduler.app.app_context():
                     db.session.merge(blueprint_row)
                     db.session.commit()
+
+            print("...done")
