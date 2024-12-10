@@ -1,7 +1,9 @@
-""" Skill Tasks """
+"""Skill Tasks"""
 
+from datetime import datetime
 from apps.authentication.models import Characters, SkillSet
 from apps import esi, db
+from ..common import invalidate_sso
 
 
 class SkillTasks:
@@ -19,33 +21,33 @@ class SkillTasks:
             seconds=3600,
             id="skill_main",
             name="skill_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
+            character_list = Characters.query.filter_by(sso_is_valid=True).all()
 
         return character_list
 
     def main(self):
-        print("Running Skill Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
+        print(f"Running Skill Main: {datetime.now()}")
 
         characters = self.get_all_users()
 
         for character in characters:
+            print(f"Checking: {character.character_name}", end="")
 
             # Get Data
             esi_params = {"character_id": character.character_id}
-            skill_data = esi.get_esi(
-                character, "get_characters_character_id_skills", **esi_params
-            )
-
+            try:
+                skill_data = esi.get_esi(
+                    character, "get_characters_character_id_skills", **esi_params
+                )
+            except RuntimeError as e:
+                print(f"Failed to get ESI data, invalidating user: {e}")
+                invalidate_sso(self.scheduler.app, character_id=character.character_id)
             ld = skill_data.data
 
             with self.scheduler.app.app_context():
@@ -62,7 +64,11 @@ class SkillTasks:
 
                 # Commit the changes
                 with self.scheduler.app.app_context():
-                    db.session.commit()
+                    try:
+                        db.session.merge(skillset)
+                        db.session.commit()
+                    except Exception as error:
+                        print(f"Failed to commit row: {skillset}, error: {error}")
 
             else:
                 skill_row = SkillSet(
@@ -72,5 +78,10 @@ class SkillTasks:
                 )
 
                 with self.scheduler.app.app_context():
-                    db.session.merge(skill_row)
-                    db.session.commit()
+                    try:
+                        db.session.merge(skill_row)
+                        db.session.commit()
+                    except Exception as error:
+                        print(f"Failed to commit row: {skill_row}, error: {error}")
+
+            print("...done")

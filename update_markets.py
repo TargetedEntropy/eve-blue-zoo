@@ -1,5 +1,4 @@
-"""ESI Market Data
-"""
+"""ESI Market Data"""
 
 # -*- encoding: utf-8 -*-
 import hashlib
@@ -141,7 +140,6 @@ def get_region_name(region_id):
 
 
 def get_market_data(region_id):
-
     # we want to know how much pages there are for The Forge
     # so we make a HEAD request first
     op = esiapp.op["get_markets_region_id_orders"](
@@ -173,7 +171,6 @@ def get_market_data(region_id):
 
 
 def save_market_data(response_data):
-
     # Create a new MarketOrder instance
     new_order = MarketOrder(
         duration=response_data.duration,
@@ -202,7 +199,6 @@ def save_market_hash(hex_hash):
 
 
 def update_region_timestamp(regionID):
-
     # Query the row to update
     update_row = session.query(MarketUpdates).filter_by(regionID=regionID).first()
 
@@ -219,7 +215,6 @@ def update_region_timestamp(regionID):
 
 
 def get_hex_hash(response_data):
-
     try:
         json_data = json.dumps(response_data, default=str)
         hash_obj = hashlib.sha256(str(json_data).encode())

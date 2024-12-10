@@ -1,6 +1,4 @@
-"""Eve Online ESI(API) Interface
-
-"""
+"""Eve Online ESI(API) Interface"""
 
 import esipy
 
@@ -55,21 +53,33 @@ class EsiAuth:
         return self.esiclient.request(request)
 
     def get_esi(self, character, schema, **kwargs):
-        """Get ESI Data with token refresh
+        """Get ESI Data with token refresh.
 
         Args:
-            character (UsersModel): the current user from the Users login_manager Model
+            character (UsersModel): The current user from the Users login_manager Model.
+            schema: The ESI operation schema to execute.
+            **kwargs: Parameters to pass to the ESI operation.
 
         Returns:
-            string: json of response from ESI
+            string: JSON response from ESI.
+
+        Raises:
+            RuntimeError: If the token refresh or ESI request fails.
         """
         if character is not None:
-        
             try:
                 self.esisecurity.update_token(character.get_sso_data())
             except Exception as error:
-                print(f"Error refreshing token for {character.character_name}, error: {error}")
-                raise
+                message = f"Error refreshing token for {character.character_name}, error: {error}"
+                print(message)
+                raise RuntimeError(message) from error
 
-        request = self.esiapp.op[schema](**kwargs)
-        return self.esiclient.request(request)
+        try:
+            request = self.esiapp.op[schema](**kwargs)
+            return self.esiclient.request(request)
+        except Exception as error:
+            message = (
+                f"Error executing ESI request for schema '{schema}', error: {error}"
+            )
+            print(message)
+            raise RuntimeError(message) from error

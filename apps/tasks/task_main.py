@@ -5,7 +5,6 @@ will qualify if they run or not based on their own schedule. Meaning, some updat
 frequently than others.
 """
 
-import os
 from importlib import import_module
 from flask_apscheduler import APScheduler
 import atexit
@@ -16,6 +15,7 @@ from apps.tasks.modules.skills import SkillTasks
 from apps.tasks.modules.notifications import NotificationTasks
 from apps.tasks.modules.market_history import MarketHistoryTasks
 
+
 class MainTasks:
     """The Main tasks driving class.
 
@@ -24,50 +24,49 @@ class MainTasks:
 
     def __init__(self, app: object, tasks=None):
         """Run internal class intialization functions"""
-        self.tasks = ["mining_ledger", "blueprints", "skills", "notifications"]
+        self.tasks = tasks or ["skills", "blueprints", "mining_ledger", "notifications"]
         self.app = app
+        self.scheduler = self._configure_scheduler()
+        self._load_scheduled_tasks()
 
-        self.scheduler = self.configure_scheduler(self.app)
-        self.load_scheduled_tasks()
-
-    def configure_scheduler(self, app):
-        # Setup the scheduler to refresh coures, assignments and submissions
+    def _configure_scheduler(self) -> APScheduler:
+        """Set up the scheduler to manage tasks."""
         scheduler = APScheduler()
-        scheduler.init_app(app)
+        scheduler.init_app(self.app)
         scheduler.start()
 
-        # Shut down the scheduler when exiting the app
-        atexit.register(lambda: scheduler.shutdown())
+        # Shut down the scheduler gracefully when exiting the app
+        atexit.register(scheduler.shutdown)
         return scheduler
 
-    def task_mining_ledger(self):
-        mining_ledger = MiningLedgerTasks(self.scheduler)
-        print("Mining Ledger Tasks Loaded")
-
-    def task_blueprints(self):
-        blueprints = BlueprintTasks(self.scheduler)
-        print("Blueprint Tasks Loaded")
-
-    def task_skills(self):
-        skills = SkillTasks(self.scheduler)
-        print("Skill Tasks Loaded")
-
-    def task_notifications(self):
-        notifications = NotificationTasks(self.scheduler)
-        print("Notifications Loaded")
-        
-    def task_market_history(self):
-        market_history = MarketHistoryTasks(self.scheduler)
-        print("Market History Loaded")        
-
-    def load_scheduled_tasks(self) -> None:
-        """Load all of our tasks.
-
-        This will run initialize the tasks.
-        """
+    def _load_scheduled_tasks(self) -> None:
+        """Load and initialize tasks based on the provided task names."""
         print(f"Running {len(self.tasks)} tasks")
 
         for task_name in self.tasks:
-            task = f"task_{task_name}"
-            if hasattr(self, task) and callable(func := getattr(self, task)):
-                func()
+            task_method_name = f"task_{task_name}"
+            task_method = getattr(self, task_method_name, None)
+            if callable(task_method):
+                task_method()
+            else:
+                print(f"Task '{task_name}' not found or is not callable.")
+
+    def task_mining_ledger(self):
+        MiningLedgerTasks(self.scheduler)
+        print("Mining Ledger Tasks Loaded")
+
+    def task_blueprints(self):
+        BlueprintTasks(self.scheduler)
+        print("Blueprint Tasks Loaded")
+
+    def task_skills(self):
+        SkillTasks(self.scheduler)
+        print("Skill Tasks Loaded")
+
+    def task_notifications(self):
+        NotificationTasks(self.scheduler)
+        print("Notification Tasks Loaded")
+
+    def task_market_history(self):
+        MarketHistoryTasks(self.scheduler)
+        print("Market History Tasks Loaded")

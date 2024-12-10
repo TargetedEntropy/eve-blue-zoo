@@ -21,21 +21,41 @@
 
             <h2 class="h5 mb-4">Alerts & Notifications</h2>
             <ul class="list-group list-group-flush">
-                <li class="">
-                  <div>
-                      <h3 class="h6 mb-1">SP Farm Updates</h3>
-                      <p class="small pe-4">Get Notification when this character reaches over 5.5mSP</p>
-                  </div>
-                  <div>
-                      <div class="">
-                          <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
-                          <input class="" type="checkbox" name="preferences" value="sp-farm-notification"
-                          {% if 'sp-farm-notification' in notifications.split(',') %} checked {% endif %}>
-                          <label class="" for="user-notification-1"></label>
-                      </div>
-                  </div>
-              </li>
-            </ul>            
+              <li class="">
+                <div>
+                    <h3 class="h6 mb-1">SP Farm Updates</h3>
+                    <p class="small pe-4">Get Notification when this character reaches over 5.5mSP
+                        <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
+                        <input class="" type="checkbox" name="preferences" value="sp-farm-notification"
+                        {% if 'sp-farm-notification' in notifications.split(',') %} checked {% endif %}>
+                        <label class="" for="user-notification-1"></label>
+                    </p>
+                </div>
+            </li>
+            <li class="">
+              <div>
+                  <h3 class="h6 mb-1">Mining Ledger</h3>
+                  <p class="small pe-4">Catalog Mining Ledger results for a single view across all characters.  
+                      <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
+                      <input class="" type="checkbox" name="preferences" value="mining-ledger_task"
+                      {% if 'mining-ledger-notification' in notifications.split(',') %} checked {% endif %}>
+                      <label class="" for="user-notification-1"></label>
+                    </p>
+              </div>
+          </li>            
+          <li class="">
+            <div>
+                <h3 class="h6 mb-1">Blueprints</h3>
+                <p class="small pe-4">Enable downloading your Blueprint list to view as one. 
+                    <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
+                    <input class="" type="checkbox" name="preferences" value="blueprint_task"
+                    {% if 'mining-ledger-notification' in notifications.split(',') %} checked {% endif %}>
+                    <label class="" for="user-notification-1"></label>
+                  </p>
+            </div>
+        </li>            
+
+        </ul>            
           </div>
           <div class="card-footer">
             <button type="submit" class="btn btn-fill btn-primary">Save</button>

@@ -1,5 +1,6 @@
-""" Blueprint Tasks """
+"""Blueprint Tasks"""
 
+from datetime import datetime
 from apps.authentication.models import Characters, Blueprints
 from apps import esi, db
 
@@ -19,26 +20,23 @@ class BlueprintTasks:
             seconds=3600,
             id="blueprint_main",
             name="blueprint_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
+            character_list = Characters.query.filter_by(sso_is_valid=True).all()
 
         return character_list
 
     def main(self):
-        print("Running Blueprint Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
+        print(f"Running Blueprint Main: {datetime.now()}")
 
         characters = self.get_all_users()
 
         for character in characters:
+            print(f"Checking: {character.character_name}", end="")
 
             # Get Data
             esi_params = {"character_id": character.character_id}
@@ -62,3 +60,5 @@ class BlueprintTasks:
                 with self.scheduler.app.app_context():
                     db.session.merge(blueprint_row)
                     db.session.commit()
+
+            print("...done")

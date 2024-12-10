@@ -1,4 +1,4 @@
-""" Notification Tasks """
+"""Notification Tasks"""
 
 from apps.authentication.models import (
     Characters,
@@ -8,6 +8,7 @@ from apps.authentication.models import (
     SkillSet,
 )
 from apps import esi, db, discord_client
+from ..common import is_feature_enabled
 
 
 class NotificationTasks:
@@ -23,10 +24,10 @@ class NotificationTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=30,
             id="notification_main",
             name="notification_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_users(self) -> list:
@@ -76,14 +77,12 @@ class NotificationTasks:
         characters = self.get_all_users()
 
         for character in characters:
-
             # Make sure there's something here
             if not character.enabled_notifications:
                 continue
 
             # Have we already sent a notification for this character that needs to be cleared?
             if not self.should_notifications_be_sent(character.character_id):
-
                 # reset notification
                 with self.scheduler.app.app_context():
                     notification_histories = (

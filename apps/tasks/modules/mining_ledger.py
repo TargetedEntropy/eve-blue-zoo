@@ -1,5 +1,6 @@
-""" Mining Ledger Tasks """
+"""Mining Ledger Tasks"""
 
+from datetime import datetime
 from apps.authentication.models import Characters, MiningLedger
 from apps import esi, db
 
@@ -19,26 +20,22 @@ class MiningLedgerTasks:
             seconds=3600,
             id="mining_ledger_main",
             name="mining_ledger_main",
-            replace_existing=True,
+            replace_existing=False,
         )
 
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
-
+            character_list = Characters.query.filter_by(sso_is_valid=True).all()
         return character_list
 
     def main(self):
-        print("Running Mining Ledger Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
+        print(f"Running Mining Ledger Main: {datetime.now()}")
 
         characters = self.get_all_users()
 
         for character in characters:
+            print(f"Checking: {character.character_name}", end="")
 
             # Get Data
             esi_params = {"character_id": character.character_id}
@@ -59,3 +56,5 @@ class MiningLedgerTasks:
                 with self.scheduler.app.app_context():
                     db.session.merge(mining_row)
                     db.session.commit()
+
+            print("...Done")
