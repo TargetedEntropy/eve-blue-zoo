@@ -15,18 +15,26 @@ import time
 
 from apps.authentication.util import hash_pass
 
+
 class Features(db.Model):
     __tablename__ = "features"
 
     id = db.Column(db.Integer, primary_key=True)
-    character_id = db.Column(db.BigInteger, db.ForeignKey("Characters.character_id"), nullable=False, unique=True)
-    
+    character_id = db.Column(
+        db.BigInteger,
+        db.ForeignKey("Characters.character_id"),
+        nullable=False,
+        unique=True,
+    )
+
     # Store feature names and their enabled status as a JSON object
     features = db.Column(db.JSON, default={})
 
-    character = db.relationship("Characters", backref=db.backref("features", uselist=False))
-    
-    
+    character = db.relationship(
+        "Characters", backref=db.backref("features", uselist=False)
+    )
+
+
 class SkillSet(db.Model):
     __tablename__ = "skillsets"
 
@@ -143,7 +151,7 @@ class Characters(db.Model):
     refresh_token = db.Column(db.Text, nullable=True)
 
     sso_is_valid = db.Column(db.Boolean, nullable=True)
-    
+
     def get_id(self):
         """Required for flask-login"""
         return self.character_id

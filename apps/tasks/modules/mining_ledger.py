@@ -4,6 +4,7 @@ from datetime import datetime
 from apps.authentication.models import Characters, MiningLedger
 from apps import esi, db
 
+
 class MiningLedgerTasks:
     """Tasks related to the Mining Ledger"""
 
@@ -34,7 +35,7 @@ class MiningLedgerTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}", end='')
+            print(f"Checking: {character.character_name}", end="")
 
             # Get Data
             esi_params = {"character_id": character.character_id}

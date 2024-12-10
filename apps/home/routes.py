@@ -99,7 +99,7 @@ def page_user():
         "home/page-user.html",
         segment=segment,
         characters=characters,
-        discord_id=discord_id
+        discord_id=discord_id,
     )
 
 

@@ -1,7 +1,9 @@
 """ Blueprint Tasks """
+
 from datetime import datetime
 from apps.authentication.models import Characters, Blueprints
 from apps import esi, db
+
 
 class BlueprintTasks:
     """Tasks related to Blueprints"""
@@ -24,7 +26,7 @@ class BlueprintTasks:
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.filter_by(sso_is_valid=True).all()        
+            character_list = Characters.query.filter_by(sso_is_valid=True).all()
 
         return character_list
 
@@ -34,7 +36,7 @@ class BlueprintTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}", end='')
+            print(f"Checking: {character.character_name}", end="")
 
             # Get Data
             esi_params = {"character_id": character.character_id}

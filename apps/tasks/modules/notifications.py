@@ -10,6 +10,7 @@ from apps.authentication.models import (
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
 
+
 class NotificationTasks:
     """Tasks related to Notifications"""
 

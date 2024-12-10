@@ -1,8 +1,10 @@
 """ Skill Tasks """
+
 from datetime import datetime
 from apps.authentication.models import Characters, SkillSet
 from apps import esi, db
 from ..common import invalidate_sso
+
 
 class SkillTasks:
     """Tasks related to Skills"""
@@ -35,8 +37,8 @@ class SkillTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}", end='')
-            
+            print(f"Checking: {character.character_name}", end="")
+
             # Get Data
             esi_params = {"character_id": character.character_id}
             try:
@@ -47,7 +49,7 @@ class SkillTasks:
                 print(f"Failed to get ESI data, invalidating user: {e}")
                 invalidate_sso(self.scheduler.app, character_id=character.character_id)
             ld = skill_data.data
-           
+
             with self.scheduler.app.app_context():
                 skillset = (
                     db.session.query(SkillSet)

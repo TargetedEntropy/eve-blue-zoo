@@ -32,7 +32,7 @@ class MarketHistoryTasks:
 
     def get_unique_type_ids(self) -> list:
         """Get unique Type Ids from Mining Ledger"""
-        with self.scheduler.app.app_context():        
+        with self.scheduler.app.app_context():
             unique_type_ids = db.session.query(db.distinct(MiningLedger.type_id)).all()
         return unique_type_ids
 
@@ -60,23 +60,22 @@ class MarketHistoryTasks:
             if type_id_history is not None:
 
                 # Check if the record exists and compare the updated_date, skip if less than 24hrs old
-                if (type_id_history.updated_date > (datetime.now() - timedelta(days=1))):
+                if type_id_history.updated_date > (datetime.now() - timedelta(days=1)):
                     continue
-
 
             # Get Data
             esi_params = {"region_id": 10000002, "type_id": item_id}
 
-            market_history_data_query = esi.get_esi(character=None, schema="get_markets_region_id_history", **esi_params
+            market_history_data_query = esi.get_esi(
+                character=None, schema="get_markets_region_id_history", **esi_params
             )
 
             market_history_datas = market_history_data_query.data
-    
 
             for market_history_data in market_history_datas:
-                
+
                 with self.scheduler.app.app_context():
-                    
+
                     market_history = MarketHistory(
                         typeID=item_id,
                         regionID=10000002,
@@ -86,7 +85,7 @@ class MarketHistoryTasks:
                         lowest=market_history_data["lowest"],
                         order_count=market_history_data["order_count"],
                         volume=market_history_data["volume"],
-                        updated_date=db.func.now()
+                        updated_date=db.func.now(),
                     )
                     db.session.merge(market_history)
                     db.session.commit()

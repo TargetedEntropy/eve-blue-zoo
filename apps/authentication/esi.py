@@ -76,11 +76,12 @@ class EsiAuth:
                 print(message)
                 raise RuntimeError(message) from error
 
-        
         try:
             request = self.esiapp.op[schema](**kwargs)
             return self.esiclient.request(request)
         except Exception as error:
-            message = f"Error executing ESI request for schema '{schema}', error: {error}"
+            message = (
+                f"Error executing ESI request for schema '{schema}', error: {error}"
+            )
             print(message)
             raise RuntimeError(message) from error
