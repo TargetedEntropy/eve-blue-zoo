@@ -15,7 +15,7 @@ class SkillTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=10,
             id="skill_main",
             name="skill_main",
             replace_existing=False,
@@ -24,7 +24,7 @@ class SkillTasks:
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.filter(Characters.access_token_expires > datetime.utcnow()).all()            
+            character_list = Characters.query.filter_by(sso_is_valid=True).all()
 
         return character_list
 
@@ -36,7 +36,7 @@ class SkillTasks:
         for character in characters:
 
             print(f"Getting Data for: {character.character_name}")
-
+            continue
             # Get Data
             esi_params = {"character_id": character.character_id}
             skill_data = esi.get_esi(

@@ -25,7 +25,7 @@ class MiningLedgerTasks:
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.filter(Characters.access_token_expires > datetime.utcnow()).all()            
+            character_list = Characters.query.filter_by(sso_is_valid=True).all()
         return character_list
 
     def main(self):

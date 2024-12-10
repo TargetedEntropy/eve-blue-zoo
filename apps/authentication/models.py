@@ -142,6 +142,8 @@ class Characters(db.Model):
     access_token_expires = db.Column(db.DateTime(), nullable=True)
     refresh_token = db.Column(db.Text, nullable=True)
 
+    sso_is_valid = db.Column(db.Boolean, nullable=True)
+    
     def get_id(self):
         """Required for flask-login"""
         return self.character_id

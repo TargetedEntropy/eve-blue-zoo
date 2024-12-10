@@ -6,7 +6,6 @@
 {% block stylesheets %}{% endblock stylesheets %}
 
 {% block content %}
-
 <div class="row">
   <div class="col-md-8">
     <div class="card">
@@ -35,8 +34,15 @@
                 <label>Characters:</label>
                 <ul>
                   {% for character in characters %}
-                    <li><a href="{{ url_for('home_blueprint.page_character_get') }}?character_id={{character.character_id}}">{{ character.character_name }}</a></li>
-                  {% endfor %}
+                  <li>
+                    <a href="{{ url_for('home_blueprint.page_character_get') }}?character_id={{ character.character_id }}">
+                      {{ character.character_name }}
+                    </a>
+                    {% if character.access_token_expires and character.access_token_expires < datetime.utcnow() %}
+                      - Expired
+                    {% endif %}
+                  </li>
+                {% endfor %}
                     <li><a href=/sso/login>Add Character</a>
                 </ul>
 
