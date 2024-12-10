@@ -29,11 +29,7 @@ class MiningLedgerTasks:
         return character_list
 
     def main(self):
-        print("Running Mining Ledger Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
+        print(f"Running Mining Ledger Main: {datetime.now()}")
 
         characters = self.get_all_users()
 

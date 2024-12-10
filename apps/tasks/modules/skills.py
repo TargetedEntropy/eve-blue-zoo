@@ -15,7 +15,7 @@ class SkillTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=10,
+            seconds=3600,
             id="skill_main",
             name="skill_main",
             replace_existing=False,
@@ -35,8 +35,6 @@ class SkillTasks:
 
         for character in characters:
 
-            print(f"Getting Data for: {character.character_name}")
-            continue
             # Get Data
             esi_params = {"character_id": character.character_id}
             skill_data = esi.get_esi(
