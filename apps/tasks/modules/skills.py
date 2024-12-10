@@ -2,6 +2,7 @@
 from datetime import datetime
 from apps.authentication.models import Characters, SkillSet
 from apps import esi, db
+from ..common import invalidate_sso
 
 class SkillTasks:
     """Tasks related to Skills"""
@@ -15,7 +16,7 @@ class SkillTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=15,
             id="skill_main",
             name="skill_main",
             replace_existing=False,
@@ -25,6 +26,7 @@ class SkillTasks:
         """Gets all characters"""
         with self.scheduler.app.app_context():
             character_list = Characters.query.filter_by(sso_is_valid=True).all()
+            #character_list = Characters.query.all()
 
         return character_list
 
@@ -34,12 +36,16 @@ class SkillTasks:
         characters = self.get_all_users()
 
         for character in characters:
-
+            print(f"Checking: {character.character_name}")
             # Get Data
             esi_params = {"character_id": character.character_id}
-            skill_data = esi.get_esi(
-                character, "get_characters_character_id_skills", **esi_params
-            )
+            try:
+                skill_data = esi.get_esi(
+                    character, "get_characters_character_id_skills", **esi_params
+                )
+            except RuntimeError as e:
+                print(f"Failed to get ESI data, invalidating user: {e}")
+                invalidate_sso(self.scheduler.app, character_id=character.character_id)
 
             ld = skill_data.data
 

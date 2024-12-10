@@ -1,5 +1,7 @@
 
+from sqlalchemy.orm.exc import NoResultFound
 from apps.authentication.models import Features
+from apps.authentication.models import Characters
 from apps import db
 
 def is_feature_enabled(app: object, character_id: int, feature_name: str) -> bool:
@@ -40,3 +42,24 @@ def update_feature(app: object, character_id: int, feature_name: str, is_enabled
             # Update the feature in the JSON blob
             feature_record.features[feature_name] = is_enabled
         db.session.commit()    
+        
+        
+
+def invalidate_sso(app: object, character_id: int) -> None:
+    """Set the sso_is_valid field to False for a specific character.
+
+    Args:
+        app (object): The Flask app instance.
+        character_id (int): The ID of the character.
+    """
+    with app.app_context():
+        # Find the character by character_id
+        character = Characters.query.filter_by(character_id=character_id).first()
+        if not character:
+            print(f"Character with ID {character_id} not found.")
+            return
+        
+        # Set the sso_is_valid field to False
+        character.sso_is_valid = False
+        db.session.commit()
+        print(f"sso_is_valid set to False for character {character_id}.")
