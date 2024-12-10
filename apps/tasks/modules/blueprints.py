@@ -1,9 +1,7 @@
 """ Blueprint Tasks """
-
+from datetime import datetime
 from apps.authentication.models import Characters, Blueprints
 from apps import esi, db
-from ..common import is_feature_enabled
-
 
 class BlueprintTasks:
     """Tasks related to Blueprints"""
@@ -26,24 +24,16 @@ class BlueprintTasks:
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
+            character_list = Characters.query.filter(Characters.access_token_expires > datetime.utcnow()).all()            
 
         return character_list
 
     def main(self):
-        print("Running Blueprint Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
+        print(f"Running Blueprint Main: {datetime.now()}")
 
         characters = self.get_all_users()
 
         for character in characters:
-
-            if not is_feature_enabled(self.scheduler.app, character.character_id, "mining_ledger"):
-                print(f"Blueprints feature not enabled for: {character.character_name}")
-                continue
 
             # Get Data
             esi_params = {"character_id": character.character_id}

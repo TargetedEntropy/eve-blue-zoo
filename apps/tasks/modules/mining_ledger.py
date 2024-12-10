@@ -1,8 +1,8 @@
 """ Mining Ledger Tasks """
 
+from datetime import datetime
 from apps.authentication.models import Characters, MiningLedger
 from apps import esi, db
-from ..common import is_feature_enabled
 
 class MiningLedgerTasks:
     """Tasks related to the Mining Ledger"""
@@ -25,8 +25,7 @@ class MiningLedgerTasks:
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
-
+            character_list = Characters.query.filter(Characters.access_token_expires > datetime.utcnow()).all()            
         return character_list
 
     def main(self):
@@ -39,11 +38,6 @@ class MiningLedgerTasks:
         characters = self.get_all_users()
 
         for character in characters:
-
-            if not is_feature_enabled(self.scheduler.app, character.character_id, "mining_ledger"):
-                print(f"Mining Ledger feature not enabled for: {character.character_name}")
-                continue
-
 
             # Get Data
             esi_params = {"character_id": character.character_id}

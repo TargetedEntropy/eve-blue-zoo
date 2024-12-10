@@ -1,8 +1,7 @@
 """ Skill Tasks """
-
+from datetime import datetime
 from apps.authentication.models import Characters, SkillSet
 from apps import esi, db
-from ..common import is_feature_enabled
 
 class SkillTasks:
     """Tasks related to Skills"""
@@ -16,7 +15,7 @@ class SkillTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=43200,
+            seconds=10,
             id="skill_main",
             name="skill_main",
             replace_existing=False,
@@ -25,25 +24,19 @@ class SkillTasks:
     def get_all_users(self) -> list:
         """Gets all characters"""
         with self.scheduler.app.app_context():
-            character_list = Characters.query.all()
+            character_list = Characters.query.filter(Characters.access_token_expires > datetime.utcnow()).all()            
 
         return character_list
 
     def main(self):
-        print("Running Skill Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
+        print(f"Running Skill Main: {datetime.now()}")
 
         characters = self.get_all_users()
 
         for character in characters:
 
-            if not is_feature_enabled(self.scheduler.app, character.character_id, "skills"):
-                print(f"Skill feature not enabled for: {character.character_name}")
-                continue
-            
+            print(f"Getting Data for: {character.character_name}")
+
             # Get Data
             esi_params = {"character_id": character.character_id}
             skill_data = esi.get_esi(
