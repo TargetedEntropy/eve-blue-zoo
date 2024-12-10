@@ -1,4 +1,4 @@
-""" Market History Tasks """
+"""Market History Tasks"""
 
 from datetime import timedelta
 from apps.authentication.models import MarketHistory, MapRegion, MiningLedger
@@ -58,7 +58,6 @@ class MarketHistoryTasks:
                 )
 
             if type_id_history is not None:
-
                 # Check if the record exists and compare the updated_date, skip if less than 24hrs old
                 if type_id_history.updated_date > (datetime.now() - timedelta(days=1)):
                     continue
@@ -73,9 +72,7 @@ class MarketHistoryTasks:
             market_history_datas = market_history_data_query.data
 
             for market_history_data in market_history_datas:
-
                 with self.scheduler.app.app_context():
-
                     market_history = MarketHistory(
                         typeID=item_id,
                         regionID=10000002,

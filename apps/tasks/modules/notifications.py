@@ -1,4 +1,4 @@
-""" Notification Tasks """
+"""Notification Tasks"""
 
 from apps.authentication.models import (
     Characters,
@@ -77,14 +77,12 @@ class NotificationTasks:
         characters = self.get_all_users()
 
         for character in characters:
-
             # Make sure there's something here
             if not character.enabled_notifications:
                 continue
 
             # Have we already sent a notification for this character that needs to be cleared?
             if not self.should_notifications_be_sent(character.character_id):
-
                 # reset notification
                 with self.scheduler.app.app_context():
                     notification_histories = (

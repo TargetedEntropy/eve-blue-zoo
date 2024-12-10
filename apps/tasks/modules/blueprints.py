@@ -1,4 +1,4 @@
-""" Blueprint Tasks """
+"""Blueprint Tasks"""
 
 from datetime import datetime
 from apps.authentication.models import Characters, Blueprints

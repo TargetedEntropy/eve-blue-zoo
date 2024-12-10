@@ -181,7 +181,6 @@ class Characters(db.Model):
 
 
 class Users(db.Model, UserMixin):
-
     __tablename__ = "Users"
 
     # our ID is the character ID from EVE API

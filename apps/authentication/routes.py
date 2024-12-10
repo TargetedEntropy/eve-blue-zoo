@@ -149,7 +149,6 @@ def callback():
         return redirect(url_for("home_blueprint.index"))
 
     else:
-
         # This is a logged out user, check in database, if the user exists
         characterID = cdata["sub"].split(":")[2]
         try:
@@ -185,7 +184,6 @@ def callback():
 def login():
     login_form = LoginForm(request.form)
     if "login" in request.form:
-
         # read form data
         username = request.form["username"]
         password = request.form["password"]
@@ -195,7 +193,6 @@ def login():
 
         # Check the password
         if user and verify_pass(password, user.password):
-
             login_user(user)
             return redirect(url_for("authentication_blueprint.route_default"))
 
@@ -216,7 +213,6 @@ def login():
 def register():
     create_account_form = CreateAccountForm(request.form)
     if "register" in request.form:
-
         username = request.form["username"]
         email = request.form["email"]
 

@@ -1,4 +1,4 @@
-""" Mining Ledger Tasks """
+"""Mining Ledger Tasks"""
 
 from datetime import datetime
 from apps.authentication.models import Characters, MiningLedger

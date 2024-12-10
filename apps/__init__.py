@@ -31,7 +31,6 @@ def register_blueprints(app):
 
 
 def configure_database(app):
-
     with app.app_context():
         db.create_all()
 

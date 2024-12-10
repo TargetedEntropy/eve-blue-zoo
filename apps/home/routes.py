@@ -2,6 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+
 from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
@@ -54,7 +55,6 @@ def index():
 @login_required
 def route_template(template):
     try:
-
         if not template.endswith(".html"):
             pass
 
@@ -237,7 +237,6 @@ def page_miningledger():
         date_list = []
 
         for ledger_date in all_dates:
-
             daily_totals = []
 
             ledger_date = ledger_date[0]
@@ -339,9 +338,7 @@ def page_blueprints():
 
 # Helper - Extract current page name from request
 def get_segment(request):
-
     try:
-
         segment = request.path.split("/")[-1]
 
         if segment == "":

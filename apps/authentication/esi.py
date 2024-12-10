@@ -1,6 +1,4 @@
-"""Eve Online ESI(API) Interface
-
-"""
+"""Eve Online ESI(API) Interface"""
 
 import esipy
 

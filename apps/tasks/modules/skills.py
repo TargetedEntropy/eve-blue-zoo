@@ -1,4 +1,4 @@
-""" Skill Tasks """
+"""Skill Tasks"""
 
 from datetime import datetime
 from apps.authentication.models import Characters, SkillSet
