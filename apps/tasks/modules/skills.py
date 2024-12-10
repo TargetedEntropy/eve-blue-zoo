@@ -15,7 +15,7 @@ class SkillTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=10,
+            seconds=3600,
             id="skill_main",
             name="skill_main",
             replace_existing=False,
