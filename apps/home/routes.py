@@ -2,7 +2,6 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-from datetime import datetime
 from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
@@ -100,8 +99,7 @@ def page_user():
         "home/page-user.html",
         segment=segment,
         characters=characters,
-        discord_id=discord_id,
-        datetime=datetime
+        discord_id=discord_id
     )
 
 

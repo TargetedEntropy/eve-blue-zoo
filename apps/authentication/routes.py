@@ -134,6 +134,7 @@ def callback():
 
         character.character_owner_hash = cdata["owner"]
         character.character_name = cdata["name"]
+        character.sso_is_valid = True
         character.update_token(auth_response)
 
         # now the character is ready, so update/create it and log the character

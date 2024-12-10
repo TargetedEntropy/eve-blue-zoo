@@ -38,7 +38,7 @@
                     <a href="{{ url_for('home_blueprint.page_character_get') }}?character_id={{ character.character_id }}">
                       {{ character.character_name }}
                     </a>
-                    {% if character.access_token_expires and character.access_token_expires < datetime.utcnow() %}
+                    {% if character.sso_is_valid != True %}
                       - Expired
                     {% endif %}
                   </li>
