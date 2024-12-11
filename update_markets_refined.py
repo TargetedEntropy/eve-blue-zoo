@@ -109,7 +109,6 @@ def get_market_data(region_id):
     if res.status == 200:
         number_of_page = res.header["X-Pages"][0]
         print(f"Market Pages: {number_of_page}")
-        # number_of_page = 10
         operations = []
         for page in range(1, number_of_page + 1):
             operations.append(
@@ -128,31 +127,33 @@ def save_market_data_bulk(response_data_list):
     """
     Save market data in bulk for better performance, handling duplicates gracefully.
     """
-    new_orders = []
+    insert_count = 0
     for data in response_data_list:
-        new_order = MarketOrder(
-            duration=data.duration,
-            is_buy_order=data.is_buy_order,
-            issued=data.issued,
-            location_id=data.location_id,
-            min_volume=data.min_volume,
-            order_id=data.order_id,
-            price=data.price,
-            range=data.range,
-            system_id=data.system_id,
-            type_id=data.type_id,
-            volume_remain=data.volume_remain,
-            volume_total=data.volume_total,
-        )
-        new_orders.append(new_order)
+        try:
+            new_order = MarketOrder(
+                duration=data.duration,
+                is_buy_order=data.is_buy_order,
+                issued=data.issued,
+                location_id=data.location_id,
+                min_volume=data.min_volume,
+                order_id=data.order_id,
+                price=data.price,
+                range=data.range,
+                system_id=data.system_id,
+                type_id=data.type_id,
+                volume_remain=data.volume_remain,
+                volume_total=data.volume_total,
+            )
+            session.merge(new_order)
+            insert_count += 1
+        except IntegrityError:
+            session.rollback()  # rollback to maintain session integrity
 
     try:
-        session.bulk_save_objects(new_orders, update_changed_only=True)
         session.commit()
-        return len(new_orders)
+        return insert_count
     except IntegrityError as e:
         session.rollback()
-        logger.error(f"Error during bulk save: {e}")
         return 0
 
 

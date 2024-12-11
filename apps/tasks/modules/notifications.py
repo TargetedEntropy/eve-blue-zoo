@@ -24,7 +24,7 @@ class NotificationTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=30,
+            seconds=3600,
             id="notification_main",
             name="notification_main",
             replace_existing=False,

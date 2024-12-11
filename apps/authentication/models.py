@@ -31,8 +31,8 @@ class Contract(db.Model):
     price = db.Column(db.Float, nullable=True) 
     reward = db.Column(db.Float, nullable=True)
     start_location_id = db.Column(db.BigInteger, nullable=True)
-    title = db.Column(db.String, nullable=True)
-    type = db.Column(db.String, nullable=False)
+    title = db.Column(db.Text, nullable=True)
+    type = db.Column(db.Text, nullable=False)
     volume = db.Column(db.Float, nullable=True) 
 
 
@@ -172,7 +172,7 @@ class Characters(db.Model):
     refresh_token = db.Column(db.Text, nullable=True)
 
     sso_is_valid = db.Column(db.Boolean, nullable=True)
-
+    
     def get_id(self):
         """Required for flask-login"""
         return self.character_id

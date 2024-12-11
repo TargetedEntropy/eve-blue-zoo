@@ -9,14 +9,11 @@ It uses the Eve Online SSO & ESI, Flask and the [Flask Dashboard Black](https://
 > Features
 
 - Registration via Eve SSO
-- Associate multiple characters
-  ![image](https://i.imgur.com/rZzhefv.png)
-- Dashboard view of all associated added Characters
-  ![image](https://i.imgur.com/A8EwnC7.png)
-- Display consolidated Mining Ledger details across Characters
-  ![image](https://i.imgur.com/BuMGulJ.png)
-- SkillPoint Farm Notifications via Discord DM
-  ![image](https://i.imgur.com/U54ukKu.png)
+- [Associate multiple characters](https://i.imgur.com/rZzhefv.png)
+- [Dashboard view of all associated added Characters](https://i.imgur.com/A8EwnC7.png)
+- [Display consolidated Mining Ledger details across Characters](https://i.imgur.com/BuMGulJ.png)
+- [SkillPoint Farm Notifications via Discord DM](https://i.imgur.com/U54ukKu.png)
+- Consolidated item view across Characters.
 <br />
 
 > Dependencies
