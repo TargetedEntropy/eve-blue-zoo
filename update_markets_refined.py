@@ -59,18 +59,6 @@ class MapRegion(Base):
 
     regionID = Column(Integer, primary_key=True, nullable=False)
     regionName = Column(String(100), nullable=True)
-    x = Column(Float, nullable=True)
-    y = Column(Float, nullable=True)
-    z = Column(Float, nullable=True)
-    xMin = Column(Float, nullable=True)
-    xMax = Column(Float, nullable=True)
-    yMin = Column(Float, nullable=True)
-    yMax = Column(Float, nullable=True)
-    zMin = Column(Float, nullable=True)
-    zMax = Column(Float, nullable=True)
-    factionID = Column(Integer, nullable=True)
-    nebula = Column(Integer, nullable=True)
-    radius = Column(Float, nullable=True)
 
 engine = create_engine(
     config["SQLALCHEMY_DATABASE_URI"],
