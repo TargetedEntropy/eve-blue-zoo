@@ -142,26 +142,21 @@ def save_market_data_bulk(response_data_list):
     """
     new_orders = []
     for data in response_data_list:
-        # try:
-            new_order = MarketOrder(
-                duration=data.duration,
-                is_buy_order=data.is_buy_order,
-                issued=data.issued,
-                location_id=data.location_id,
-                min_volume=data.min_volume,
-                order_id=data.order_id,
-                price=data.price,
-                range=data.range,
-                system_id=data.system_id,
-                type_id=data.type_id,
-                volume_remain=data.volume_remain,
-                volume_total=data.volume_total,
-            )
-            new_orders.append(new_order)
-        # except IntegrityError:
-        #     # Handle specific duplicate case or skip
-        #     logger.warning(f"Duplicate entry detected for order_id: {data.order_id}")
-        #     session.rollback()  # rollback to maintain session integrity
+        new_order = MarketOrder(
+            duration=data.duration,
+            is_buy_order=data.is_buy_order,
+            issued=data.issued,
+            location_id=data.location_id,
+            min_volume=data.min_volume,
+            order_id=data.order_id,
+            price=data.price,
+            range=data.range,
+            system_id=data.system_id,
+            type_id=data.type_id,
+            volume_remain=data.volume_remain,
+            volume_total=data.volume_total,
+        )
+        new_orders.append(new_order)
 
     try:
         session.bulk_save_objects(new_orders, update_changed_only=True)
