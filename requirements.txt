@@ -16,3 +16,4 @@ cryptography==37.0.2
 python-dotenv==1.0.1
 esipy==1.2.3
 Flask-Discord==0.1.69
+tqdm==4.67.1
