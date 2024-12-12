@@ -15,6 +15,27 @@ import time
 
 from apps.authentication.util import hash_pass
 
+class Contract(db.Model):
+    __tablename__ = "contracts"
+
+    id = db.Column(db.Integer, primary_key=True) 
+    buyout = db.Column(db.Float, nullable=True)  
+    collateral = db.Column(db.Float, nullable=True)  
+    date_expired = db.Column(db.DateTime, nullable=False)  
+    date_issued = db.Column(db.DateTime, nullable=False)  
+    days_to_complete = db.Column(db.Integer, nullable=True)  
+    end_location_id = db.Column(db.BigInteger, nullable=True)
+    for_corporation = db.Column(db.Boolean, nullable=True)  
+    issuer_corporation_id = db.Column(db.Integer, nullable=False) 
+    issuer_id = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=True) 
+    reward = db.Column(db.Float, nullable=True)
+    start_location_id = db.Column(db.BigInteger, nullable=True)
+    title = db.Column(db.Text, nullable=True)
+    type = db.Column(db.Text, nullable=False)
+    volume = db.Column(db.Float, nullable=True) 
+
+
 
 class Features(db.Model):
     __tablename__ = "features"
@@ -151,7 +172,7 @@ class Characters(db.Model):
     refresh_token = db.Column(db.Text, nullable=True)
 
     sso_is_valid = db.Column(db.Boolean, nullable=True)
-
+    
     def get_id(self):
         """Required for flask-login"""
         return self.character_id

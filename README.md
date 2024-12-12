@@ -9,14 +9,11 @@ It uses the Eve Online SSO & ESI, Flask and the [Flask Dashboard Black](https://
 > Features
 
 - Registration via Eve SSO
-- Associate multiple characters
-  ![image](https://i.imgur.com/rZzhefv.png)
-- Dashboard view of all associated added Characters
-  ![image](https://i.imgur.com/A8EwnC7.png)
-- Display consolidated Mining Ledger details across Characters
-  ![image](https://i.imgur.com/BuMGulJ.png)
-- SkillPoint Farm Notifications via Discord DM
-  ![image](https://i.imgur.com/U54ukKu.png)
+- [Associate multiple characters](https://i.imgur.com/rZzhefv.png)
+- [Dashboard view of all associated added Characters](https://i.imgur.com/A8EwnC7.png)
+- [Display consolidated Mining Ledger details across Characters](https://i.imgur.com/BuMGulJ.png)
+- [SkillPoint Farm Notifications via Discord DM](https://i.imgur.com/U54ukKu.png)
+- [Consolidated Item Blueprint view across Characters](https://i.imgur.com/BG6egoJ.png)
 <br />
 
 > Dependencies
@@ -31,7 +28,7 @@ It uses the Eve Online SSO & ESI, Flask and the [Flask Dashboard Black](https://
 
 <br />
 
-## ✨ How to use it
+## How to use it
 
 ```bash
 $ # Get the code
@@ -81,7 +78,3 @@ $ # Access the dashboard in browser: http://127.0.0.1:5000/
 - 👉 [EsiPy](https://github.com/Kyria/EsiPy)
 - 👉 [Flask Dashboard Black](https://appseed.us/product/black-dashboard/flask/)
 
-<br />
-
----
-[Flask Black Dashboard](https://appseed.us/product/black-dashboard/flask/) - Provided by **AppSeed [App Generator](https://appseed.us/generator/)**.

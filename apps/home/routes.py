@@ -7,7 +7,7 @@ from flask import render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.orm import aliased
+from sqlalchemy.orm import aliased, joinedload
 from sqlalchemy import create_engine, distinct, desc
 from apps import esi, db
 from apps.home import blueprint
@@ -294,10 +294,10 @@ def page_miningledger():
             date_list.append(data_builder)
 
     except Exception as e:
-        print(f"error: {e}")
-        data = []
+        print(f"Error: {e}")
+        date_list = []
 
-    # Serve the file (if exists) from app/templates/home/FILE.html
+    # Serve the template
     return render_template(
         "home/ui-miningledger.html", segment=segment, date_list=date_list
     )
@@ -308,6 +308,8 @@ def page_miningledger():
 def page_blueprints():
     # Detect the current page
     segment = get_segment(request)
+    page = request.args.get("page", 1, type=int)  # Get the page number from the query string (default to 1)
+    per_page = 100  # Number of blueprints per page
 
     # Get All of the users' Characters
     try:
@@ -317,22 +319,47 @@ def page_blueprints():
     except NoResultFound:
         characters = []
 
-    # Get all the Blueprints they own
-    all_blueprints = []
-    for character in characters:
-        blueprints = Blueprints.query.filter(
-            Blueprints.character_id == character.character_id
-        ).all()
+    # Get all character IDs
+    character_ids = [character.character_id for character in characters]
 
-        for bp in blueprints:
-            item_name = InvType.query.filter(InvType.typeID == bp.type_id).first()
-            bp.characterName = character.character_name
-            bp.itemName = item_name.typeName
-            all_blueprints.append(bp)
+    if not character_ids:
+        return render_template("home/ui-blueprints.html", segment=segment, data=[], page=page, total_pages=0)
+
+    # Total number of blueprints for these characters
+    total_blueprints = Blueprints.query.filter(
+        Blueprints.character_id.in_(character_ids)
+    ).count()
+
+    # Calculate total pages
+    total_pages = (total_blueprints + per_page - 1) // per_page  # Round up division
+
+    # Fetch blueprints for the current page
+    blueprints = Blueprints.query.filter(
+        Blueprints.character_id.in_(character_ids)
+    ).offset((page - 1) * per_page).limit(per_page).all()
+
+    # Fetch all item names in one query
+    type_ids = {bp.type_id for bp in blueprints}
+    item_names = {
+        item.typeID: item.typeName
+        for item in InvType.query.filter(InvType.typeID.in_(type_ids)).all()
+    }
+
+    # Build the final list
+    character_map = {character.character_id: character.character_name for character in characters}
+    all_blueprints = []
+    for bp in blueprints:
+        bp.characterName = character_map.get(bp.character_id, "Unknown")
+        bp.itemName = item_names.get(bp.type_id, "Unknown")
+        all_blueprints.append(bp)
 
     # Serve the file (if exists) from app/templates/home/FILE.html
     return render_template(
-        "home/ui-blueprints.html", segment=segment, data=all_blueprints
+        "home/ui-blueprints.html",
+        segment=segment,
+        data=all_blueprints,
+        page=page,
+        total_pages=total_pages,
     )
 
 

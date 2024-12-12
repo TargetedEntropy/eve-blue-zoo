@@ -26,9 +26,9 @@ class MarketHistoryTasks:
     def get_all_regions(self) -> list:
         """Gets all regions"""
         with self.scheduler.app.app_context():
-            character_list = MapRegion.query.all()
+            region_list = MapRegion.query.all()
 
-        return character_list
+        return region_list
 
     def get_unique_type_ids(self) -> list:
         """Get unique Type Ids from Mining Ledger"""
