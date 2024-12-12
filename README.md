@@ -28,7 +28,7 @@ It uses the Eve Online SSO & ESI, Flask and the [Flask Dashboard Black](https://
 
 <br />
 
-## ✨ How to use it
+## How to use it
 
 ```bash
 $ # Get the code
@@ -78,7 +78,3 @@ $ # Access the dashboard in browser: http://127.0.0.1:5000/
 - 👉 [EsiPy](https://github.com/Kyria/EsiPy)
 - 👉 [Flask Dashboard Black](https://appseed.us/product/black-dashboard/flask/)
 
-<br />
-
----
-[Flask Black Dashboard](https://appseed.us/product/black-dashboard/flask/) - Provided by **AppSeed [App Generator](https://appseed.us/generator/)**.
