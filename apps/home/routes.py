@@ -294,10 +294,10 @@ def page_miningledger():
             date_list.append(data_builder)
 
     except Exception as e:
-        print(f"error: {e}")
-        data = []
+        print(f"Error: {e}")
+        date_list = []
 
-    # Serve the file (if exists) from app/templates/home/FILE.html
+    # Serve the template
     return render_template(
         "home/ui-miningledger.html", segment=segment, date_list=date_list
     )
