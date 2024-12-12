@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} User Blueprints {% endblock %} 
+{% block title %} User Blueprints {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}{% endblock stylesheets %}
@@ -11,20 +11,19 @@
   <a href="{{ url_for('home_blueprint.page_blueprints', page=page - 1) }}">&laquo; Previous</a>
   {% endif %}
   <span>Page {{ page }} of {{ total_pages }}</span>
-  {% if page < total_pages %}
-  <a href="{{ url_for('home_blueprint.page_blueprints', page=page + 1) }}">Next &raquo;</a>
-  {% endif %}
+  {% if page < total_pages %} <a href="{{ url_for('home_blueprint.page_blueprints', page=page + 1) }}">Next &raquo;</a>
+    {% endif %}
 </div>
-<div class="row">
+
+<div class="row" style="background-color: black;">
   <div class="col-md-12">
     <div class="card card-plain">
-      <div class="card-header">
-        User Blueprints
-      </div>
+
       <div class="card-body">
-        <table id="ledger" class="display" style="width:100%">
+        <table id="ledger" class="display" style="width:auto" align="left">
           <thead>
             <tr>
+              <th></th>
               <th>Blueprint</th>
               <th>Character</th>
               <th>Location</th>
@@ -36,6 +35,7 @@
           <tbody>
             {% for row in data %}
             <tr>
+              <td><img src="https://images.evetech.net/types/{{ row.type_id }}/bp"></td>
               <td>{{ row.itemName }}</td>
               <td>{{ row.characterName }}</td>
               <td>{{ row.location_flag }}</td>
@@ -61,11 +61,11 @@
 <script type="text/javascript">
   $(document).ready(function () {
     $('#ledger').DataTable({
-      paging: true,       // Enable pagination
-      searching: true,    // Enable search/filter
-      ordering: true,     // Enable column sorting
-      pageLength: 100,     // Number of rows per page
-      lengthChange: false // Disable the ability to change rows per page
+      paging: true,
+      searching: true,
+      ordering: true,
+      pageLength: 100,
+      lengthChange: false
     });
   });
 </script>

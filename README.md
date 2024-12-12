@@ -13,7 +13,7 @@ It uses the Eve Online SSO & ESI, Flask and the [Flask Dashboard Black](https://
 - [Dashboard view of all associated added Characters](https://i.imgur.com/A8EwnC7.png)
 - [Display consolidated Mining Ledger details across Characters](https://i.imgur.com/BuMGulJ.png)
 - [SkillPoint Farm Notifications via Discord DM](https://i.imgur.com/U54ukKu.png)
-- Consolidated item view across Characters.
+- [Consolidated Item Blueprint view across Characters](https://i.imgur.com/BG6egoJ.png)
 <br />
 
 > Dependencies
