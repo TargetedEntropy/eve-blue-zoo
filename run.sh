@@ -1,1 +1,1 @@
-gunicorn --bind 0.0.0.0:8001 run:app
+gunicorn --bind 0.0.0.0:5000 run:app

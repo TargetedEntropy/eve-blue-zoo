@@ -6,8 +6,8 @@ from apps import esi, db
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 
-class ContractTasks:
-    """Tasks related to Contracts"""
+class ContractItemTasks:
+    """Tasks related to Contract Items"""
 
     def __init__(self, scheduler):
         self.scheduler = scheduler
@@ -17,8 +17,8 @@ class ContractTasks:
         """Setup task execution schedule"""
         self.scheduler.add_job(
             func=self.main,
-            trigger="interval",
-            seconds=30,
+            # trigger="interval",
+            # seconds=300,
             id="contracts_main",
             name="contracts_main",
             replace_existing=False,
@@ -37,47 +37,53 @@ class ContractTasks:
                 .outerjoin(ContractItem, Contract.id == ContractItem.contract_id) \
                 .filter(ContractItem.contract_id.is_(None)) \
                 .all()
+#                .limit(50) \
+
         return contracts_without_items
         
 
     def main(self):
-        print(f"Running Contracts Main: {datetime.now()}")
+        print(f"Running Contract Items Main: {datetime.now()}")
 
         characters = self.get_all_users()
 
         for character in characters:
             print(f"Checking: {character.character_name}", end="")
 
-            # Get Data
-            esi_params = {"region_id": 10000066}
-            contract_data = esi.get_esi(
-                character, "get_contracts_public_region_id", **esi_params
-            )
-            
-            # Save Data
-            for ld in contract_data.data:
-                contract_row = Contract(
-                    id=ld["contract_id"],
-                    buyout=ld.get("buyout", None),
-                    collateral=ld.get("collateral", None),
-                    date_expired=ld["date_expired"],
-                    date_issued=ld["date_issued"],               
-                    days_to_complete=ld.get("days_to_complete", None),
-                    end_location_id=ld.get("end_location_id", None),
-                    for_corporation=ld.get("for_corporation", False),
-                    issuer_corporation_id=ld.get("issuer_corporation_id", None),
-                    issuer_id=ld.get("issuer_id", None),
-                    price=ld.get("price", None),
-                    reward=ld.get("reward", None),
-                    start_location_id=ld.get("start_location_id", None),
-                    title=ld.get("title", None),
-                    type=ld.get("type", None),
-                    volume=ld.get("volume", None)
-                )
+            contracts = self.get_contracts_without_items()
+            for contract in contracts:
+                # Get Data
+                if contract.type not in ['item_exchange', 'auction']: continue
+                print(f"Checking: {contract.id}")
+                esi_params = {"contract_id": contract.id}
+
+                try:
+                    esi_data = esi.get_esi(
+                        character, "get_contracts_public_items_contract_id", **esi_params
+                    )
+                except Exception as error:
+                    continue
+                
+                if hasattr(esi_data.data, 'error'): continue
+                
+                # Save Data
+                for ld in esi_data.data:
+                    contract_item_row = ContractItem(
+                        contract_id= contract.id,
+                        record_id=ld.get("record_id", None),
+                        is_blueprint_copy=ld.get("is_blueprint_copy", None),
+                        is_included=ld.get("is_included", None),
+                        item_id=ld.get("item_id", None),
+                        material_efficiency=ld.get("material_efficiency", None),
+                        quantity=ld.get("quantity", None),
+                        runs=ld.get("runs", None),
+                        time_efficiency=ld.get("time_efficiency", None),
+                        type_id=ld.get("type_id", None)
+                    )
 
 
-                with self.scheduler.app.app_context():
-                    db.session.merge(contract_row)
-                    db.session.commit()
+                    with self.scheduler.app.app_context():
+                        db.session.merge(contract_item_row)
+                        db.session.commit()
 
             print("...Done")

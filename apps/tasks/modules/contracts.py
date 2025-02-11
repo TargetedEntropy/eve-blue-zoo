@@ -16,8 +16,8 @@ class ContractTasks:
         """Setup task execution schedule"""
         self.scheduler.add_job(
             func=self.main,
-            trigger="interval",
-            seconds=30,
+            # trigger="interval",
+            # seconds=30,
             id="contracts_main",
             name="contracts_main",
             replace_existing=False,

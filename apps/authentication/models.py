@@ -36,17 +36,17 @@ class Contract(db.Model):
 
 class ContractItem(db.Model):
     __tablename__ = "contract_items"
-
-    record_id = db.Colum(db.BigInteger, primary_key=True, autoincrement=False)
-    contract_id = db.Colum(db.BigInteger, nullable=False)
-    is_blueprint_copy = db.Colum(db.Boolean, nullable=True)
-    is_included = db.Colum(db.Boolean, nullable=False)
-    item_id = db.Colum(db.BigInteger, nullable=True)
-    material_efficiency = db.Colum(db.Integer, nullable=True)
-    quantity = db.Colum(db.Integer, nullable=False)
-    runs = db.Colum(db.Integer, nullable=True)
-    time_efficiency = db.Colum(db.Integer, nullable=True)
-    type_id = db.Colum(db.Integer, nullable=False)
+    id = db.Column(db.Integer, primary_key=True) 
+    contract_id = db.Column(db.BigInteger, nullable=False)
+    record_id = db.Column(db.BigInteger, nullable=False)
+    is_blueprint_copy = db.Column(db.Boolean, nullable=True)
+    is_included = db.Column(db.Boolean, nullable=False)
+    item_id = db.Column(db.BigInteger, nullable=True)
+    material_efficiency = db.Column(db.Integer, nullable=True)
+    quantity = db.Column(db.Integer, nullable=False)
+    runs = db.Column(db.Integer, nullable=True)
+    time_efficiency = db.Column(db.Integer, nullable=True)
+    type_id = db.Column(db.Integer, nullable=False)
 
 
 class Features(db.Model):
