@@ -17,10 +17,10 @@ class ContractItemTasks:
         """Setup task execution schedule"""
         self.scheduler.add_job(
             func=self.main,
-            # trigger="interval",
-            # seconds=300,
-            id="contracts_main",
-            name="contracts_main",
+            trigger="interval",
+            seconds=300,
+            id="contract_item_main",
+            name="contract_item_main",
             replace_existing=False,
         )
 

@@ -26,9 +26,7 @@ class MainTasks:
 
     def __init__(self, app: object, tasks=None):
         """Run internal class intialization functions"""
-        self.tasks = tasks or ["contract_items"]
-        #self.tasks = tasks or []
-        #self.tasks = tasks or ["contracts"]
+        self.tasks = tasks or ["contracts", "contract_items"]
         #["skills", "blueprints", "mining_ledger", "notifications", "market_history", "contracts"]
         self.app = app
         self.scheduler = self._configure_scheduler()
