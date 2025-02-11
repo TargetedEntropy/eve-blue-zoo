@@ -14,6 +14,7 @@ from apps.tasks.modules.blueprints import BlueprintTasks
 from apps.tasks.modules.skills import SkillTasks
 from apps.tasks.modules.notifications import NotificationTasks
 from apps.tasks.modules.market_history import MarketHistoryTasks
+from apps.tasks.modules.contracts import ContractTasks
 
 
 class MainTasks:
@@ -24,7 +25,8 @@ class MainTasks:
 
     def __init__(self, app: object, tasks=None):
         """Run internal class intialization functions"""
-        self.tasks = tasks or ["skills", "blueprints", "mining_ledger", "notifications", "market_history"]
+        self.tasks = tasks or ["contracts"]
+        #["skills", "blueprints", "mining_ledger", "notifications", "market_history"]
         self.app = app
         self.scheduler = self._configure_scheduler()
         self._load_scheduled_tasks()
@@ -70,3 +72,11 @@ class MainTasks:
     def task_market_history(self):
         MarketHistoryTasks(self.scheduler)
         print("Market History Tasks Loaded")
+
+    def task_contracts(self):
+        ContractTasks(self.scheduler)
+        print("Contract Tasks Loaded")
+
+    def task_contracts(self):
+        ContractTasks(self.scheduler)
+        print("Contract Tasks Loaded")

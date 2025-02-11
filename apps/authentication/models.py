@@ -2,16 +2,15 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-
+import time
+from datetime import datetime
 from flask_login import UserMixin
-from sqlalchemy import BigInteger, Column, Integer, ForeignKey, func
+from sqlalchemy import BigInteger, Column, Integer, ForeignKey, Boolean, func
 from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.ext.declarative import declared_attr
 
 from apps import db, login_manager
 
-from datetime import datetime
-import time
 
 from apps.authentication.util import hash_pass
 
@@ -35,6 +34,19 @@ class Contract(db.Model):
     type = db.Column(db.Text, nullable=False)
     volume = db.Column(db.Float, nullable=True) 
 
+class ContractItem(db.Model):
+    __tablename__ = "contract_items"
+
+    record_id = db.Colum(db.BigInteger, primary_key=True, autoincrement=False)
+    contract_id = db.Colum(db.BigInteger, nullable=False)
+    is_blueprint_copy = db.Colum(db.Boolean, nullable=True)
+    is_included = db.Colum(db.Boolean, nullable=False)
+    item_id = db.Colum(db.BigInteger, nullable=True)
+    material_efficiency = db.Colum(db.Integer, nullable=True)
+    quantity = db.Colum(db.Integer, nullable=False)
+    runs = db.Colum(db.Integer, nullable=True)
+    time_efficiency = db.Colum(db.Integer, nullable=True)
+    type_id = db.Colum(db.Integer, nullable=False)
 
 
 class Features(db.Model):
