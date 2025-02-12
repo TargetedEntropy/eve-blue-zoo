@@ -81,7 +81,21 @@ class ContractItem(db.Model):
     time_efficiency = db.Column(db.Integer, nullable=True)
     type_id = db.Column(db.Integer, nullable=False)
 
+class ContractTrack(db.Model):
+    __tablename__ = "contract_watch"
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)    
+    type_id = db.Column(db.BigInteger, nullable=True)
+    located = db.Column(db.Boolean, default=False)
+    notified = db.Column(db.Boolean, default=False)
 
+class ContractNotify(db.Model):
+    __tablename__ = "contract_notify"
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)    
+    contract_id = db.Column(db.BigInteger, nullable=True)
+    
+    
 class Features(db.Model):
     __tablename__ = "features"
 
@@ -126,13 +140,6 @@ class SentNotifications(db.Model):
     total_sp = db.Column(db.Integer, nullable=False)
     notification_cleared = db.Column(db.Boolean, nullable=False, default=False)
 
-class ContractWatch(db.Model):
-    __tablename__ = "contract_watch"
-    id = db.Column(db.Integer, primary_key=True)
-    character_id = db.Column(db.Integer, nullable=False)    
-    type_id = db.Column(db.BigInteger, nullable=True)
-    located = db.Column(db.Boolean, default=False)
-    notified = db.Column(db.Boolean, default=False)
 
 class MarketHistory(db.Model):
     __tablename__ = "market_history"

@@ -8,7 +8,9 @@ from apps.authentication.models import (
     SkillSet, 
     Contract, 
     ContractItem,
-    ContractWatch
+    ContractTrack,
+    InvType,
+    ContractNotify
 )
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
@@ -26,7 +28,7 @@ class ContractWatch:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=320,
+            seconds=340,
             id="notification_main",
             name="notification_main",
             replace_existing=False,
@@ -39,7 +41,7 @@ class ContractWatch:
         return character_list
 
     def send_discord_msg(
-        self, user_id: str, character_name: str, skill_points: int
+        self, user_id: str,  msg: str
     ) -> None:
         print("sending notification")
         dm_channel = discord_client.bot_request(
@@ -49,7 +51,7 @@ class ContractWatch:
             f"/channels/{dm_channel['id']}/messages",
             "POST",
             json={
-                "content": f"Hello! {character_name} is ready to harvest with {skill_points:,}!"
+                "content": msg
             },
         )
 
@@ -68,7 +70,39 @@ class ContractWatch:
             return False
         else:
             return True
+    def get_unnotified_matching_contracts(self, character_id: int) -> list:
+        """ Get contract items that match watched contract types and haven't been notified yet """
+        with self.scheduler.app.app_context():
+            # Find matching contract items and contract watch entries for the same type_id
+            matching_items = db.session.query(ContractItem, ContractTrack.id) \
+                .join(ContractTrack, ContractItem.type_id == ContractTrack.type_id) \
+                .all()
+            print(f"mitems: {matching_items}")
+            # Unpack the tuple into separate variables
+            new_matches = []
+            for item, watch_id in matching_items:
+                # Now 'item' is a ContractItem, and 'watch_id' is ContractWatch.id
+                existing_notify = ContractNotify.query.filter_by(character_id=character_id, contract_id=item.contract_id).first()
+                if not existing_notify:
+                    new_matches.append((item, item.contract_id))  # Storing the tuple with both values
 
+            
+        return new_matches
+                
+    def get_type_name(self, type_id: int) -> str:
+        """ Get the typeName for a given typeID """
+        with self.scheduler.app.app_context():
+            inv_type = InvType.query.filter_by(typeID=type_id).first()
+            return inv_type.typeName if inv_type else None
+
+    def add_contract_notification(self, character_id: int, contract_id: int) -> None:
+        """ Add a new contract notification entry """
+        with self.scheduler.app.app_context():
+            new_notification = ContractNotify(character_id=character_id, contract_id=contract_id)
+            db.session.add(new_notification)
+            db.session.commit()
+                    
+    
     def main(self):
         print("Running Contracts Watch Main")
 
@@ -87,61 +121,19 @@ class ContractWatch:
             if not user.discord_user_id:
                 continue
 
-            if character.enabled_notifications == "sp-farm-notification":
-                with self.scheduler.app.app_context():
-                    character_skill_info = SkillSet.query.filter(
-                        SkillSet.character_id == character.character_id
-                    ).one()
+            if "contract-task" in character.enabled_notifications:
 
-                    character_info = Characters.query.filter(
-                        Characters.character_id == character.character_id
-                    ).one()
+                data = self.get_unnotified_matching_contracts(character.character_id)
+                for item, watch_id in data:
 
-                if character_skill_info.total_sp > 5500000:
-                    print(
-                        f"{character_info.character_name} is ready for harvest with sp: {character_skill_info.total_sp:,}!"
-                    )
+                    item_name = self.get_type_name(item.type_id)
+                    print(f"ItemName: {item_name}")
 
                     # send discord message
                     self.send_discord_msg(
                         user.discord_user_id,
-                        character_info.character_name,
-                        character_skill_info.total_sp,
+                        msg=f"Found a {item_name}"
                     )
-
-                    # save total_sp to SentNotifications
-                    with self.scheduler.app.app_context():
-                        sent_notification = SentNotifications(
-                            character_id=character.character_id,
-                            master_character_id=character.master_character_id,
-                            total_sp=character_skill_info.total_sp,
-                        )
-
-                        db.session.add(sent_notification)
-                        db.session.commit()
-                        
-            if character.id == 1:
-                with self.scheduler.app.app_context():
-                    item_info = ContractItem.query.filter(
-                        ContractItem.type_id == "23913"
-                    ).all()
-                    for item in item_info:
-                        if item.contract_id in [214340697, 214500982, 214515392]: continue
-
-                        # send discord message
-                        self.send_discord_msg(
-                            user.discord_user_id,
-                            "Nyx",
-                            0000,
-                        )
-
-                        # # save total_sp to SentNotifications
-                        # with self.scheduler.app.app_context():
-                        #     sent_notification = SentNotifications(
-                        #         character_id=character.character_id,
-                        #         master_character_id=character.master_character_id,
-                        #         total_sp=character_skill_info.total_sp,
-                        #     )
-
-                        #     db.session.add(sent_notification)
-                        #     db.session.commit()
+                    self.add_contract_notification(character.character_id, watch_id)
+                    
+                    
