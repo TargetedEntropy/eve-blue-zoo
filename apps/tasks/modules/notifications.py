@@ -5,11 +5,12 @@ from apps.authentication.models import (
     CharacterNotifications,
     SentNotifications,
     Users,
-    SkillSet,
+    SkillSet, 
+    Contract, 
+    ContractItem
 )
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
-
 
 class NotificationTasks:
     """Tasks related to Notifications"""
@@ -24,7 +25,7 @@ class NotificationTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=320,
             id="notification_main",
             name="notification_main",
             replace_existing=False,
@@ -148,3 +149,29 @@ class NotificationTasks:
 
                         db.session.add(sent_notification)
                         db.session.commit()
+                        
+            if character.id == 1:
+                with self.scheduler.app.app_context():
+                    item_info = ContractItem.query.filter(
+                        ContractItem.type_id == "23913"
+                    ).all()
+                    for item in item_info:
+                        if item.contract_id in [214340697, 214500982, 214515392]: continue
+
+                        # send discord message
+                        self.send_discord_msg(
+                            user.discord_user_id,
+                            "Nyx",
+                            0000,
+                        )
+
+                        # # save total_sp to SentNotifications
+                        # with self.scheduler.app.app_context():
+                        #     sent_notification = SentNotifications(
+                        #         character_id=character.character_id,
+                        #         master_character_id=character.master_character_id,
+                        #         total_sp=character_skill_info.total_sp,
+                        #     )
+
+                        #     db.session.add(sent_notification)
+                        #     db.session.commit()
