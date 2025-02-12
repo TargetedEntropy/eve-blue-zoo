@@ -29,8 +29,8 @@ class ContractWatch:
             func=self.main,
             trigger="interval",
             seconds=340,
-            id="notification_main",
-            name="notification_main",
+            id="contract_watch_main",
+            name="contract_watch_main",
             replace_existing=False,
         )
 

@@ -3,6 +3,7 @@
 from datetime import datetime
 from apps.authentication.models import Characters, Blueprints
 from apps import esi, db
+from ..common import invalidate_sso
 
 
 class BlueprintTasks:
@@ -38,12 +39,16 @@ class BlueprintTasks:
         for character in characters:
             print(f"Checking: {character.character_name}", end="")
 
-            # Get Data
-            esi_params = {"character_id": character.character_id}
-            blueprint_data = esi.get_esi(
-                character, "get_characters_character_id_blueprints", **esi_params
-            )
-
+            try:
+                # Get Data
+                esi_params = {"character_id": character.character_id}
+                blueprint_data = esi.get_esi(
+                    character, "get_characters_character_id_blueprints", **esi_params
+                )
+            except RuntimeError as e:
+                print(f"Failed to get ESI data, invalidating user: {e}")
+                invalidate_sso(self.scheduler.app, character_id=character.character_id)
+                
             # Save Data
             for ld in blueprint_data.data:
                 blueprint_row = Blueprints(

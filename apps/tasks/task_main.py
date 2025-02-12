@@ -4,31 +4,27 @@ Here we will have a root function which is called on a schedule, that will then 
 will qualify if they run or not based on their own schedule. Meaning, some updates will happen more
 frequently than others.
 """
-
-from importlib import import_module
 from flask_apscheduler import APScheduler
 import atexit
 
-from apps.tasks.modules.mining_ledger import MiningLedgerTasks
-from apps.tasks.modules.blueprints import BlueprintTasks
-from apps.tasks.modules.skills import SkillTasks
-from apps.tasks.modules.notifications import NotificationTasks
-from apps.tasks.modules.market_history import MarketHistoryTasks
-from apps.tasks.modules.contracts import ContractTasks
-from apps.tasks.modules.contract_items import ContractItemTasks
-from apps.tasks.modules.contract_watch import ContractWatch
+from apps.tasks.modules import MiningLedgerTasks, BlueprintTasks, SkillTasks, NotificationTasks, MarketHistoryTasks, ContractTasks, ContractItemTasks, ContractWatch
 
 class MainTasks:
     """The Main tasks driving class.
 
-    We intialize, control and execute our tasks here.
+    We initialize, control, and execute our tasks here.
     """
 
     def __init__(self, app: object, tasks=None):
+<<<<<<< HEAD
         """Run internal class intialization functions"""
         # self.tasks = tasks # or ["contracts", "contract_items"]
         self.tasks = tasks or ["skills", "blueprints"]
         # ["skills", "blueprints", "mining_ledger", "notifications", "market_history", "contracts"]
+=======
+        """Run internal class initialization functions"""
+        self.tasks = tasks or ["contracts", "contract_items", "contract_watch"] #, "skills", "blueprints", "mining_ledger", "notifications", "market_history"]
+>>>>>>> 6d1619a (cleanup tasks)
         self.app = app
         self.scheduler = self._configure_scheduler()
         self._load_scheduled_tasks()
@@ -46,12 +42,23 @@ class MainTasks:
     def _load_scheduled_tasks(self) -> None:
         """Load and initialize tasks based on the provided task names."""
         print(f"Running {len(self.tasks)} tasks")
+        
+        task_classes = {
+            "mining_ledger": MiningLedgerTasks,
+            "blueprints": BlueprintTasks,
+            "skills": SkillTasks,
+            "notifications": NotificationTasks,
+            "market_history": MarketHistoryTasks,
+            "contracts": ContractTasks,
+            "contract_items": ContractItemTasks,
+            "contract_watch": ContractWatch,
+        }
 
         for task_name in self.tasks:
-            task_method_name = f"task_{task_name}"
-            task_method = getattr(self, task_method_name, None)
-            if callable(task_method):
-                task_method()
+            task_class = task_classes.get(task_name)
+            if task_class:
+                task_class(self.scheduler)
+                print(f"{task_name.replace('_', ' ').title()} Tasks Loaded")
             else:
                 print(f"Task '{task_name}' not found or is not callable.")
 
