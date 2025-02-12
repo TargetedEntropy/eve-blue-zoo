@@ -32,7 +32,8 @@ class Contract(db.Model):
     start_location_id = db.Column(db.BigInteger, nullable=True)
     title = db.Column(db.Text, nullable=True)
     type = db.Column(db.Text, nullable=False)
-    volume = db.Column(db.Float, nullable=True) 
+    volume = db.Column(db.Float, nullable=True)
+    parsed = db.Column(db.Boolean, nullable=True)
 
 class ContractItem(db.Model):
     __tablename__ = "contract_items"
@@ -93,6 +94,13 @@ class SentNotifications(db.Model):
     total_sp = db.Column(db.Integer, nullable=False)
     notification_cleared = db.Column(db.Boolean, nullable=False, default=False)
 
+class ContractWatch(db.Model):
+    __tablename__ = "contract_watch"
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)    
+    type_id = db.Column(db.BigInteger, nullable=True)
+    located = db.Column(db.Boolean, default=False)
+    notified = db.Column(db.Boolean, default=False)
 
 class MarketHistory(db.Model):
     __tablename__ = "market_history"
