@@ -3,12 +3,12 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.orm import aliased, joinedload
-from sqlalchemy import create_engine, distinct, desc
+from sqlalchemy.orm import aliased
+from sqlalchemy import distinct, desc
 from apps import esi, db
 from apps.home import blueprint
 from apps.authentication.models import (
@@ -103,21 +103,17 @@ def page_user():
         characters=characters,
         discord_id=discord_id,
     )
-from flask import Flask, request, jsonify, render_template
-from flask_sqlalchemy import SQLAlchemy
+
 
 @blueprint.route("/page-contracts.html", methods=["GET", "POST"])
 def display_contract_selection():
     # Detect the current page
     segment = get_segment(request)
-        
+
     if request.method == "POST":
         pass
-        
-    return render_template(
-        "home/page-contracts.html",
-        segment=segment
-    )
+
+    return render_template("home/page-contracts.html", segment=segment)
 
 
 @blueprint.route("/autocomplete", methods=["GET"])
@@ -126,14 +122,11 @@ def autocomplete():
     if not query:
         return jsonify([])
 
-    results = (
-        InvType.query.filter(InvType.typeName.ilike(f"%{query}%"))
-        .limit(10)
-        .all()
-    )
-    
-    return jsonify([{"typeID": item.typeID, "typeName": item.typeName} for item in results])
+    results = InvType.query.filter(InvType.typeName.ilike(f"%{query}%")).limit(10).all()
 
+    return jsonify(
+        [{"typeID": item.typeID, "typeName": item.typeName} for item in results]
+    )
 
 
 @blueprint.route("/page-character.html", methods=["POST"])
@@ -409,9 +402,9 @@ def page_blueprints():
     )
 
 # Helper - Extract current page name from request
-def get_segment(request):
+def get_segment(req):
     try:
-        segment = request.path.split("/")[-1]
+        segment = req.path.split("/")[-1]
 
         if segment == "":
             segment = "index"
