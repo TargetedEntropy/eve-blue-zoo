@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask import render_template, request, redirect, url_for, jsonify
+from flask import render_template, request, redirect, url_for, jsonify, flash
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
@@ -22,6 +22,7 @@ from apps.authentication.models import (
     CharacterNotifications,
     BlueprintLongDurationOrder,
     StaStation
+    ContractTrack,
 )
 
 from dotenv import dotenv_values
@@ -106,17 +107,64 @@ def page_user():
 
 
 @blueprint.route("/page-contracts.html", methods=["GET", "POST"])
+@login_required
 def display_contract_selection():
-    # Detect the current page
     segment = get_segment(request)
 
     if request.method == "POST":
-        pass
+        action = request.form.get("action")
+        type_id = request.form.get("typeID")
 
-    return render_template("home/page-contracts.html", segment=segment)
+        if not type_id:
+            flash("Invalid request. Please try again.", "danger")
+            return redirect(url_for("home_blueprint.display_contract_selection"))
 
+        if action == "add":
+            # Add tracking logic
+            existing_track = ContractTrack.query.filter_by(
+                character_id=current_user.character_id, type_id=type_id
+            ).first()
+
+            if existing_track:
+                flash("This item is already being tracked.", "warning")
+            else:
+                new_tracking = ContractTrack(
+                    character_id=current_user.character_id,
+                    type_id=type_id
+                )
+                db.session.add(new_tracking)
+                db.session.commit()
+                flash("Item successfully added to tracking.", "success")
+
+        elif action == "remove":
+            # Remove tracking logic
+            tracked_item = ContractTrack.query.filter_by(
+                character_id=current_user.character_id, type_id=type_id
+            ).first()
+
+            if tracked_item:
+                db.session.delete(tracked_item)
+                db.session.commit()
+                flash("Item removed from tracking.", "success")
+            else:
+                flash("Item not found in tracking.", "warning")
+
+        return redirect(url_for("home_blueprint.display_contract_selection"))
+
+    # Fetch user's tracked items
+    tracked_items = db.session.query(
+        ContractTrack.type_id, InvType.typeName
+    ).join(InvType, ContractTrack.type_id == InvType.typeID
+    ).filter(ContractTrack.character_id == current_user.character_id).all()
+
+    return render_template(
+        "home/page-contracts.html",
+        segment=segment,
+        tracked_items=tracked_items
+    )
 
 @blueprint.route("/autocomplete", methods=["GET"])
+@login_required
 def autocomplete():
     query = request.args.get("query", "").strip()
     if not query:
