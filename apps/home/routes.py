@@ -363,6 +363,39 @@ def page_blueprints():
     )
 
 
+@blueprint.route("/page-bp-finder.html")
+@login_required
+def bp_finder():
+    # Detect the current page
+    segment = get_segment(request)
+
+    try:
+        characters = Characters.query.filter(
+            Characters.master_character_id == current_user.character_id
+        )
+    except NoResultFound:
+        characters = []
+
+    discord_id = None
+
+    try:
+        user = Users.query.filter(
+            Users.character_id == current_user.character_id
+        ).first()
+        discord_id = user.discord_user_id
+    except NoResultFound:
+        user = []
+
+    # Serve the file (if exists) from app/templates/home/FILE.html
+    return render_template(
+        "home/page-bp-finder.html",
+        segment=segment,
+        characters=characters,
+        discord_id=discord_id,
+    )
+
+
+
 # Helper - Extract current page name from request
 def get_segment(request):
     try:
@@ -375,3 +408,6 @@ def get_segment(request):
 
     except BaseException:
         return None
+
+
+

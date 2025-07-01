@@ -170,6 +170,18 @@ class MiningLedger(db.Model):
     solar_system_id = db.Column(db.BigInteger)
     type_id = db.Column(db.BigInteger)
 
+class ActivityProduct(db.Model):
+    __tablename__ = 'activity_products'
+    
+    # Primary key - you might want to add an auto-incrementing ID
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    
+    # Data columns based on your CSV
+    type_id = db.Column(db.Integer, nullable=False)
+    activity_id = db.Column(db.Integer, nullable=False)
+    product_type_id = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    
 
 class Characters(db.Model):
     __tablename__ = "Characters"

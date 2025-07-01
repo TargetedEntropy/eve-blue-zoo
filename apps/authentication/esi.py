@@ -1,6 +1,7 @@
 """Eve Online ESI(API) Interface"""
 
 import esipy
+from esipy import EsiApp
 
 
 class EsiAuth:
@@ -18,7 +19,9 @@ class EsiAuth:
             app (obj): The Flask App object
         """
         # init our ESI App
-        self.esiapp = esipy.App.create(app.config["ESI_SWAGGER_JSON"])
+        esi_app = EsiApp()
+        self.esiapp = esi_app.get_latest_swagger
+        #self.esiapp = esipy.App.create(app.config["ESI_SWAGGER_JSON"])
 
         # init the security object
         self.esisecurity = esipy.EsiSecurity(

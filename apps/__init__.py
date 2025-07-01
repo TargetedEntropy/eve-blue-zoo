@@ -50,6 +50,7 @@ def configure_discord(app):
 
 
 def create_app(config):
+    print("Starting App")
     app = Flask(__name__)
     app.config.from_object(config)
     configure_discord(app)

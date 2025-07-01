@@ -37,4 +37,4 @@ if DEBUG:
     app.logger.info("PREFERRED_URL_SCHEME = " + app_config.PREFERRED_URL_SCHEME)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
