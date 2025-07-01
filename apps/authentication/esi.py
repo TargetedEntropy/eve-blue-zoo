@@ -21,7 +21,6 @@ class EsiAuth:
         # init our ESI App
         esi_app = EsiApp()
         self.esiapp = esi_app.get_latest_swagger
-        #self.esiapp = esipy.App.create(app.config["ESI_SWAGGER_JSON"])
 
         # init the security object
         self.esisecurity = esipy.EsiSecurity(
