@@ -308,7 +308,9 @@ def page_miningledger():
 def page_blueprints():
     # Detect the current page
     segment = get_segment(request)
-    page = request.args.get("page", 1, type=int)  # Get the page number from the query string (default to 1)
+    page = request.args.get(
+        "page", 1, type=int
+    )  # Get the page number from the query string (default to 1)
     per_page = 100  # Number of blueprints per page
 
     # Get All of the users' Characters
@@ -323,7 +325,13 @@ def page_blueprints():
     character_ids = [character.character_id for character in characters]
 
     if not character_ids:
-        return render_template("home/ui-blueprints.html", segment=segment, data=[], page=page, total_pages=0)
+        return render_template(
+            "home/ui-blueprints.html",
+            segment=segment,
+            data=[],
+            page=page,
+            total_pages=0,
+        )
 
     # Total number of blueprints for these characters
     total_blueprints = Blueprints.query.filter(
@@ -334,9 +342,12 @@ def page_blueprints():
     total_pages = (total_blueprints + per_page - 1) // per_page  # Round up division
 
     # Fetch blueprints for the current page
-    blueprints = Blueprints.query.filter(
-        Blueprints.character_id.in_(character_ids)
-    ).offset((page - 1) * per_page).limit(per_page).all()
+    blueprints = (
+        Blueprints.query.filter(Blueprints.character_id.in_(character_ids))
+        .offset((page - 1) * per_page)
+        .limit(per_page)
+        .all()
+    )
 
     # Fetch all item names in one query
     type_ids = {bp.type_id for bp in blueprints}
@@ -346,7 +357,9 @@ def page_blueprints():
     }
 
     # Build the final list
-    character_map = {character.character_id: character.character_name for character in characters}
+    character_map = {
+        character.character_id: character.character_name for character in characters
+    }
     all_blueprints = []
     for bp in blueprints:
         bp.characterName = character_map.get(bp.character_id, "Unknown")
@@ -395,7 +408,6 @@ def bp_finder():
     )
 
 
-
 # Helper - Extract current page name from request
 def get_segment(request):
     try:
@@ -408,6 +420,3 @@ def get_segment(request):
 
     except BaseException:
         return None
-
-
-

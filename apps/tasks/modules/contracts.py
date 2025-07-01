@@ -42,7 +42,7 @@ class ContractTasks:
             contract_data = esi.get_esi(
                 character, "get_contracts_public_region_id", **esi_params
             )
-            
+
             # Save Data
             for ld in contract_data.data:
                 contract_row = Contract(
@@ -50,7 +50,7 @@ class ContractTasks:
                     buyout=ld.get("buyout", None),
                     collateral=ld.get("collateral", None),
                     date_expired=ld["date_expired"],
-                    date_issued=ld["date_issued"],               
+                    date_issued=ld["date_issued"],
                     days_to_complete=ld.get("days_to_complete", None),
                     end_location_id=ld.get("end_location_id", None),
                     for_corporation=ld.get("for_corporation", False),
@@ -61,9 +61,8 @@ class ContractTasks:
                     start_location_id=ld.get("start_location_id", None),
                     title=ld.get("title", None),
                     type=ld.get("type", None),
-                    volume=ld.get("volume", None)
+                    volume=ld.get("volume", None),
                 )
-
 
                 with self.scheduler.app.app_context():
                     db.session.merge(contract_row)

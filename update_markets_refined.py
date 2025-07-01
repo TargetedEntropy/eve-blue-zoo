@@ -32,6 +32,7 @@ logger.addHandler(console)
 config = dotenv_values(".env")
 Base = declarative_base()
 
+
 class MarketOrder(Base):
     __tablename__ = "MarketOrders"
 
@@ -48,17 +49,20 @@ class MarketOrder(Base):
     volume_remain = Column(BigInteger, nullable=False)
     volume_total = Column(BigInteger, nullable=False)
 
+
 class MarketUpdates(Base):
     __tablename__ = "MarketUpdates"
 
     regionID = Column(BigInteger, primary_key=True, nullable=False)
     updated_data = Column(DateTime, nullable=False, default=func.now())
 
+
 class MapRegion(Base):
     __tablename__ = "mapRegions"
 
     regionID = Column(Integer, primary_key=True, nullable=False)
     regionName = Column(String(100), nullable=True)
+
 
 engine = create_engine(
     config["SQLALCHEMY_DATABASE_URI"],
@@ -86,6 +90,7 @@ esiclient = EsiClient(
     security=esisecurity, cache=None, headers={"User-Agent": config["ESI_USER_AGENT"]}
 )
 
+
 def get_region_id_by_date():
     result = (
         session.query(MarketUpdates.regionID)
@@ -94,9 +99,11 @@ def get_region_id_by_date():
     )
     return result[0]
 
+
 def get_region_name(region_id):
     result = session.query(MapRegion.regionName).filter_by(regionID=region_id).first()
     return result[0]
+
 
 def get_market_data(region_id):
     op = esiapp.op["get_markets_region_id_orders"](
@@ -122,6 +129,7 @@ def get_market_data(region_id):
         return results
     else:
         return []
+
 
 def save_market_data_bulk(response_data_list):
     """
@@ -168,6 +176,7 @@ def update_region_timestamp(regionID):
         session.add(new_region)
         session.commit()
 
+
 def get_orders_for_region(region_id):
     order_count, insert_count = 0, 0
 
@@ -185,6 +194,7 @@ def get_orders_for_region(region_id):
     update_region_timestamp(region_id)
 
     print(f"Total order count: {order_count}, total insert count: {insert_count}")
+
 
 if __name__ == "__main__":
     region_id = "10000002"  # Jita

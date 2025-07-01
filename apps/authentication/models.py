@@ -2,6 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+
 import time
 from datetime import datetime
 from flask_login import UserMixin
@@ -14,29 +15,31 @@ from apps import db, login_manager
 
 from apps.authentication.util import hash_pass
 
+
 class Contract(db.Model):
     __tablename__ = "contracts"
 
-    id = db.Column(db.Integer, primary_key=True) 
-    buyout = db.Column(db.Float, nullable=True)  
-    collateral = db.Column(db.Float, nullable=True)  
-    date_expired = db.Column(db.DateTime, nullable=False)  
-    date_issued = db.Column(db.DateTime, nullable=False)  
-    days_to_complete = db.Column(db.Integer, nullable=True)  
+    id = db.Column(db.Integer, primary_key=True)
+    buyout = db.Column(db.Float, nullable=True)
+    collateral = db.Column(db.Float, nullable=True)
+    date_expired = db.Column(db.DateTime, nullable=False)
+    date_issued = db.Column(db.DateTime, nullable=False)
+    days_to_complete = db.Column(db.Integer, nullable=True)
     end_location_id = db.Column(db.BigInteger, nullable=True)
-    for_corporation = db.Column(db.Boolean, nullable=True)  
-    issuer_corporation_id = db.Column(db.Integer, nullable=False) 
+    for_corporation = db.Column(db.Boolean, nullable=True)
+    issuer_corporation_id = db.Column(db.Integer, nullable=False)
     issuer_id = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=True) 
+    price = db.Column(db.Float, nullable=True)
     reward = db.Column(db.Float, nullable=True)
     start_location_id = db.Column(db.BigInteger, nullable=True)
     title = db.Column(db.Text, nullable=True)
     type = db.Column(db.Text, nullable=False)
-    volume = db.Column(db.Float, nullable=True) 
+    volume = db.Column(db.Float, nullable=True)
+
 
 class ContractItem(db.Model):
     __tablename__ = "contract_items"
-    id = db.Column(db.Integer, primary_key=True) 
+    id = db.Column(db.Integer, primary_key=True)
     contract_id = db.Column(db.BigInteger, nullable=False)
     record_id = db.Column(db.BigInteger, nullable=False)
     is_blueprint_copy = db.Column(db.Boolean, nullable=True)
@@ -170,18 +173,19 @@ class MiningLedger(db.Model):
     solar_system_id = db.Column(db.BigInteger)
     type_id = db.Column(db.BigInteger)
 
+
 class ActivityProduct(db.Model):
-    __tablename__ = 'activity_products'
-    
+    __tablename__ = "activity_products"
+
     # Primary key - you might want to add an auto-incrementing ID
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    
+
     # Data columns based on your CSV
     type_id = db.Column(db.Integer, nullable=False)
     activity_id = db.Column(db.Integer, nullable=False)
     product_type_id = db.Column(db.Integer, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    
+
 
 class Characters(db.Model):
     __tablename__ = "Characters"
@@ -196,7 +200,7 @@ class Characters(db.Model):
     refresh_token = db.Column(db.Text, nullable=True)
 
     sso_is_valid = db.Column(db.Boolean, nullable=True)
-    
+
     def get_id(self):
         """Required for flask-login"""
         return self.character_id
