@@ -108,19 +108,30 @@ class BlueprintLongDurationOrder(Base):
     # Primary key
     id = Column(Integer, primary_key=True, autoincrement=True)
 
+    # Order reference
+    order_id = Column(
+        BigInteger, nullable=False, unique=True
+    )  # Reference to the actual market order
+
     # Item information
-    type_id = Column(Integer, nullable=False, unique=True)  # ItemID from market orders
+    type_id = Column(Integer, nullable=False)  # ItemID from market orders
+
+    # Location information
+    location_id = Column(BigInteger, nullable=False)
+    system_id = Column(Integer, nullable=True)
+
+    # Price information
+    price = Column(BigInteger, nullable=False)  # Price in cents (same as MarketOrder)
+
+    # Order details
+    duration = Column(Integer, nullable=False)  # Store the actual duration
+    is_buy_order = Column(Boolean, nullable=False)
 
     # Additional metadata
     first_detected = Column(DateTime, default=datetime.utcnow, nullable=False)
     last_updated = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
-
-    # Optional: Store additional info about the blueprint
-    order_count = Column(
-        Integer, nullable=True
-    )  # Number of orders found with duration > 90
 
 
 class EVEMarketCollector:
@@ -310,60 +321,64 @@ class EVEMarketCollector:
         with self.Session() as session:
             # Find market orders for blueprints with duration > 90 days
             long_duration_orders = (
-                session.query(MarketOrder.type_id)
+                session.query(MarketOrder)
                 .filter(
                     MarketOrder.type_id.in_(blueprint_type_ids),
                     MarketOrder.duration > 90,
                 )
-                .distinct()
                 .all()
             )
 
             saved_count = 0
+            updated_count = 0
 
-            for (type_id,) in long_duration_orders:
-                # Check if already exists
+            for order in long_duration_orders:
+                # Check if this specific order already exists
                 existing = (
                     session.query(BlueprintLongDurationOrder)
-                    .filter_by(type_id=type_id)
+                    .filter_by(order_id=order.order_id)
                     .first()
                 )
 
                 if not existing:
-                    # Count how many orders exist for this type
-                    order_count = (
-                        session.query(MarketOrder)
-                        .filter(
-                            MarketOrder.type_id == type_id, MarketOrder.duration > 90
-                        )
-                        .count()
-                    )
-
-                    # Create new record
+                    # Create new record for this specific order
                     blueprint_record = BlueprintLongDurationOrder(
-                        type_id=type_id, order_count=order_count
+                        order_id=order.order_id,
+                        type_id=order.type_id,
+                        location_id=order.location_id,
+                        system_id=order.system_id,
+                        price=order.price,
+                        duration=order.duration,
+                        is_buy_order=order.is_buy_order,
                     )
                     session.add(blueprint_record)
                     saved_count += 1
                 else:
-                    # Update order count
-                    order_count = (
-                        session.query(MarketOrder)
-                        .filter(
-                            MarketOrder.type_id == type_id, MarketOrder.duration > 90
-                        )
-                        .count()
-                    )
-                    existing.order_count = order_count
+                    # Update existing record (in case price or other details changed)
+                    existing.location_id = order.location_id
+                    existing.system_id = order.system_id
+                    existing.price = order.price
+                    existing.duration = order.duration
+                    existing.is_buy_order = order.is_buy_order
+                    existing.last_updated = datetime.utcnow()
+                    updated_count += 1
 
             try:
                 session.commit()
                 logger.info(
-                    f"Saved/updated {saved_count} blueprint type IDs with long duration orders"
+                    f"Saved {saved_count} new blueprint orders and updated {updated_count} existing orders with long durations"
                 )
             except SQLAlchemyError as e:
                 logger.error(f"Database error while saving blueprint records: {e}")
                 session.rollback()
+
+            # Log summary statistics
+            total_orders = session.query(BlueprintLongDurationOrder).count()
+            unique_types = (
+                session.query(BlueprintLongDurationOrder.type_id).distinct().count()
+            )
+            logger.info(f"Total blueprint orders with duration > 90: {total_orders}")
+            logger.info(f"Unique blueprint types: {unique_types}")
 
 
 def main():
