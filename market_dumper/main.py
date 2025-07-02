@@ -304,8 +304,7 @@ class EVEMarketCollector:
         with self.Session() as session:
             # Get unique productTypeIDs that represent blueprints
             blueprint_ids = (
-                session.query(IndustryActivityProduct.productTypeID)
-                .filter(IndustryActivityProduct.productTypeID.isnot(None))
+                session.query(IndustryActivityProduct.typeID)
                 .distinct()
                 .all()
             )
@@ -317,7 +316,9 @@ class EVEMarketCollector:
     def find_long_duration_blueprint_orders(self):
         """Find blueprint orders with duration > 90 days and save to new table."""
         blueprint_type_ids = self.get_blueprint_type_ids()
-
+        if 60347 in blueprint_type_ids:
+            print('Found')
+        
         with self.Session() as session:
             # Find market orders for blueprints with duration > 90 days
             long_duration_orders = (
@@ -328,7 +329,7 @@ class EVEMarketCollector:
                 )
                 .all()
             )
-
+            print(f"long_duration_orders_len: {len(long_duration_orders)}")
             saved_count = 0
             updated_count = 0
 

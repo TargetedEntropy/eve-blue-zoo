@@ -36,6 +36,36 @@ class Contract(db.Model):
     type = db.Column(db.Text, nullable=False)
     volume = db.Column(db.Float, nullable=True)
 
+class BlueprintLongDurationOrder(db.Model):
+    __tablename__ = "blueprint_long_duration_orders"
+
+    # Primary key
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Order reference
+    order_id = db.Column(
+        db.BigInteger, nullable=False, unique=True
+    )  # Reference to the actual market order
+
+    # Item information
+    type_id = db.Column(db.Integer, nullable=False)  # ItemID from market orders
+
+    # Location information
+    location_id = db.Column(db.BigInteger, nullable=False)
+    system_id = db.Column(db.Integer, nullable=True)
+
+    # Price information
+    price = db.Column(db.BigInteger, nullable=False)  # Price in cents (same as MarketOrder)
+
+    # Order details
+    duration = db.Column(db.Integer, nullable=False)  # Store the actual duration
+    is_buy_order = db.Column(db.Boolean, nullable=False)
+
+    # Additional metadata
+    first_detected = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    last_updated = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
 class ContractItem(db.Model):
     __tablename__ = "contract_items"
@@ -227,6 +257,43 @@ class Characters(db.Model):
         )
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
+
+
+class StaStation(db.Model):
+    __tablename__ = 'staStations'
+    
+    # Primary key
+    stationID = db.Column(db.BigInteger, primary_key=True, nullable=False)
+    
+    # Security and operational data
+    security = db.Column(db.Float, nullable=True)
+    dockingCostPerVolume = db.Column(db.Float, nullable=True)
+    maxShipVolumeDockable = db.Column(db.Float, nullable=True)
+    officeRentalCost = db.Column(db.Integer, nullable=True)
+    operationID = db.Column(db.Integer, nullable=True)
+    
+    # Station classification
+    stationTypeID = db.Column(db.Integer, nullable=True)
+    corporationID = db.Column(db.Integer, nullable=True)
+    
+    # Location hierarchy
+    solarSystemID = db.Column(db.Integer, nullable=True)
+    constellationID = db.Column(db.Integer, nullable=True)
+    regionID = db.Column(db.Integer, nullable=True)
+    
+    # Station information
+    stationName = db.Column(db.String(100), nullable=True)
+    
+    # Coordinate information
+    x = db.Column(db.Float, nullable=True)
+    y = db.Column(db.Float, nullable=True)
+    z = db.Column(db.Float, nullable=True)
+    
+    # Reprocessing information
+    reprocessingEfficiency = db.Column(db.Float, nullable=True)
+    reprocessingStationsTake = db.Column(db.Float, nullable=True)
+    reprocessingHangarFlag = db.Column(db.Integer, nullable=True)
+    
 
 
 class Users(db.Model, UserMixin):

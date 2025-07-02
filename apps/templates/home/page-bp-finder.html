@@ -1,23 +1,178 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} User Profile {% endblock %} 
-
-<!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block title %} Blueprint Finder {% endblock %} 
 
 {% block content %}
-
-  <div class="content">
-    <div class="row">
-      <div class="col-md-8">
-        <div class="card">
-          stuff
+<div class="header bg-gradient-primary pb-8 pt-5 pt-md-8">
+    <div class="container-fluid">
+        <div class="header-body">
+            <h1 class="text-white">Blueprint Finder</h1>
+            <p class="text-white">Find blueprints available on the market that you don't already own</p>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-{% endblock content %}
+<div class="container-fluid mt--7">
+    <div class="row">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header border-0">
+                    <h3 class="mb-0">Search Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('home_blueprint.bp_finder') }}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="system_name">System Name</label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="system_name" 
+                                           name="system_name" 
+                                           placeholder="Enter system name (e.g., Jita)" 
+                                           value="{{ system_name or '' }}"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="search_radius">Search Radius</label>
+                                    <select class="form-control" id="search_radius" name="search_radius">
+                                        <option value="0" {% if search_radius == 0 %}selected{% endif %}>Exact System Only</option>
+                                        <option value="5" {% if search_radius == 5 %}selected{% endif %}>Within Constellation</option>
+                                        <option value="10" {% if search_radius == 10 %}selected{% endif %}>Within Region</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+    {% if missing_blueprints %}
+    <div class="row mt-4">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header border-0">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="mb-0">Available Blueprints ({{ results_count }} found)</h3>
+                        </div>
+                        <div class="col-4">
+                            <input type="text" 
+                                   class="form-control form-control-sm" 
+                                   id="blueprintFilter" 
+                                   placeholder="Filter blueprints by name...">
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-items-center table-flush" id="blueprintTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th scope="col">Blueprint</th>
+                                <th scope="col">Price (ISK)</th>
+                                <th scope="col">Location</th>
+                                <th scope="col">System</th>
+                                <th scope="col">Security</th>
+                                <th scope="col">Duration</th>
+                                <th scope="col">Last Updated</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for blueprint in missing_blueprints %}
+                            <tr>
+                                <td>
+                                    <div class="media align-items-center">
+                                        <div class="media-body">
+                                            <span class="mb-0 text-sm font-weight-bold">{{ blueprint.type_name }}</span>
+                                            <br>
+                                            <small class="text-muted">ID: {{ blueprint.type_id }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ "{:,.2f}".format(blueprint.price) }}</td>
+                                <td>
+                                    <span class="badge badge-dot mr-4">
+                                        <i class="bg-info"></i>
+                                        {{ blueprint.station_name }}
+                                    </span>
+                                </td>
+                                <td>{{ blueprint.system_name }}</td>
+                                <td>
+                                    <span class="badge badge-{% if blueprint.system_security >= 0.5 %}success{% elif blueprint.system_security > 0.0 %}warning{% else %}danger{% endif %}">
+                                        {{ blueprint.system_security }}
+                                    </span>
+                                </td>
+                                <td>{{ blueprint.duration }} days</td>
+                                <td>{{ blueprint.last_updated.strftime('%Y-%m-%d %H:%M') }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" 
+                                            onclick="copyToClipboard('{{ blueprint.type_id }}')">
+                                        Copy ID
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif system_name %}
+    <div class="row mt-4">
+        <div class="col">
+            <div class="alert alert-info" role="alert">
+                <strong>No Results!</strong> Either you already own all available blueprints in this area, or there are no blueprints for sale.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(function() {
+        // You could add a toast notification here
+        console.log('Copied to clipboard: ' + text);
+    }, function(err) {
+        console.error('Could not copy text: ', err);
+    });
+}
+
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const filterInput = document.getElementById('blueprintFilter');
+    const table = document.getElementById('blueprintTable');
+    
+    if (filterInput && table) {
+        filterInput.addEventListener('keyup', function() {
+            const filter = this.value.toLowerCase();
+            const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            
+            for (let i = 0; i < rows.length; i++) {
+                const blueprintName = rows[i].getElementsByClassName('font-weight-bold')[0];
+                if (blueprintName) {
+                    const txtValue = blueprintName.textContent || blueprintName.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

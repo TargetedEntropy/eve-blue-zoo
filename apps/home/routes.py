@@ -20,6 +20,8 @@ from apps.authentication.models import (
     MiningLedger,
     MapSolarSystems,
     CharacterNotifications,
+    BlueprintLongDurationOrder,
+    StaStation
 )
 
 from dotenv import dotenv_values
@@ -375,39 +377,6 @@ def page_blueprints():
         total_pages=total_pages,
     )
 
-
-@blueprint.route("/page-bp-finder.html")
-@login_required
-def bp_finder():
-    # Detect the current page
-    segment = get_segment(request)
-
-    try:
-        characters = Characters.query.filter(
-            Characters.master_character_id == current_user.character_id
-        )
-    except NoResultFound:
-        characters = []
-
-    discord_id = None
-
-    try:
-        user = Users.query.filter(
-            Users.character_id == current_user.character_id
-        ).first()
-        discord_id = user.discord_user_id
-    except NoResultFound:
-        user = []
-
-    # Serve the file (if exists) from app/templates/home/FILE.html
-    return render_template(
-        "home/page-bp-finder.html",
-        segment=segment,
-        characters=characters,
-        discord_id=discord_id,
-    )
-
-
 # Helper - Extract current page name from request
 def get_segment(request):
     try:
@@ -420,3 +389,225 @@ def get_segment(request):
 
     except BaseException:
         return None
+
+@blueprint.route("/page-bp-finder.html", methods=['GET', 'POST'])
+@login_required
+def bp_finder():
+    # Detect the current page
+    segment = get_segment(request)
+    
+    # Initialize variables
+    missing_blueprints = []
+    system_name = None
+    search_radius = 5  # Default search radius in jumps
+    
+    if request.method == 'POST':
+        system_name = request.form.get('system_name', '').strip()
+        search_radius = int(request.form.get('search_radius', 5))
+        
+        if system_name:
+            # Get all character IDs for the current user
+            user_characters = db.session.query(Characters.character_id).filter(
+                Characters.master_character_id == current_user.character_id
+            ).all()
+            user_character_ids = [char.character_id for char in user_characters]
+            print(f"user_character_ids: {user_character_ids}")
+            # Get all blueprint type_ids owned by the user's characters
+            owned_blueprints = db.session.query(Blueprints.type_id).filter(
+                Blueprints.character_id.in_(user_character_ids)
+            ).distinct().all()
+            owned_type_ids = [bp.type_id for bp in owned_blueprints]
+            print(f"owned_type_ids: {owned_type_ids}")
+            print(f"owned_type_ids_len: {len(owned_type_ids)}")
+            
+            # Find the system by name
+            target_system = db.session.query(MapSolarSystems).filter(
+                MapSolarSystems.solarSystemName.ilike(f'%{system_name}%')
+            ).first()
+            
+            if target_system:
+                # Get blueprint orders not owned by the user
+                query = db.session.query(
+                    BlueprintLongDurationOrder,
+                    MapSolarSystems,
+                    StaStation,
+                    InvType
+                ).join(
+                    MapSolarSystems,
+                    BlueprintLongDurationOrder.system_id == MapSolarSystems.solarSystemID
+                ).outerjoin(
+                    StaStation,
+                    BlueprintLongDurationOrder.location_id == StaStation.stationID
+                ).join(
+                    InvType,
+                    BlueprintLongDurationOrder.type_id == InvType.typeID
+                ).filter(
+                    ~BlueprintLongDurationOrder.type_id.in_(owned_type_ids) if owned_type_ids else True,
+                    BlueprintLongDurationOrder.is_buy_order == False  # Only sell orders
+                )
+                
+                # If search_radius is 0, only search in the exact system
+                if search_radius == 0:
+                    query = query.filter(
+                        BlueprintLongDurationOrder.system_id == target_system.solarSystemID
+                    )
+                else:
+                    # For radius search, we'll need to implement a more complex filter
+                    # For now, let's search within the same constellation or region
+                    if search_radius <= 5:
+                        # Search within constellation
+                        query = query.filter(
+                            MapSolarSystems.constellationID == target_system.constellationID
+                        )
+                    else:
+                        # Search within region
+                        query = query.filter(
+                            MapSolarSystems.regionID == target_system.regionID
+                        )
+                
+                # Order by price
+                query = query.order_by(BlueprintLongDurationOrder.price.asc())
+                
+                # Execute query and format results
+                results = query.limit(100).all()  # Limit to prevent overwhelming results
+                
+                for order, system, station, item_type in results:
+                    blueprint_info = {
+                        'order_id': order.order_id,
+                        'type_id': order.type_id,
+                        'type_name': item_type.typeName,
+                        'price': order.price / 100,  # Convert from cents to ISK
+                        'location_id': order.location_id,
+                        'system_name': system.solarSystemName,
+                        'system_security': round(system.security, 1),
+                        'region_id': system.regionID,
+                        'constellation_id': system.constellationID,
+                        'station_name': station.stationName if station else 'Citadel/Structure',
+                        'duration': order.duration,
+                        'last_updated': order.last_updated
+                    }
+                    missing_blueprints.append(blueprint_info)
+    
+    # Serve the template with results
+    return render_template(
+        "home/page-bp-finder.html",
+        segment=segment,
+        missing_blueprints=missing_blueprints,
+        system_name=system_name,
+        search_radius=search_radius,
+        results_count=len(missing_blueprints)
+    )
+
+
+# Optional: Add an API endpoint for AJAX requests
+@blueprint.route("/api/bp-finder", methods=['POST'])
+@login_required
+def api_bp_finder():
+    """API endpoint for finding missing blueprints"""
+    data = request.get_json()
+    system_name = data.get('system_name', '').strip()
+    search_radius = int(data.get('search_radius', 5))
+    max_price = data.get('max_price')  # Optional price filter
+    
+    if not system_name:
+        return jsonify({'error': 'System name is required'}), 400
+    
+    # Get all character IDs for the current user
+    user_characters = db.session.query(Characters.character_id).filter(
+        Characters.master_character_id == current_user.character_id
+    ).all()
+    user_character_ids = [char.character_id for char in user_characters]
+    
+    # Get all blueprint type_ids owned by the user's characters
+    owned_blueprints = db.session.query(Blueprints.type_id).filter(
+        Blueprints.character_id.in_(user_character_ids)
+    ).distinct().all()
+    owned_type_ids = [bp.type_id for bp in owned_blueprints]
+    
+    # Find the system
+    target_system = db.session.query(MapSolarSystems).filter(
+        MapSolarSystems.solarSystemName.ilike(f'%{system_name}%')
+    ).first()
+    
+    if not target_system:
+        return jsonify({'error': f'System "{system_name}" not found'}), 404
+    
+    # Build the query
+    query = db.session.query(
+        BlueprintLongDurationOrder,
+        MapSolarSystems,
+        StaStation,
+        InvType
+    ).join(
+        MapSolarSystems,
+        BlueprintLongDurationOrder.system_id == MapSolarSystems.solarSystemID
+    ).outerjoin(
+        StaStation,
+        BlueprintLongDurationOrder.location_id == StaStation.stationID
+    ).join(
+        InvType,
+        BlueprintLongDurationOrder.type_id == InvType.typeID
+    ).filter(
+        ~BlueprintLongDurationOrder.type_id.in_(owned_type_ids) if owned_type_ids else True,
+        BlueprintLongDurationOrder.is_buy_order == False
+    )
+    
+    # Apply price filter if provided
+    if max_price:
+        query = query.filter(BlueprintLongDurationOrder.price <= max_price * 100)  # Convert to cents
+    
+    # Apply location filter based on radius
+    if search_radius == 0:
+        query = query.filter(
+            BlueprintLongDurationOrder.system_id == target_system.solarSystemID
+        )
+    elif search_radius <= 5:
+        query = query.filter(
+            MapSolarSystems.constellationID == target_system.constellationID
+        )
+    else:
+        query = query.filter(
+            MapSolarSystems.regionID == target_system.regionID
+        )
+    
+    # Order by price and limit results
+    query = query.order_by(BlueprintLongDurationOrder.price.asc()).limit(100)
+    
+    results = []
+    for order, system, station, item_type in query.all():
+        results.append({
+            'order_id': order.order_id,
+            'type_id': order.type_id,
+            'type_name': item_type.typeName,
+            'price': order.price / 100,
+            'location': {
+                'location_id': order.location_id,
+                'system_name': system.solarSystemName,
+                'system_security': round(system.security, 1),
+                'station_name': station.stationName if station else 'Citadel/Structure'
+            },
+            'duration': order.duration,
+            'last_updated': order.last_updated.isoformat()
+        })
+    
+    return jsonify({
+        'success': True,
+        'results': results,
+        'count': len(results),
+        'search_params': {
+            'system': target_system.solarSystemName,
+            'radius': search_radius,
+            'max_price': max_price
+        }
+    })
+
+
+# Helper function to calculate jump distance between systems (optional enhancement)
+def calculate_jump_distance(system1_id, system2_id):
+    """
+    Calculate the number of jumps between two systems.
+    This would require additional EVE static data tables for jump connections.
+    """
+    # This is a placeholder - you would need the actual jump connection data
+    # from EVE's static data export to implement this properly
+    pass
