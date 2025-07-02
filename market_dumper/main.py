@@ -67,7 +67,7 @@ class IndustryActivityProduct(Base):
 
     # Columns matching the MySQL table structure
     # Note: No primary key defined in the original table
-    typeID = Column(Integer, nullable=True)
+    typeID = Column(Integer, primary_key=True, nullable=True)
     activityID = Column(Integer, nullable=True)
     productTypeID = Column(Integer, nullable=True)
     quantity = Column(Integer, nullable=True)
@@ -148,7 +148,7 @@ class EVEMarketCollector:
         with self.Session() as session:
             regions = (
                 session.query(MapRegion.regionID)
-                .filter(MapRegion.factionID.is_(None))
+                .filter(MapRegion.factionID.is_not(None))
                 .all()
             )
 
