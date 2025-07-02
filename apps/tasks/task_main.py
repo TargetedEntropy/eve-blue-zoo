@@ -16,15 +16,10 @@ class MainTasks:
     """
 
     def __init__(self, app: object, tasks=None):
-<<<<<<< HEAD
         """Run internal class intialization functions"""
         # self.tasks = tasks # or ["contracts", "contract_items"]
         self.tasks = tasks or ["skills", "blueprints"]
         # ["skills", "blueprints", "mining_ledger", "notifications", "market_history", "contracts"]
-=======
-        """Run internal class initialization functions"""
-        self.tasks = tasks or ["contracts", "contract_items", "contract_watch"] #, "skills", "blueprints", "mining_ledger", "notifications", "market_history"]
->>>>>>> 6d1619a (cleanup tasks)
         self.app = app
         self.scheduler = self._configure_scheduler()
         self._load_scheduled_tasks()

@@ -18,8 +18,8 @@ class ContractItemTasks:
         """Setup task execution schedule"""
         self.scheduler.add_job(
             func=self.main,
-           trigger="interval",
-           seconds=310,
+           #trigger="interval",
+           #seconds=310,
             id="contract_item_main",
             name="contract_item_main",
             replace_existing=False,
@@ -35,7 +35,7 @@ class ContractItemTasks:
         """Get contracts without items, we need to get the items"""
         with self.scheduler.app.app_context():
             contracts_without_items = Contract.query \
-                .filter(Contract.parsed.is_(False)) \
+                .filter(Contract.parsed.is_(None)) \
                 .all()
                 # .limit(50) \
 
@@ -56,10 +56,10 @@ class ContractItemTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}", end="")
+            print(f"Checking items for: {character.character_name}", end="")
 
             contracts = self.get_contracts_without_items()
-
+            print(f"ContractCount: {len(contracts)}")
             for contract in contracts:
                 # Skip check
                 if contract.type not in ['item_exchange', 'auction']: continue

@@ -103,6 +103,37 @@ def page_user():
         characters=characters,
         discord_id=discord_id,
     )
+from flask import Flask, request, jsonify, render_template
+from flask_sqlalchemy import SQLAlchemy
+
+@blueprint.route("/page-contracts.html", methods=["GET", "POST"])
+def display_contract_selection():
+    # Detect the current page
+    segment = get_segment(request)
+        
+    if request.method == "POST":
+        pass
+        
+    return render_template(
+        "home/page-contracts.html",
+        segment=segment
+    )
+
+
+@blueprint.route("/autocomplete", methods=["GET"])
+def autocomplete():
+    query = request.args.get("query", "").strip()
+    if not query:
+        return jsonify([])
+
+    results = (
+        InvType.query.filter(InvType.typeName.ilike(f"%{query}%"))
+        .limit(10)
+        .all()
+    )
+    
+    return jsonify([{"typeID": item.typeID, "typeName": item.typeName} for item in results])
+
 
 
 @blueprint.route("/page-character.html", methods=["POST"])
