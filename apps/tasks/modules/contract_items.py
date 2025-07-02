@@ -18,8 +18,8 @@ class ContractItemTasks:
         """Setup task execution schedule"""
         self.scheduler.add_job(
             func=self.main,
-           #trigger="interval",
-           #seconds=310,
+            # trigger="interval",
+            # seconds=310,
             id="contract_item_main",
             name="contract_item_main",
             replace_existing=False,
@@ -34,21 +34,20 @@ class ContractItemTasks:
     def get_contracts_without_items(self) -> list:
         """Get contracts without items, we need to get the items"""
         with self.scheduler.app.app_context():
-            contracts_without_items = Contract.query \
-                .filter(Contract.parsed.is_(None)) \
-                .all()
-                # .limit(50) \
+            contracts_without_items = Contract.query.filter(
+                Contract.parsed.is_(None)
+            ).all()
+            # .limit(50) \
 
         return contracts_without_items
 
     def update_contract_parsed(self, contract_id: int, parsed_value: bool) -> None:
-        """ Update the 'parsed' column for a specific contract """
+        """Update the 'parsed' column for a specific contract"""
         with self.scheduler.app.app_context():
             contract = Contract.query.filter_by(id=contract_id).first()
             if contract:
                 contract.parsed = parsed_value
                 db.session.commit()
-            
 
     def main(self):
         print(f"Running Contract Items Main: {datetime.now()}")
@@ -62,7 +61,8 @@ class ContractItemTasks:
             print(f"ContractCount: {len(contracts)}")
             for contract in contracts:
                 # Skip check
-                if contract.type not in ['item_exchange', 'auction']: continue
+                if contract.type not in ["item_exchange", "auction"]:
+                    continue
                 print(f"Checking: {contract.id}")
 
                 # Get Data
@@ -76,11 +76,11 @@ class ContractItemTasks:
                 except Exception as error:
                     self.update_contract_parsed(contract.id, True)
                     continue
-                
-                if hasattr(esi_data.data, 'error') or not esi_data.data:
+
+                if hasattr(esi_data.data, "error") or not esi_data.data:
                     self.update_contract_parsed(contract.id, True)
                     continue
-                
+
                 # Save Data
                 for ld in esi_data.data:
                     contract_item_row = ContractItem(

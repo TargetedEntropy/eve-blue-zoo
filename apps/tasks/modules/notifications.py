@@ -5,12 +5,13 @@ from apps.authentication.models import (
     CharacterNotifications,
     SentNotifications,
     Users,
-    SkillSet, 
-    Contract, 
-    ContractItem
+    SkillSet,
+    Contract,
+    ContractItem,
 )
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
+
 
 class NotificationTasks:
     """Tasks related to Notifications"""
@@ -145,4 +146,3 @@ class NotificationTasks:
 
                         db.session.add(sent_notification)
                         db.session.commit()
-                        

@@ -4,10 +4,21 @@ Here we will have a root function which is called on a schedule, that will then 
 will qualify if they run or not based on their own schedule. Meaning, some updates will happen more
 frequently than others.
 """
+
 from flask_apscheduler import APScheduler
 import atexit
 
-from apps.tasks.modules import MiningLedgerTasks, BlueprintTasks, SkillTasks, NotificationTasks, MarketHistoryTasks, ContractTasks, ContractItemTasks, ContractWatch
+from apps.tasks.modules import (
+    MiningLedgerTasks,
+    BlueprintTasks,
+    SkillTasks,
+    NotificationTasks,
+    MarketHistoryTasks,
+    ContractTasks,
+    ContractItemTasks,
+    ContractWatch,
+)
+
 
 class MainTasks:
     """The Main tasks driving class.
@@ -37,7 +48,7 @@ class MainTasks:
     def _load_scheduled_tasks(self) -> None:
         """Load and initialize tasks based on the provided task names."""
         print(f"Running {len(self.tasks)} tasks")
-        
+
         task_classes = {
             "mining_ledger": MiningLedgerTasks,
             "blueprints": BlueprintTasks,

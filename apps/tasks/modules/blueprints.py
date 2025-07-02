@@ -48,7 +48,7 @@ class BlueprintTasks:
             except RuntimeError as e:
                 print(f"Failed to get ESI data, invalidating user: {e}")
                 invalidate_sso(self.scheduler.app, character_id=character.character_id)
-                
+
             # Save Data
             for ld in blueprint_data.data:
                 blueprint_row = Blueprints(

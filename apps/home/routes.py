@@ -129,8 +129,7 @@ def display_contract_selection():
                 flash("This item is already being tracked.", "warning")
             else:
                 new_tracking = ContractTrack(
-                    character_id=current_user.character_id,
-                    type_id=type_id
+                    character_id=current_user.character_id, type_id=type_id
                 )
                 db.session.add(new_tracking)
                 db.session.commit()
@@ -152,16 +151,17 @@ def display_contract_selection():
         return redirect(url_for("home_blueprint.display_contract_selection"))
 
     # Fetch user's tracked items
-    tracked_items = db.session.query(
-        ContractTrack.type_id, InvType.typeName
-    ).join(InvType, ContractTrack.type_id == InvType.typeID
-    ).filter(ContractTrack.character_id == current_user.character_id).all()
+    tracked_items = (
+        db.session.query(ContractTrack.type_id, InvType.typeName)
+        .join(InvType, ContractTrack.type_id == InvType.typeID)
+        .filter(ContractTrack.character_id == current_user.character_id)
+        .all()
+    )
 
     return render_template(
-        "home/page-contracts.html",
-        segment=segment,
-        tracked_items=tracked_items
+        "home/page-contracts.html", segment=segment, tracked_items=tracked_items
     )
+
 
 @blueprint.route("/autocomplete", methods=["GET"])
 @login_required
