@@ -21,7 +21,7 @@ from apps.authentication.models import (
     MapSolarSystems,
     CharacterNotifications,
     BlueprintLongDurationOrder,
-    StaStation
+    StaStation,
     ContractTrack,
 )
 
