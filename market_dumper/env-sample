@@ -1,0 +1,9 @@
+# Database connection string
+# For MySQL
+DATABASE_DSN=mysql+pymysql://username:password@localhost:5432/database_name
+
+# For PostgreSQL
+# DATABASE_DSN=postgresql://username:password@localhost:5432/database_name
+
+# For SQLite (for testing)
+# DATABASE_DSN=sqlite:///eve_market.db

@@ -41,7 +41,7 @@
               <td>{{ row.location_flag }}</td>
               <td>{{ row.material_efficiency }}</td>
               <td>{{ row.time_efficiency }}</td>
-              <td>{{ row.runs }}</td>
+              <td>{{ "BPO" if row.runs == -1 else row.runs }}</td>
             </tr>
             {% endfor %}
           </tbody>

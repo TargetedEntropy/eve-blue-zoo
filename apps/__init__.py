@@ -2,6 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+
 from importlib import import_module
 from flask import Flask
 from flask_login import LoginManager
@@ -44,12 +45,14 @@ def configure_tasks(app):
     task_master = import_module("apps.tasks.task_main")
     task_master.MainTasks(app)
 
+
 def configure_discord(app):
     global discord_client
     discord_client = DiscordOAuth2Session(app)
 
 
 def create_app(config):
+    print("Starting App")
     app = Flask(__name__)
     app.config.from_object(config)
     configure_discord(app)

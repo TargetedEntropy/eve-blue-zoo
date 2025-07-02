@@ -2,6 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+
 import time
 from datetime import datetime
 from flask_login import UserMixin
@@ -14,29 +15,61 @@ from apps import db, login_manager
 
 from apps.authentication.util import hash_pass
 
+
 class Contract(db.Model):
     __tablename__ = "contracts"
 
-    id = db.Column(db.Integer, primary_key=True) 
-    buyout = db.Column(db.Float, nullable=True)  
-    collateral = db.Column(db.Float, nullable=True)  
-    date_expired = db.Column(db.DateTime, nullable=False)  
-    date_issued = db.Column(db.DateTime, nullable=False)  
-    days_to_complete = db.Column(db.Integer, nullable=True)  
+    id = db.Column(db.Integer, primary_key=True)
+    buyout = db.Column(db.Float, nullable=True)
+    collateral = db.Column(db.Float, nullable=True)
+    date_expired = db.Column(db.DateTime, nullable=False)
+    date_issued = db.Column(db.DateTime, nullable=False)
+    days_to_complete = db.Column(db.Integer, nullable=True)
     end_location_id = db.Column(db.BigInteger, nullable=True)
-    for_corporation = db.Column(db.Boolean, nullable=True)  
-    issuer_corporation_id = db.Column(db.Integer, nullable=False) 
+    for_corporation = db.Column(db.Boolean, nullable=True)
+    issuer_corporation_id = db.Column(db.Integer, nullable=False)
     issuer_id = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=True) 
+    price = db.Column(db.Float, nullable=True)
     reward = db.Column(db.Float, nullable=True)
     start_location_id = db.Column(db.BigInteger, nullable=True)
     title = db.Column(db.Text, nullable=True)
     type = db.Column(db.Text, nullable=False)
-    volume = db.Column(db.Float, nullable=True) 
+    volume = db.Column(db.Float, nullable=True)
+
+class BlueprintLongDurationOrder(db.Model):
+    __tablename__ = "blueprint_long_duration_orders"
+
+    # Primary key
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Order reference
+    order_id = db.Column(
+        db.BigInteger, nullable=False, unique=True
+    )  # Reference to the actual market order
+
+    # Item information
+    type_id = db.Column(db.Integer, nullable=False)  # ItemID from market orders
+
+    # Location information
+    location_id = db.Column(db.BigInteger, nullable=False)
+    system_id = db.Column(db.Integer, nullable=True)
+
+    # Price information
+    price = db.Column(db.BigInteger, nullable=False)  # Price in cents (same as MarketOrder)
+
+    # Order details
+    duration = db.Column(db.Integer, nullable=False)  # Store the actual duration
+    is_buy_order = db.Column(db.Boolean, nullable=False)
+
+    # Additional metadata
+    first_detected = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    last_updated = db.Column(
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
+    )
 
 class ContractItem(db.Model):
     __tablename__ = "contract_items"
-    id = db.Column(db.Integer, primary_key=True) 
+    id = db.Column(db.Integer, primary_key=True)
     contract_id = db.Column(db.BigInteger, nullable=False)
     record_id = db.Column(db.BigInteger, nullable=False)
     is_blueprint_copy = db.Column(db.Boolean, nullable=True)
@@ -171,6 +204,19 @@ class MiningLedger(db.Model):
     type_id = db.Column(db.BigInteger)
 
 
+class ActivityProduct(db.Model):
+    __tablename__ = "activity_products"
+
+    # Primary key - you might want to add an auto-incrementing ID
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+    # Data columns based on your CSV
+    type_id = db.Column(db.Integer, nullable=False)
+    activity_id = db.Column(db.Integer, nullable=False)
+    product_type_id = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+
+
 class Characters(db.Model):
     __tablename__ = "Characters"
     character_id = db.Column(db.BigInteger, primary_key=True)
@@ -184,7 +230,7 @@ class Characters(db.Model):
     refresh_token = db.Column(db.Text, nullable=True)
 
     sso_is_valid = db.Column(db.Boolean, nullable=True)
-    
+
     def get_id(self):
         """Required for flask-login"""
         return self.character_id
@@ -211,6 +257,43 @@ class Characters(db.Model):
         )
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
+
+
+class StaStation(db.Model):
+    __tablename__ = 'staStations'
+    
+    # Primary key
+    stationID = db.Column(db.BigInteger, primary_key=True, nullable=False)
+    
+    # Security and operational data
+    security = db.Column(db.Float, nullable=True)
+    dockingCostPerVolume = db.Column(db.Float, nullable=True)
+    maxShipVolumeDockable = db.Column(db.Float, nullable=True)
+    officeRentalCost = db.Column(db.Integer, nullable=True)
+    operationID = db.Column(db.Integer, nullable=True)
+    
+    # Station classification
+    stationTypeID = db.Column(db.Integer, nullable=True)
+    corporationID = db.Column(db.Integer, nullable=True)
+    
+    # Location hierarchy
+    solarSystemID = db.Column(db.Integer, nullable=True)
+    constellationID = db.Column(db.Integer, nullable=True)
+    regionID = db.Column(db.Integer, nullable=True)
+    
+    # Station information
+    stationName = db.Column(db.String(100), nullable=True)
+    
+    # Coordinate information
+    x = db.Column(db.Float, nullable=True)
+    y = db.Column(db.Float, nullable=True)
+    z = db.Column(db.Float, nullable=True)
+    
+    # Reprocessing information
+    reprocessingEfficiency = db.Column(db.Float, nullable=True)
+    reprocessingStationsTake = db.Column(db.Float, nullable=True)
+    reprocessingHangarFlag = db.Column(db.Integer, nullable=True)
+    
 
 
 class Users(db.Model, UserMixin):

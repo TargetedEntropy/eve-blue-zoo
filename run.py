@@ -15,7 +15,7 @@ from apps import create_app, db
 DEBUG = config("DEBUG", default=True, cast=bool)
 
 # The configuration
-GET_CONFIG_MODE = "Debug" #  if DEBUG else "Production"
+GET_CONFIG_MODE = "Debug"  #  if DEBUG else "Production"
 
 try:
     # Load the configuration using the default values
@@ -37,4 +37,4 @@ if DEBUG:
     app.logger.info("PREFERRED_URL_SCHEME = " + app_config.PREFERRED_URL_SCHEME)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")
