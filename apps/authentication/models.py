@@ -67,6 +67,7 @@ class BlueprintLongDurationOrder(db.Model):
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
+
 class ContractItem(db.Model):
     __tablename__ = "contract_items"
     id = db.Column(db.Integer, primary_key=True)
@@ -80,6 +81,22 @@ class ContractItem(db.Model):
     runs = db.Column(db.Integer, nullable=True)
     time_efficiency = db.Column(db.Integer, nullable=True)
     type_id = db.Column(db.Integer, nullable=False)
+
+
+class ContractTrack(db.Model):
+    __tablename__ = "contract_watch"
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)
+    type_id = db.Column(db.BigInteger, nullable=True)
+    located = db.Column(db.Boolean, default=False)
+    notified = db.Column(db.Boolean, default=False)
+
+
+class ContractNotify(db.Model):
+    __tablename__ = "contract_notify"
+    id = db.Column(db.Integer, primary_key=True)
+    character_id = db.Column(db.Integer, nullable=False)
+    contract_id = db.Column(db.BigInteger, nullable=True)
 
 
 class Features(db.Model):

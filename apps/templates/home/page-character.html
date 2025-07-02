@@ -37,8 +37,8 @@
                   <h3 class="h6 mb-1">Mining Ledger</h3>
                   <p class="small pe-4">Catalog Mining Ledger results for a single view across all characters.  
                       <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
-                      <input class="" type="checkbox" name="preferences" value="mining-ledger_task"
-                      {% if 'mining-ledger-notification' in notifications.split(',') %} checked {% endif %}>
+                      <input class="" type="checkbox" name="preferences" value="mining-ledger-task"
+                      {% if 'mining-ledger-task' in notifications.split(',') %} checked {% endif %}>
                       <label class="" for="user-notification-1"></label>
                     </p>
               </div>
@@ -48,12 +48,23 @@
                 <h3 class="h6 mb-1">Blueprints</h3>
                 <p class="small pe-4">Enable downloading your Blueprint list to view as one. 
                     <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
-                    <input class="" type="checkbox" name="preferences" value="blueprint_task"
-                    {% if 'mining-ledger-notification' in notifications.split(',') %} checked {% endif %}>
+                    <input class="" type="checkbox" name="preferences" value="blueprint-task"
+                    {% if 'blueprint-task' in notifications.split(',') %} checked {% endif %}>
                     <label class="" for="user-notification-1"></label>
                   </p>
             </div>
-        </li>            
+          </li>            
+          <li class="">
+            <div>
+                <h3 class="h6 mb-1">Contracts</h3>
+                <p class="small pe-4">Track Public Contracts for Items. 
+                    <input type="hidden" id="character_id" name="character_id" value="{{character.character_id}}">
+                    <input class="" type="checkbox" name="preferences" value="contract-task"
+                    {% if 'contract-task' in notifications.split(',') %} checked {% endif %}>
+                    <label class="" for="user-notification-1"></label>
+                  </p>
+            </div>
+          </li>            
 
         </ul>            
           </div>

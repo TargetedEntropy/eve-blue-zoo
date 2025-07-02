@@ -6,6 +6,8 @@ from apps.authentication.models import (
     SentNotifications,
     Users,
     SkillSet,
+    Contract,
+    ContractItem,
 )
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
@@ -24,7 +26,7 @@ class NotificationTasks:
         self.scheduler.add_job(
             func=self.main,
             trigger="interval",
-            seconds=3600,
+            seconds=320,
             id="notification_main",
             name="notification_main",
             replace_existing=False,
@@ -69,10 +71,6 @@ class NotificationTasks:
 
     def main(self):
         print("Running Notification Main")
-
-        from datetime import datetime
-
-        print(f"now = {datetime.now()}")
 
         characters = self.get_all_users()
 

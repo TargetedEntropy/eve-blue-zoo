@@ -18,8 +18,8 @@ class ContractItemTasks:
         """Setup task execution schedule"""
         self.scheduler.add_job(
             func=self.main,
-            trigger="interval",
-            seconds=300,
+            # trigger="interval",
+            # seconds=310,
             id="contract_item_main",
             name="contract_item_main",
             replace_existing=False,
@@ -34,16 +34,20 @@ class ContractItemTasks:
     def get_contracts_without_items(self) -> list:
         """Get contracts without items, we need to get the items"""
         with self.scheduler.app.app_context():
-            contracts_without_items = (
-                Contract.query.outerjoin(
-                    ContractItem, Contract.id == ContractItem.contract_id
-                )
-                .filter(ContractItem.contract_id.is_(None))
-                .all()
-            )
-        #                .limit(50) \
+            contracts_without_items = Contract.query.filter(
+                Contract.parsed.is_(None)
+            ).all()
+            # .limit(50) \
 
         return contracts_without_items
+
+    def update_contract_parsed(self, contract_id: int, parsed_value: bool) -> None:
+        """Update the 'parsed' column for a specific contract"""
+        with self.scheduler.app.app_context():
+            contract = Contract.query.filter_by(id=contract_id).first()
+            if contract:
+                contract.parsed = parsed_value
+                db.session.commit()
 
     def main(self):
         print(f"Running Contract Items Main: {datetime.now()}")
@@ -51,16 +55,18 @@ class ContractItemTasks:
         characters = self.get_all_users()
 
         for character in characters:
-            print(f"Checking: {character.character_name}", end="")
+            print(f"Checking items for: {character.character_name}", end="")
 
             contracts = self.get_contracts_without_items()
+            print(f"ContractCount: {len(contracts)}")
             for contract in contracts:
-                # Get Data
+                # Skip check
                 if contract.type not in ["item_exchange", "auction"]:
                     continue
                 print(f"Checking: {contract.id}")
-                esi_params = {"contract_id": contract.id}
 
+                # Get Data
+                esi_params = {"contract_id": contract.id}
                 try:
                     esi_data = esi.get_esi(
                         character,
@@ -68,9 +74,11 @@ class ContractItemTasks:
                         **esi_params,
                     )
                 except Exception as error:
+                    self.update_contract_parsed(contract.id, True)
                     continue
 
-                if hasattr(esi_data.data, "error"):
+                if hasattr(esi_data.data, "error") or not esi_data.data:
+                    self.update_contract_parsed(contract.id, True)
                     continue
 
                 # Save Data
@@ -91,5 +99,7 @@ class ContractItemTasks:
                     with self.scheduler.app.app_context():
                         db.session.merge(contract_item_row)
                         db.session.commit()
+
+                    self.update_contract_parsed(contract.id, True)
 
             print("...Done")
