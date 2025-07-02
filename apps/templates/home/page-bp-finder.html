@@ -85,7 +85,6 @@
                                 <th scope="col">Security</th>
                                 <th scope="col">Duration</th>
                                 <th scope="col">Last Updated</th>
-                                <th scope="col">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -115,12 +114,6 @@
                                 </td>
                                 <td>{{ blueprint.duration }} days</td>
                                 <td>{{ blueprint.last_updated.strftime('%Y-%m-%d %H:%M') }}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-primary" 
-                                            onclick="copyToClipboard('{{ blueprint.type_id }}')">
-                                        Copy ID
-                                    </button>
-                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
