@@ -7,13 +7,14 @@ from apps.authentication.models import (
     Users,
     SkillSet, 
     Contract, 
-    ContractItem
+    ContractItem,
+    ContractWatch
 )
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
 
-class NotificationTasks:
-    """Tasks related to Notifications"""
+class ContractWatch:
+    """Tasks related to Watching Contracts"""
 
     def __init__(self, scheduler):
         self.scheduler = scheduler
@@ -69,40 +70,13 @@ class NotificationTasks:
             return True
 
     def main(self):
-        print("Running Notification Main")
+        print("Running Contracts Watch Main")
 
         characters = self.get_all_users()
 
         for character in characters:
             # Make sure there's something here
             if not character.enabled_notifications:
-                continue
-
-            # Have we already sent a notification for this character that needs to be cleared?
-            if not self.should_notifications_be_sent(character.character_id):
-                # reset notification
-                with self.scheduler.app.app_context():
-                    notification_histories = (
-                        SentNotifications.query.filter(
-                            SentNotifications.character_id == character.character_id
-                        )
-                        .filter(SentNotifications.notification_cleared == False)
-                        .all()
-                    )
-
-                    skill_info = SkillSet.query.filter(
-                        SkillSet.character_id == character.character_id
-                    ).one()
-
-                for notification_history in notification_histories:
-                    if notification_history.total_sp == skill_info.total_sp:
-                        continue
-                    if notification_history.total_sp > skill_info.total_sp:
-                        notification_history.notification_cleared = True
-
-                        with self.scheduler.app.app_context():
-                            db.session.merge(notification_history)
-                            db.session.commit()
                 continue
 
             # If we don't have a discord ID, no point in going on
@@ -146,3 +120,28 @@ class NotificationTasks:
                         db.session.add(sent_notification)
                         db.session.commit()
                         
+            if character.id == 1:
+                with self.scheduler.app.app_context():
+                    item_info = ContractItem.query.filter(
+                        ContractItem.type_id == "23913"
+                    ).all()
+                    for item in item_info:
+                        if item.contract_id in [214340697, 214500982, 214515392]: continue
+
+                        # send discord message
+                        self.send_discord_msg(
+                            user.discord_user_id,
+                            "Nyx",
+                            0000,
+                        )
+
+                        # # save total_sp to SentNotifications
+                        # with self.scheduler.app.app_context():
+                        #     sent_notification = SentNotifications(
+                        #         character_id=character.character_id,
+                        #         master_character_id=character.master_character_id,
+                        #         total_sp=character_skill_info.total_sp,
+                        #     )
+
+                        #     db.session.add(sent_notification)
+                        #     db.session.commit()

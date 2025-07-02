@@ -111,7 +111,7 @@ def page_character_post():
     # Detect the current page
     segment = get_segment(request)
     character_id = request.form["character_id"]
-
+    print(f"segment: {segment}")
     ownercheck = (
         db.session.query(Characters)
         .filter(Characters.master_character_id == current_user.character_id)

@@ -16,7 +16,7 @@ from apps.tasks.modules.notifications import NotificationTasks
 from apps.tasks.modules.market_history import MarketHistoryTasks
 from apps.tasks.modules.contracts import ContractTasks
 from apps.tasks.modules.contract_items import ContractItemTasks
-
+from apps.tasks.modules.contract_watch import ContractWatch
 
 class MainTasks:
     """The Main tasks driving class.
@@ -82,3 +82,7 @@ class MainTasks:
     def task_contract_items(self):
         ContractItemTasks(self.scheduler)
         print("Contract Item Tasks Loaded")
+        
+    def task_contract_watch(self):
+        ContractWatch(self.scheduler)
+        print("Contract Watch Tasks Loaded")
