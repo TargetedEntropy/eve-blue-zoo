@@ -36,6 +36,7 @@ class Contract(db.Model):
     type = db.Column(db.Text, nullable=False)
     volume = db.Column(db.Float, nullable=True)
 
+
 class BlueprintLongDurationOrder(db.Model):
     __tablename__ = "blueprint_long_duration_orders"
 
@@ -55,7 +56,9 @@ class BlueprintLongDurationOrder(db.Model):
     system_id = db.Column(db.Integer, nullable=True)
 
     # Price information
-    price = db.Column(db.BigInteger, nullable=False)  # Price in cents (same as MarketOrder)
+    price = db.Column(
+        db.BigInteger, nullable=False
+    )  # Price in cents (same as MarketOrder)
 
     # Order details
     duration = db.Column(db.Integer, nullable=False)  # Store the actual duration
@@ -66,37 +69,6 @@ class BlueprintLongDurationOrder(db.Model):
     last_updated = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
-
-
-class ContractItem(db.Model):
-    __tablename__ = "contract_items"
-    id = db.Column(db.Integer, primary_key=True)
-    contract_id = db.Column(db.BigInteger, nullable=False)
-    record_id = db.Column(db.BigInteger, nullable=False)
-    is_blueprint_copy = db.Column(db.Boolean, nullable=True)
-    is_included = db.Column(db.Boolean, nullable=False)
-    item_id = db.Column(db.BigInteger, nullable=True)
-    material_efficiency = db.Column(db.Integer, nullable=True)
-    quantity = db.Column(db.Integer, nullable=False)
-    runs = db.Column(db.Integer, nullable=True)
-    time_efficiency = db.Column(db.Integer, nullable=True)
-    type_id = db.Column(db.Integer, nullable=False)
-
-
-class ContractTrack(db.Model):
-    __tablename__ = "contract_watch"
-    id = db.Column(db.Integer, primary_key=True)
-    character_id = db.Column(db.Integer, nullable=False)
-    type_id = db.Column(db.BigInteger, nullable=True)
-    located = db.Column(db.Boolean, default=False)
-    notified = db.Column(db.Boolean, default=False)
-
-
-class ContractNotify(db.Model):
-    __tablename__ = "contract_notify"
-    id = db.Column(db.Integer, primary_key=True)
-    character_id = db.Column(db.Integer, nullable=False)
-    contract_id = db.Column(db.BigInteger, nullable=True)
 
 
 class Features(db.Model):
@@ -277,40 +249,39 @@ class Characters(db.Model):
 
 
 class StaStation(db.Model):
-    __tablename__ = 'staStations'
-    
+    __tablename__ = "staStations"
+
     # Primary key
     stationID = db.Column(db.BigInteger, primary_key=True, nullable=False)
-    
+
     # Security and operational data
     security = db.Column(db.Float, nullable=True)
     dockingCostPerVolume = db.Column(db.Float, nullable=True)
     maxShipVolumeDockable = db.Column(db.Float, nullable=True)
     officeRentalCost = db.Column(db.Integer, nullable=True)
     operationID = db.Column(db.Integer, nullable=True)
-    
+
     # Station classification
     stationTypeID = db.Column(db.Integer, nullable=True)
     corporationID = db.Column(db.Integer, nullable=True)
-    
+
     # Location hierarchy
     solarSystemID = db.Column(db.Integer, nullable=True)
     constellationID = db.Column(db.Integer, nullable=True)
     regionID = db.Column(db.Integer, nullable=True)
-    
+
     # Station information
     stationName = db.Column(db.String(100), nullable=True)
-    
+
     # Coordinate information
     x = db.Column(db.Float, nullable=True)
     y = db.Column(db.Float, nullable=True)
     z = db.Column(db.Float, nullable=True)
-    
+
     # Reprocessing information
     reprocessingEfficiency = db.Column(db.Float, nullable=True)
     reprocessingStationsTake = db.Column(db.Float, nullable=True)
     reprocessingHangarFlag = db.Column(db.Integer, nullable=True)
-    
 
 
 class Users(db.Model, UserMixin):
