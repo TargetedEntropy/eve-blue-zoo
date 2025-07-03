@@ -1,13 +1,7 @@
 """Common Eve Models"""
 
-
-# from sqlalchemy.ext.declarative import declared_attr
-
-# from apps import db, login_manager
-
-# from apps.authentication.util import hash_pass
-
 from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Column,
     Integer,
@@ -20,7 +14,7 @@ from sqlalchemy import (
     DECIMAL,
     JSON,
 )
-from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 
