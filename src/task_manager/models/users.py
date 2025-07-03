@@ -18,8 +18,9 @@ from sqlalchemy import (
     DateTime,
 )
 
-from flask_app.apps import db
 from sqlalchemy.ext.declarative import declarative_base
+from db import get_db
+db = get_db()
 
 class MiningLedger(db.Model):
     __tablename__ = "MiningLedger"

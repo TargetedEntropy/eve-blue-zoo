@@ -1,0 +1,13 @@
+
+# Core dependencies
+sqlalchemy>=1.4.0
+python-dotenv>=0.19.0
+apscheduler>=3.9.0
+
+# Database drivers (choose based on your database)
+
+# MySQL
+mysqlclient>=2.1.0
+
+# For better logging
+colorlog>=6.0.0
