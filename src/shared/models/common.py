@@ -152,4 +152,6 @@ class Features(Base):
     # Store feature names and their enabled status as a JSON object
     features = Column(JSON, default={})
 
-    character = relationship("Characters", backref=backref("features", uselist=False))
+    character = relationship(
+        "Characters", backref=backref(
+            "features", uselist=False))

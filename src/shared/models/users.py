@@ -1,5 +1,4 @@
-""" User Related Classes, data for users """
-
+"""User Related Classes, data for users"""
 
 import os
 import hashlib
@@ -7,13 +6,24 @@ import binascii
 import time
 from datetime import datetime
 from flask_login import UserMixin
-from sqlalchemy import BigInteger, Column, Integer, Date, Boolean, Text, String, DateTime
-#from sqlalchemy.orm import relationship
-#from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    Integer,
+    Date,
+    Boolean,
+    Text,
+    String,
+    DateTime,
+)
+
+# from sqlalchemy.orm import relationship
+# from sqlalchemy.ext.declarative import declared_attr
 
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
 
 class MiningLedger(Base):
     __tablename__ = "MiningLedger"
@@ -123,6 +133,7 @@ class Users(Base, UserMixin):
         if "refresh_token" in token_response:
             self.refresh_token = token_response["refresh_token"]
 
+
 class SkillSet(Base):
     __tablename__ = "skillsets"
 
@@ -136,7 +147,7 @@ def hash_pass(password):
     """Hash a password for storing."""
 
     salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
-    pwdhash = hashlib.pbkdf2_hmac("sha512", password.encode("utf-8"), salt, 100000)
+    pwdhash = hashlib.pbkdf2_hmac(
+        "sha512", password.encode("utf-8"), salt, 100000)
     pwdhash = binascii.hexlify(pwdhash)
     return salt + pwdhash  # return bytes
-

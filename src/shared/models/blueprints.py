@@ -21,8 +21,10 @@ class BlueprintLongDurationOrder(Base):
     is_buy_order = Column(Boolean, nullable=False)
     first_detected = Column(DateTime, default=datetime.utcnow, nullable=False)
     last_updated = Column(
-        DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-    )
+        DateTime,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+        nullable=False)
 
 
 class Blueprints(Base):
