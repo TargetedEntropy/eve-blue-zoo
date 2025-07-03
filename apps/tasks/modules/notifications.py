@@ -30,6 +30,7 @@ class NotificationTasks:
             id="notification_main",
             name="notification_main",
             replace_existing=False,
+            max_instances=1
         )
 
     def get_all_users(self) -> list:

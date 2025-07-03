@@ -22,6 +22,7 @@ class BlueprintTasks:
             id="blueprint_main",
             name="blueprint_main",
             replace_existing=False,
+            max_instances=1
         )
 
     def get_all_users(self) -> list:

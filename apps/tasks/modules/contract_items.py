@@ -23,6 +23,7 @@ class ContractItemTasks:
             id="contract_item_main",
             name="contract_item_main",
             replace_existing=False,
+            max_instances=1
         )
 
     def get_all_users(self) -> list:

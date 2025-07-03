@@ -21,6 +21,7 @@ class MiningLedgerTasks:
             id="mining_ledger_main",
             name="mining_ledger_main",
             replace_existing=False,
+            max_instances=1
         )
 
     def get_all_users(self) -> list:

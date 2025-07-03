@@ -33,6 +33,7 @@ class ContractWatch:
             id="contract_watch_main",
             name="contract_watch_main",
             replace_existing=False,
+            max_instances=1
         )
 
     def get_all_users(self) -> list:
@@ -77,7 +78,7 @@ class ContractWatch:
                 .join(ContractTrack, ContractItem.type_id == ContractTrack.type_id)
                 .all()
             )
-            print(f"mitems: {matching_items}")
+            print(f"matching_items: {matching_items}")
             # Unpack the tuple into separate variables
             new_matches = []
             for item, watch_id in matching_items:
