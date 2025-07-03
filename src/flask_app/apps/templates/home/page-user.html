@@ -1,0 +1,62 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Page User {% endblock %} 
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="title">Profile</h5>
+      </div>
+      <div class="card-body">
+        <form>
+          <div class="row">
+            <div class="col-md-3 px-md-1">
+              <div class="form-group">
+                <img src="https://images.evetech.net/characters/{{ current_user.character_id }}/portrait?tenant=tranquility&size=256"><br>
+                <strong>{{ current_user.character_name }}</strong>
+              </div>
+              <div class="text-left">
+                {% if discord_id is not none %}
+                  <h5 class="card-title">Discord Linked</h5>
+                {% else %}
+                  <h3 class="card-title">Discord Not Linked</h3>
+                  <h4 class="card-title"><a href="/discord/login">Link!</a></h4>
+                {% endif %}
+              </div>              
+            </div>
+            <div class="col-md-5 pr-md-1">
+              <div class="form-group">
+                <label>Characters:</label>
+                <ul>
+                  {% for character in characters %}
+                  <li>
+                    <a href="{{ url_for('home_blueprint.page_character_get') }}?character_id={{ character.character_id }}">
+                      {{ character.character_name }}
+                    </a>
+                    {% if character.sso_is_valid != True %}
+                      - Expired
+                    {% endif %}
+                  </li>
+                {% endfor %}
+                    <li><a href=/sso/login>Add Character</a>
+                </ul>
+
+
+              </div>
+            </div>
+            
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

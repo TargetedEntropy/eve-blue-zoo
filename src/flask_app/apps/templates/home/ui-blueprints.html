@@ -1,0 +1,72 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} User Blueprints {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+<div class="pagination">
+  {% if page > 1 %}
+  <a href="{{ url_for('home_blueprint.page_blueprints', page=page - 1) }}">&laquo; Previous</a>
+  {% endif %}
+  <span>Page {{ page }} of {{ total_pages }}</span>
+  {% if page < total_pages %} <a href="{{ url_for('home_blueprint.page_blueprints', page=page + 1) }}">Next &raquo;</a>
+    {% endif %}
+</div>
+
+<div class="row" style="background-color: black;">
+  <div class="col-md-12">
+    <div class="card card-plain">
+
+      <div class="card-body">
+        <table id="ledger" class="display" style="width:auto" align="left">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Blueprint</th>
+              <th>Character</th>
+              <th>Location</th>
+              <th>ME</th>
+              <th>TE</th>
+              <th>Runs</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              <td><img src="https://images.evetech.net/types/{{ row.type_id }}/bp"></td>
+              <td>{{ row.itemName }}</td>
+              <td>{{ row.characterName }}</td>
+              <td>{{ row.location_flag }}</td>
+              <td>{{ row.material_efficiency }}</td>
+              <td>{{ row.time_efficiency }}</td>
+              <td>{{ "BPO" if row.runs == -1 else row.runs }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+<script type="text/javascript">
+  $(document).ready(function () {
+    $('#ledger').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      pageLength: 100,
+      lengthChange: false
+    });
+  });
+</script>
+{% endblock javascripts %}
