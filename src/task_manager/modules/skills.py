@@ -1,7 +1,7 @@
 """Skill Tasks"""
 
 from datetime import datetime
-from apps.authentication.models import Characters, SkillSet
+from models.users import Characters, SkillSet
 from apps import esi, db
 from ..common import invalidate_sso
 

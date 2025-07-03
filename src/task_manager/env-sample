@@ -1,0 +1,24 @@
+# Database Configuration
+# Option 1: Use a complete DSN (Database Connection String)
+DATABASE_URL=postgresql://username:password@localhost:5432/tasks_db
+# DATABASE_URL=mysql+pymysql://username:password@localhost:3306/tasks_db
+# DATABASE_URL=sqlite:///tasks_db.db
+
+# Option 2: Use individual database components (fallback if DATABASE_URL not set)
+DB_TYPE=postgresql
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=tasks_db
+
+# Database Options
+DB_ECHO=false  # Set to true to enable SQL query logging
+
+# Application Settings
+LOG_LEVEL=INFO
+SCHEDULER_TIMEZONE=UTC
+
+# Task-specific settings (if needed)
+TASK_TIMEOUT=300
+MAX_RETRIES=3
