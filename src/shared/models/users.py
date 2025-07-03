@@ -6,6 +6,7 @@ import binascii
 import time
 from datetime import datetime
 from flask_login import UserMixin
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import (
     BigInteger,
     Column,
@@ -17,15 +18,10 @@ from sqlalchemy import (
     DateTime,
 )
 
-# from sqlalchemy.orm import relationship
-# from sqlalchemy.ext.declarative import declared_attr
-
+from flask_app.apps import db
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
-
-
-class MiningLedger(Base):
+class MiningLedger(db.Model):
     __tablename__ = "MiningLedger"
     id = Column(BigInteger, primary_key=True)
     character_id = Column(BigInteger)
@@ -35,7 +31,7 @@ class MiningLedger(Base):
     type_id = Column(BigInteger)
 
 
-class Characters(Base):
+class Characters(db.Model):
     __tablename__ = "Characters"
     character_id = Column(BigInteger, primary_key=True)
     master_character_id = Column(BigInteger)
@@ -77,7 +73,7 @@ class Characters(Base):
             self.refresh_token = token_response["refresh_token"]
 
 
-class Users(Base, UserMixin):
+class Users(db.Model, UserMixin):
     __tablename__ = "Users"
 
     # our ID is the character ID from EVE API
@@ -134,7 +130,7 @@ class Users(Base, UserMixin):
             self.refresh_token = token_response["refresh_token"]
 
 
-class SkillSet(Base):
+class SkillSet(db.Model):
     __tablename__ = "skillsets"
 
     id = Column(Integer, primary_key=True)
