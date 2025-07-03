@@ -3,6 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+
 from apps import login_manager
 from shared.models.users import Users
 

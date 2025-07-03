@@ -1,7 +1,8 @@
 """Blueprint Tasks"""
 
 from datetime import datetime
-from apps.authentication.models import Characters, Blueprints
+from shared.models.users import Characters
+from shared.models.blueprints import Blueprints
 from apps import esi, db
 from ..common import invalidate_sso
 

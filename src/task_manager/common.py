@@ -1,6 +1,6 @@
 from sqlalchemy.orm.exc import NoResultFound
-from apps.authentication.models import Features
-from apps.authentication.models import Characters
+from shared.models.common import Features
+from shared.models.users import Characters
 from apps import db
 
 

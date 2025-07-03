@@ -15,7 +15,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from apps import db, login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
-from apps.authentication.models import Users, Characters
+from shared.models.users import Users, Characters
 from sqlalchemy.orm.exc import NoResultFound
 from cryptography.fernet import Fernet
 from esipy.exceptions import APIException

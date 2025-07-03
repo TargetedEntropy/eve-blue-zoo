@@ -11,19 +11,11 @@ from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, desc
 from apps import esi, db
 from apps.home import blueprint
-from apps.authentication.models import (
-    Users,
-    Characters,
-    Blueprints,
-    InvType,
-    SkillSet,
-    MiningLedger,
-    MapSolarSystems,
-    CharacterNotifications,
-    BlueprintLongDurationOrder,
-    StaStation,
-    ContractTrack,
-)
+from shared.models.users import Users, Characters, SkillSet, MiningLedger
+from shared.models.blueprints import Blueprints, BlueprintLongDurationOrder
+from shared.models.common import InvType, MapSolarSystems, StaStation
+from shared.models.contracts import ContractTrack
+from shared.models.notifications import CharacterNotifications
 
 from dotenv import dotenv_values
 
