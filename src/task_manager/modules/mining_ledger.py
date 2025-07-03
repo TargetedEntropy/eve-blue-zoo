@@ -1,7 +1,7 @@
 """Mining Ledger Tasks"""
 
 from datetime import datetime
-from shared.models.users import Characters, MiningLedger
+from models.users import Characters, MiningLedger
 from apps import esi, db
 
 

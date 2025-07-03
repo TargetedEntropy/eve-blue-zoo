@@ -1,8 +1,8 @@
 """Contract Tasks"""
 from datetime import datetime
-from shared.models.users import Characters
-from shared.models.common import MapRegion
-from shared.models.contracts import Contract
+from models.users import Characters
+from models.common import MapRegion
+from models.contracts import Contract
 from apps import esi, db
 
 class ContractTasks:

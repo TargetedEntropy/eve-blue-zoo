@@ -1,9 +1,9 @@
 """Market History Tasks"""
 
 from datetime import timedelta
-from shared.models.users import MiningLedger
-from shared.models.common import MapRegion
-from shared.models.market import MarketHistory
+from models.users import MiningLedger
+from models.common import MapRegion
+from models.market import MarketHistory
 
 from apps import esi, db
 

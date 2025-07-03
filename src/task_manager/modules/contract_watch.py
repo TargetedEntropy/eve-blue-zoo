@@ -1,9 +1,9 @@
 """Notification Tasks"""
 
-from shared.models.common import InvType
-from shared.models.contracts import Contract, ContractItem, ContractTrack, ContractNotify
-from shared.models.notifications import CharacterNotifications, SentNotifications
-from shared.models.users import Characters, SkillSet, Users
+from models.common import InvType
+from models.contracts import Contract, ContractItem, ContractTrack, ContractNotify
+from models.notifications import CharacterNotifications, SentNotifications
+from models.users import Characters, SkillSet, Users
 from apps import esi, db, discord_client
 from ..common import is_feature_enabled
 
