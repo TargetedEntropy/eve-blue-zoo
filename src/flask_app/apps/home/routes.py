@@ -9,13 +9,14 @@ from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
 from sqlalchemy.orm import aliased
 from sqlalchemy import distinct, desc
-from apps import esi, db
+from apps import esi
 from apps.home import blueprint
-from apps.authentication.models import Users, Characters, SkillSet, MiningLedger
-from apps.authentication.models import Blueprints, BlueprintLongDurationOrder
-from apps.authentication.models import InvType, MapSolarSystems, StaStation
-from apps.authentication.models import ContractTrack
-from apps.authentication.models import CharacterNotifications
+from models.users import Users
+from models.characters import Characters, SkillSet, MiningLedger
+from models.blueprints import Blueprints, BlueprintLongDurationOrder
+from models.common import InvType, MapSolarSystems, StaStation
+from models.contracts import ContractTrack
+from models.notifications import CharacterNotifications
 
 from dotenv import dotenv_values
 

@@ -12,19 +12,22 @@ import esipy
 from apps.authentication.util import verify_pass
 from flask import render_template, redirect, request, url_for, session
 from flask_login import current_user, login_user, logout_user, login_required
-from apps import db, login_manager, esi
+from apps import login_manager, esi
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
-from apps.authentication.models import Users, Characters
 from sqlalchemy.orm.exc import NoResultFound
 from cryptography.fernet import Fernet
 from esipy.exceptions import APIException
-
 from apps import discord_client
 from flask_discord import requires_authorization
 
+from models.users import Users
+from models.characters import Characters
+from models.database import get_db
+
 fen_key = Fernet.generate_key()
 cipher_suite = Fernet(fen_key)
+
 
 
 @blueprint.route("/")
@@ -137,6 +140,7 @@ def callback():
         character.sso_is_valid = True
         character.update_token(auth_response)
 
+        db = get_db()
         # now the character is ready, so update/create it and log the character
         try:
             db.session.merge(character)

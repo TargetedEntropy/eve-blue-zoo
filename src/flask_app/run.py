@@ -8,7 +8,10 @@ from flask_migrate import Migrate
 from decouple import config
 
 from apps.config import config_dict
-from apps import create_app, db
+from apps import create_app
+from models.database import get_db
+
+
 
 
 # WARNING: Don't run with debug turned on in production!
@@ -27,6 +30,7 @@ except KeyError:
 app_config.PREFERRED_URL_SCHEME = "https"
 
 app = create_app(app_config)
+db = get_db()
 Migrate(app, db)
 
 
