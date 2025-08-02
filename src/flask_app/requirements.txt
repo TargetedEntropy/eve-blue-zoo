@@ -14,7 +14,6 @@ Werkzeug
 apscheduler
 cryptography
 python-dotenv
-esipy
 Flask-Discord
 tqdm
 flask_apscheduler

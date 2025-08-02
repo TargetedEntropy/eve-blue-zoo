@@ -3,8 +3,10 @@
 from models.common import InvType
 from models.contracts import Contract, ContractItem, ContractTrack, ContractNotify
 from models.notifications import CharacterNotifications, SentNotifications
-from models.users import Characters, SkillSet, Users
-from apps import esi, db, discord_client
+from models.characters import Characters, SkillSet
+from models.users import Users
+from models.database import SessionLocal
+from apps import esi, discord_client
 from ..common import is_feature_enabled
 
 

@@ -1,8 +1,9 @@
 """Skill Tasks"""
 
 from datetime import datetime
-from models.users import Characters, SkillSet
-from apps import esi, db
+from models.characters import Characters, SkillSet
+from models.database import SessionLocal
+from apps import esi
 from ..common import invalidate_sso
 
 
@@ -26,8 +27,8 @@ class SkillTasks:
 
     def get_all_users(self) -> list:
         """Gets all characters"""
-        with self.scheduler.app.app_context():
-            character_list = Characters.query.filter_by(sso_is_valid=True).all()
+        with SessionLocal() as session:
+            character_list = session.query(Characters).filter_by(sso_is_valid=True).all()
 
         return character_list
 
@@ -50,9 +51,9 @@ class SkillTasks:
                 invalidate_sso(self.scheduler.app, character_id=character.character_id)
             ld = skill_data.data
 
-            with self.scheduler.app.app_context():
+            with SessionLocal() as session:
                 skillset = (
-                    db.session.query(SkillSet)
+                    session.query(SkillSet)
                     .filter_by(character_id=character.character_id)
                     .first()
                 )
@@ -63,10 +64,10 @@ class SkillTasks:
                 skillset.unallocated_sp = ld["unallocated_sp"]
 
                 # Commit the changes
-                with self.scheduler.app.app_context():
+                with SessionLocal() as session:
                     try:
-                        db.session.merge(skillset)
-                        db.session.commit()
+                        session.merge(skillset)
+                        session.commit()
                     except Exception as error:
                         print(f"Failed to commit row: {skillset}, error: {error}")
 
@@ -77,10 +78,10 @@ class SkillTasks:
                     unallocated_sp=ld["unallocated_sp"],
                 )
 
-                with self.scheduler.app.app_context():
+                with SessionLocal() as session:
                     try:
-                        db.session.merge(skill_row)
-                        db.session.commit()
+                        session.merge(skill_row)
+                        session.commit()
                     except Exception as error:
                         print(f"Failed to commit row: {skill_row}, error: {error}")
 

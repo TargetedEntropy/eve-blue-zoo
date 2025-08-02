@@ -14,11 +14,13 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 
-# Import database configuration
+# Import shared database configuration
 try:
-    from .db import init_db, get_db
+    from models.database import SessionLocal, engine, Base
 except ImportError:
-    from db import init_db, get_db
+    import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    from models.database import SessionLocal, engine, Base
 
 # Import task modules
 try:

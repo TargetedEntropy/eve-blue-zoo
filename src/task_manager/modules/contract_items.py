@@ -1,9 +1,10 @@
 """Contract Tasks"""
 
 from datetime import datetime
-from models.users import Characters
+from models.characters import Characters
 from models.contracts import Contract, ContractItem
-from apps import esi, db
+from models.database import SessionLocal
+from apps import esi
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 

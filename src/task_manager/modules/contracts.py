@@ -1,9 +1,10 @@
 """Contract Tasks"""
 from datetime import datetime
-from models.users import Characters
+from models.characters import Characters
 from models.common import MapRegion
 from models.contracts import Contract
-from apps import esi, db
+from models.database import SessionLocal
+from apps import esi
 
 class ContractTasks:
     """Tasks related to Contracts"""
@@ -26,14 +27,14 @@ class ContractTasks:
     
     def get_all_users(self) -> list:
         """Gets all characters"""
-        with self.scheduler.app.app_context():
-            character_list = Characters.query.filter_by(sso_is_valid=True).all()
+        with SessionLocal() as session:
+            character_list = session.query(Characters).filter_by(sso_is_valid=True).all()
         return character_list
     
     def get_all_regions(self) -> list:
         """Gets all regions from the database"""
-        with self.scheduler.app.app_context():
-            regions = MapRegion.query.all()
+        with SessionLocal() as session:
+            regions = session.query(MapRegion).all()
         return regions
 
     def main(self):
@@ -66,33 +67,30 @@ class ContractTasks:
                 if contract_data and hasattr(contract_data, 'data') and contract_data.data:
                     contracts_saved = 0
                     
-                    # Save Data
-                    for ld in contract_data.data:
-                        contract_row = Contract(
-                            id=ld["contract_id"],
-                            buyout=ld.get("buyout", None),
-                            collateral=ld.get("collateral", None),
-                            date_expired=ld["date_expired"],
-                            date_issued=ld["date_issued"],
-                            days_to_complete=ld.get("days_to_complete", None),
-                            end_location_id=ld.get("end_location_id", None),
-                            for_corporation=ld.get("for_corporation", False),
-                            issuer_corporation_id=ld.get("issuer_corporation_id", None),
-                            issuer_id=ld.get("issuer_id", None),
-                            price=ld.get("price", None),
-                            reward=ld.get("reward", None),
-                            start_location_id=ld.get("start_location_id", None),
-                            title=ld.get("title", None),
-                            type=ld.get("type", None),
-                            volume=ld.get("volume", None),
-                        )
-                        with self.scheduler.app.app_context():
-                            db.session.merge(contract_row)
+                    # Save all contracts for this region in a single session
+                    with SessionLocal() as session:
+                        for ld in contract_data.data:
+                            contract_row = Contract(
+                                id=ld["contract_id"],
+                                buyout=ld.get("buyout", None),
+                                collateral=ld.get("collateral", None),
+                                date_expired=ld["date_expired"],
+                                date_issued=ld["date_issued"],
+                                days_to_complete=ld.get("days_to_complete", None),
+                                end_location_id=ld.get("end_location_id", None),
+                                for_corporation=ld.get("for_corporation", False),
+                                issuer_corporation_id=ld.get("issuer_corporation_id", None),
+                                issuer_id=ld.get("issuer_id", None),
+                                price=ld.get("price", None),
+                                reward=ld.get("reward", None),
+                                start_location_id=ld.get("start_location_id", None),
+                                title=ld.get("title", None),
+                                type=ld.get("type", None),
+                                volume=ld.get("volume", None),
+                            )
+                            session.merge(contract_row)
                             contracts_saved += 1
-                    
-                    # Commit after processing all contracts for this region
-                    with self.scheduler.app.app_context():
-                        db.session.commit()
+                        session.commit()
                     
                     print(f"  Saved {contracts_saved} contracts")
                 else:

@@ -1,11 +1,11 @@
 """Market History Tasks"""
 
 from datetime import timedelta
-from models.users import MiningLedger
+from models.characters import MiningLedger
 from models.common import MapRegion
 from models.market import MarketHistory
-
-from apps import esi, db
+from models.database import SessionLocal
+from apps import esi
 
 
 class MarketHistoryTasks:

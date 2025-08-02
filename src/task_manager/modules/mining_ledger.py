@@ -1,8 +1,9 @@
 """Mining Ledger Tasks"""
 
 from datetime import datetime
-from models.users import Characters, MiningLedger
-from apps import esi, db
+from models.characters import Characters, MiningLedger
+from models.database import SessionLocal
+from .esi import EsiApp
 
 
 class MiningLedgerTasks:
@@ -26,8 +27,8 @@ class MiningLedgerTasks:
 
     def get_all_users(self) -> list:
         """Gets all characters"""
-        with self.scheduler.app.app_context():
-            character_list = Characters.query.filter_by(sso_is_valid=True).all()
+        with SessionLocal() as session:
+            character_list = session.query(Characters).filter_by(sso_is_valid=True).all()
         return character_list
 
     def main(self):
@@ -54,8 +55,8 @@ class MiningLedgerTasks:
                     type_id=ld["type_id"],
                 )
 
-                with self.scheduler.app.app_context():
-                    db.session.merge(mining_row)
-                    db.session.commit()
+                with SessionLocal() as session:
+                    session.merge(mining_row)
+                    session.commit()
 
             print("...Done")

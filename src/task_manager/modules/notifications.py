@@ -1,9 +1,11 @@
 """Notification Tasks"""
 
-from models.users import Characters, Users, SkillSet
+from models.characters import Characters, SkillSet
+from models.users import Users
 from models.contracts import Contract, ContractItem
 from models.notifications import CharacterNotifications, SentNotifications
-from apps import esi, db, discord_client
+from models.database import SessionLocal
+from apps import esi, discord_client
 from ..common import is_feature_enabled
 
 
