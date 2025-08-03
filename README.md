@@ -4,6 +4,8 @@ This is portal for Eve Online players with features focused for users with multi
 
 It uses the Eve Online SSO & ESI, Flask and the [Flask Dashboard Black](https://appseed.us/product/black-dashboard/flask/) template.
 
+This also heavily is dependent on [Preston](https://github.com/Celeo/Preston).
+
 <br />
 
 > Features
@@ -75,6 +77,6 @@ $ # Access the dashboard in browser: http://127.0.0.1:5000/
 
 - 👉 [Eve Online Swagger](https://esi.evetech.net/)
 - 👉 [Eve Online Developer Application](https://developers.eveonline.com/applications)
-- 👉 [EsiPy](https://github.com/Kyria/EsiPy)
+- 👉 [Preston](https://github.com/Celeo/Preston)
 - 👉 [Flask Dashboard Black](https://appseed.us/product/black-dashboard/flask/)
 

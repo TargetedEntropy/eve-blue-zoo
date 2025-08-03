@@ -1,0 +1,22 @@
+
+# Core dependencies
+sqlalchemy>=1.4.0
+python-dotenv>=0.19.0
+apscheduler>=3.9.0
+
+# Database drivers (choose based on your database)
+
+# MySQL
+mysqlclient>=2.1.0
+
+# For better logging
+colorlog>=6.0.0
+
+# Preston ESI Migration
+preston>=3.0.0
+pyjwt>=2.0.0
+requests>=2.28.0
+urllib3>=1.26.0
+diskcache>=5.4.0
+ratelimit>=2.2.0
+cryptography>=3.4.0

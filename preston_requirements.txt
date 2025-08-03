@@ -1,0 +1,41 @@
+# Preston ESI Migration Dependencies
+# These dependencies have been added to each component's requirements.txt:
+# - src/flask_app/requirements.txt
+# - src/task_manager/requirements.txt  
+# - src/market_dumper/requirements.txt
+
+# Core Preston Dependencies (added to all components):
+preston>=3.0.0                # Main Preston ESI library
+pyjwt>=2.0.0                 # JWT token handling for EVE SSO
+requests>=2.28.0             # HTTP requests (may upgrade existing)
+urllib3>=1.26.0              # HTTP client library
+diskcache>=5.4.0             # Local caching for ESI responses
+ratelimit>=2.2.0             # API rate limiting
+cryptography>=3.4.0         # Cryptographic operations for JWT
+
+# Installation Instructions:
+# To install Preston dependencies for each component:
+
+# Flask App:
+# cd src/flask_app && pip install -r requirements.txt
+
+# Task Manager:
+# cd src/task_manager && pip install -r requirements.txt
+
+# Market Dumper:
+# cd src/market_dumper && pip install -r requirements.txt
+
+# Optional dependencies (not included by default):
+# httpx>=0.24.0              # Async HTTP support
+# redis>=4.0.0               # Distributed caching
+# prometheus-client>=0.15.0  # Metrics collection
+# structlog>=22.0.0          # Structured logging
+
+# Development/Testing (not included by default):
+# pytest>=7.0.0
+# pytest-asyncio>=0.20.0
+# pytest-mock>=3.8.0
+# responses>=0.22.0
+
+# Note: Some dependencies like python-dotenv and cryptography
+# were already present in Flask app requirements.txt

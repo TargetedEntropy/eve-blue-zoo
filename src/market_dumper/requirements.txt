@@ -1,0 +1,11 @@
+requests>=2.31.0
+sqlalchemy>=2.0.0
+python-dotenv>=1.0.0
+
+# Preston ESI Migration
+preston>=3.0.0
+pyjwt>=2.0.0
+urllib3>=1.26.0
+diskcache>=5.4.0
+ratelimit>=2.2.0
+cryptography>=3.4.0
