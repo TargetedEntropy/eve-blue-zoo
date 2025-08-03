@@ -43,6 +43,14 @@ def _init_extensions(app):
     login_manager.login_view = 'authentication_blueprint.login'  # Configure login endpoint
     login_manager.login_message = 'Please log in to access this page.'
     
+    # Register user loader function
+    @login_manager.user_loader
+    def load_user(character_id):
+        from models.users import Users
+        from models.database import SessionLocal
+        with SessionLocal() as session:
+            return session.query(Users).filter_by(character_id=int(character_id)).first()
+    
     # ESI Authentication
     esi.init_app(app)
     

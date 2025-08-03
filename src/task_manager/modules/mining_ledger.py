@@ -3,7 +3,7 @@
 from datetime import datetime
 from models.characters import Characters, MiningLedger
 from models.database import SessionLocal
-from .esi import EsiApp
+from ..esi_client import esi
 
 
 class MiningLedgerTasks:

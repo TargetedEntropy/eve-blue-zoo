@@ -4,7 +4,7 @@ from datetime import datetime
 from models.characters import Characters
 from models.contracts import Contract, ContractItem
 from models.database import SessionLocal
-from apps import esi
+from ..esi_client import esi
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql import func
 

@@ -4,7 +4,7 @@ from models.characters import Characters
 from models.common import MapRegion
 from models.contracts import Contract
 from models.database import SessionLocal
-from apps import esi
+from ..esi_client import esi
 
 class ContractTasks:
     """Tasks related to Contracts"""

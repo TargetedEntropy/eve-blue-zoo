@@ -1,4 +1,9 @@
 """Notification Tasks"""
+import sys
+import os
+
+# Add path to access Flask app
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../flask_app'))
 
 from models.common import InvType
 from models.contracts import Contract, ContractItem, ContractTrack, ContractNotify
@@ -6,7 +11,7 @@ from models.notifications import CharacterNotifications, SentNotifications
 from models.characters import Characters, SkillSet
 from models.users import Users
 from models.database import SessionLocal
-from apps import esi, discord_client
+from apps import discord_client
 from ..common import is_feature_enabled
 
 

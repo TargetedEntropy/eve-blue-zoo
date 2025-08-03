@@ -4,7 +4,7 @@ from datetime import datetime
 from models.characters import Characters
 from models.blueprints import Blueprints
 from models.database import SessionLocal
-from apps import esi
+from ..esi_client import esi
 from ..common import invalidate_sso
 
 

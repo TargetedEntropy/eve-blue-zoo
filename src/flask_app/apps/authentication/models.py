@@ -11,10 +11,6 @@ Copyright (c) 2019 - present AppSeed.us
 # from sqlalchemy.orm import relationship, declarative_base
 # from sqlalchemy.ext.declarative import declared_attr
 
-from apps import login_manager
-
-from models.users import Uesrs
-
 # from apps.authentication.util import hash_pass
 
 
@@ -422,13 +418,4 @@ from models.users import Uesrs
 #     radius = db.Column(db.Float, nullable=True)
 
 
-@login_manager.user_loader
-def user_loader(character_id):
-    return Users.query.filter_by(character_id=character_id).first()
-
-
-@login_manager.request_loader
-def request_loader(request):
-    character_name = request.form.get("character_name")
-    user = Users.query.filter_by(character_name=character_name).first()
-    return user if user else None
+# User loader functions are now defined in apps/__init__.py

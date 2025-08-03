@@ -5,7 +5,7 @@ from models.characters import MiningLedger
 from models.common import MapRegion
 from models.market import MarketHistory
 from models.database import SessionLocal
-from apps import esi
+from ..esi_client import esi
 
 
 class MarketHistoryTasks:
@@ -68,7 +68,7 @@ class MarketHistoryTasks:
 
             # Get Data
             esi_params = {"region_id": 10000002, "type_id": item_id}
-
+            
             market_history_data_query = esi.get_esi(
                 character=None, schema="get_markets_region_id_history", **esi_params
             )

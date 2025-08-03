@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask import render_template, request, redirect, url_for, jsonify, flash
+from flask import render_template, request, redirect, url_for, jsonify, flash, g
 from flask_login import login_required, current_user
 from jinja2 import TemplateNotFound
 from sqlalchemy.orm.exc import NoResultFound
@@ -27,11 +27,11 @@ config = dotenv_values(".env")
 @login_required
 def index():
     # Get Master Wallet
-    wallet = esi.get_wallet(current_user)
-
+    #wallet = esi.get_wallet(current_user)
+    wallet = None
     # Get Characters
     characters = (
-        db.session.query(
+        g.db.query(
             Characters.character_name,
             Characters.character_id,
             SkillSet.total_sp,
@@ -74,7 +74,7 @@ def page_user():
     segment = get_segment(request)
 
     try:
-        characters = Characters.query.filter(
+        characters = g.db.query(Characters).filter(
             Characters.master_character_id == current_user.character_id
         )
     except NoResultFound:
@@ -83,7 +83,7 @@ def page_user():
     discord_id = None
 
     try:
-        user = Users.query.filter(
+        user = g.db.query(Users).filter(
             Users.character_id == current_user.character_id
         ).first()
         discord_id = user.discord_user_id
@@ -114,7 +114,7 @@ def display_contract_selection():
 
         if action == "add":
             # Add tracking logic
-            existing_track = ContractTrack.query.filter_by(
+            existing_track = g.db.query(ContractTrack).filter_by(
                 character_id=current_user.character_id, type_id=type_id
             ).first()
 
@@ -124,19 +124,19 @@ def display_contract_selection():
                 new_tracking = ContractTrack(
                     character_id=current_user.character_id, type_id=type_id
                 )
-                db.session.add(new_tracking)
-                db.session.commit()
+                g.db.add(new_tracking)
+                g.db.commit()
                 flash("Item successfully added to tracking.", "success")
 
         elif action == "remove":
             # Remove tracking logic
-            tracked_item = ContractTrack.query.filter_by(
+            tracked_item = g.db.query(ContractTrack).filter_by(
                 character_id=current_user.character_id, type_id=type_id
             ).first()
 
             if tracked_item:
-                db.session.delete(tracked_item)
-                db.session.commit()
+                g.db.delete(tracked_item)
+                g.db.commit()
                 flash("Item removed from tracking.", "success")
             else:
                 flash("Item not found in tracking.", "warning")
@@ -145,7 +145,7 @@ def display_contract_selection():
 
     # Fetch user's tracked items
     tracked_items = (
-        db.session.query(ContractTrack.type_id, InvType.typeName)
+        g.db.query(ContractTrack.type_id, InvType.typeName)
         .join(InvType, ContractTrack.type_id == InvType.typeID)
         .filter(ContractTrack.character_id == current_user.character_id)
         .all()
@@ -163,7 +163,7 @@ def autocomplete():
     if not query:
         return jsonify([])
 
-    results = InvType.query.filter(InvType.typeName.ilike(f"%{query}%")).limit(10).all()
+    results = g.db.query(InvType).filter(InvType.typeName.ilike(f"%{query}%")).limit(10).all()
 
     return jsonify(
         [{"typeID": item.typeID, "typeName": item.typeName} for item in results]
@@ -178,7 +178,7 @@ def page_character_post():
     character_id = request.form["character_id"]
     print(f"segment: {segment}")
     ownercheck = (
-        db.session.query(Characters)
+        g.db.query(Characters)
         .filter(Characters.master_character_id == current_user.character_id)
         .filter(Characters.character_id == character_id)
         .first()
@@ -193,7 +193,7 @@ def page_character_post():
 
         try:
             characternotifications = (
-                db.session.query(CharacterNotifications)
+                g.db.query(CharacterNotifications)
                 .filter(CharacterNotifications.character_id == character_id)
                 .filter(
                     CharacterNotifications.master_character_id
@@ -204,15 +204,15 @@ def page_character_post():
 
             characternotifications.enabled_notifications = preferences_str
 
-            db.session.commit()
+            g.db.commit()
         except Exception as error:
             characternotifications = CharacterNotifications(
                 character_id=character_id,
                 master_character_id=current_user.character_id,
                 enabled_notifications=preferences_str,
             )
-            db.session.add(characternotifications)
-            db.session.commit()
+            g.db.add(characternotifications)
+            g.db.commit()
 
         return redirect(
             f"{url_for('home_blueprint.page_character_get')}?character_id={character_id}"
@@ -239,7 +239,7 @@ def page_character_get():
         return render_template("home/page-404.html"), 404
 
     notifications = (
-        db.session.query(CharacterNotifications.enabled_notifications)
+        g.db.query(CharacterNotifications.enabled_notifications)
         .filter(CharacterNotifications.character_id == character_id)
         .filter(CharacterNotifications.master_character_id == current_user.character_id)
         .first()
@@ -253,7 +253,7 @@ def page_character_get():
     try:
         # Get Characters
         character = (
-            db.session.query(
+            g.db.query(
                 Characters.character_name,
                 Characters.character_id,
                 SkillSet.total_sp,
@@ -285,14 +285,14 @@ def page_miningledger():
 
     try:
         # # Define the query
-        # query = db.session.query(distinct(MiningLedger.date)).order_by(desc(MiningLedger.date))
+        # query = g.db.query(distinct(MiningLedger.date)).order_by(desc(MiningLedger.date))
 
         # Aliasing the Characters table for the join
         CharactersAlias = aliased(Characters)
 
         # Updating the query
         query = (
-            db.session.query(distinct(MiningLedger.date))
+            g.db.query(distinct(MiningLedger.date))
             .join(Characters, MiningLedger.character_id == Characters.character_id)
             .filter(Characters.master_character_id == current_user.character_id)
             .order_by(desc(MiningLedger.date))
@@ -312,7 +312,7 @@ def page_miningledger():
 
             # Define the query
             ledger_query = (
-                db.session.query(
+                g.db.query(
                     Characters.character_name,
                     MiningLedger.type_id,
                     InvType.typeName,
@@ -382,7 +382,7 @@ def page_blueprints():
 
     # Get All of the users' Characters
     try:
-        characters = Characters.query.filter(
+        characters = g.db.query(Characters).filter(
             Characters.master_character_id == current_user.character_id
         ).all()
     except NoResultFound:
@@ -401,7 +401,7 @@ def page_blueprints():
         )
 
     # Total number of blueprints for these characters
-    total_blueprints = Blueprints.query.filter(
+    total_blueprints = g.db.query(Blueprints).filter(
         Blueprints.character_id.in_(character_ids)
     ).count()
 
@@ -410,7 +410,7 @@ def page_blueprints():
 
     # Fetch blueprints for the current page
     blueprints = (
-        Blueprints.query.filter(Blueprints.character_id.in_(character_ids))
+        g.db.query(Blueprints).filter(Blueprints.character_id.in_(character_ids))
         .offset((page - 1) * per_page)
         .limit(per_page)
         .all()
@@ -420,7 +420,7 @@ def page_blueprints():
     type_ids = {bp.type_id for bp in blueprints}
     item_names = {
         item.typeID: item.typeName
-        for item in InvType.query.filter(InvType.typeID.in_(type_ids)).all()
+        for item in g.db.query(InvType).filter(InvType.typeID.in_(type_ids)).all()
     }
 
     # Build the final list
@@ -472,13 +472,13 @@ def bp_finder():
         
         if system_name:
             # Get all character IDs for the current user
-            user_characters = db.session.query(Characters.character_id).filter(
+            user_characters = g.db.query(Characters.character_id).filter(
                 Characters.master_character_id == current_user.character_id
             ).all()
             user_character_ids = [char.character_id for char in user_characters]
             print(f"user_character_ids: {user_character_ids}")
             # Get all blueprint type_ids owned by the user's characters
-            owned_blueprints = db.session.query(Blueprints.type_id).filter(
+            owned_blueprints = g.db.query(Blueprints.type_id).filter(
                 Blueprints.character_id.in_(user_character_ids)
             ).distinct().all()
             owned_type_ids = [bp.type_id for bp in owned_blueprints]
@@ -486,13 +486,13 @@ def bp_finder():
             print(f"owned_type_ids_len: {len(owned_type_ids)}")
             
             # Find the system by name
-            target_system = db.session.query(MapSolarSystems).filter(
+            target_system = g.db.query(MapSolarSystems).filter(
                 MapSolarSystems.solarSystemName.ilike(f'%{system_name}%')
             ).first()
             
             if target_system:
                 # Get blueprint orders not owned by the user
-                query = db.session.query(
+                query = g.db.query(
                     BlueprintLongDurationOrder,
                     MapSolarSystems,
                     StaStation,
@@ -578,19 +578,19 @@ def api_bp_finder():
         return jsonify({'error': 'System name is required'}), 400
     
     # Get all character IDs for the current user
-    user_characters = db.session.query(Characters.character_id).filter(
+    user_characters = g.db.query(Characters.character_id).filter(
         Characters.master_character_id == current_user.character_id
     ).all()
     user_character_ids = [char.character_id for char in user_characters]
     
     # Get all blueprint type_ids owned by the user's characters
-    owned_blueprints = db.session.query(Blueprints.type_id).filter(
+    owned_blueprints = g.db.query(Blueprints.type_id).filter(
         Blueprints.character_id.in_(user_character_ids)
     ).distinct().all()
     owned_type_ids = [bp.type_id for bp in owned_blueprints]
     
     # Find the system
-    target_system = db.session.query(MapSolarSystems).filter(
+    target_system = g.db.query(MapSolarSystems).filter(
         MapSolarSystems.solarSystemName.ilike(f'%{system_name}%')
     ).first()
     
@@ -598,7 +598,7 @@ def api_bp_finder():
         return jsonify({'error': f'System "{system_name}" not found'}), 404
     
     # Build the query
-    query = db.session.query(
+    query = g.db.query(
         BlueprintLongDurationOrder,
         MapSolarSystems,
         StaStation,

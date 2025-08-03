@@ -8,7 +8,7 @@ import hmac
 import hashlib
 import urllib.parse
 import json
-import esipy
+import logging
 from apps.authentication.util import verify_pass
 from flask import render_template, redirect, request, url_for, session
 from flask_login import current_user, login_user, logout_user, login_required
@@ -17,16 +17,28 @@ from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from sqlalchemy.orm.exc import NoResultFound
 from cryptography.fernet import Fernet
-from esipy.exceptions import APIException
 from apps import discord_client
 from flask_discord import requires_authorization
 
 from models.users import Users
 from models.characters import Characters
-from models.database import get_db
+from flask import g
 
-fen_key = Fernet.generate_key()
-cipher_suite = Fernet(fen_key)
+logger = logging.getLogger(__name__)
+
+def get_cipher_suite():
+    """Get a Fernet cipher suite using app's secret key"""
+    from flask import current_app
+    import base64
+    import hashlib
+    
+    # Use Flask's SECRET_KEY to generate a consistent Fernet key
+    secret_key = current_app.config['SECRET_KEY'].encode()
+    # Hash to get exactly 32 bytes for Fernet key
+    key_hash = hashlib.sha256(secret_key).digest()
+    # Encode as base64 for Fernet
+    fernet_key = base64.urlsafe_b64encode(key_hash)
+    return Fernet(fernet_key)
 
 
 
@@ -36,13 +48,15 @@ def route_default():
 
 
 def Encrypt(text_f):
-    encrypted = fen_key.encrypt(bytes(text_f.get(), "utf-8"))
+    cipher_suite = get_cipher_suite()
+    encrypted = cipher_suite.encrypt(bytes(text_f.get(), "utf-8"))
     print("[*] Encrypted: {}".format(encrypted))
     return encrypted
 
 
 def Decrypt(text_f):
-    plain = fen_key.decrypt(bytes(text_f.get(), "utf-8"))
+    cipher_suite = get_cipher_suite()
+    plain = cipher_suite.decrypt(bytes(text_f.get(), "utf-8"))
     print("[*] Plain: {}".format(plain))
     return plain
 
@@ -59,6 +73,7 @@ def generate_token(salt="None"):
     obj = {"salt": salt}
     j = json.dumps(obj)
 
+    cipher_suite = get_cipher_suite()
     encMessage = urllib.parse.quote_plus(cipher_suite.encrypt(j.encode()))
 
     return encMessage
@@ -75,19 +90,22 @@ def sso_login():
 
     session["token"] = urllib.parse.unquote_plus(token)
 
-    return redirect(
-        esi.esisecurity.get_auth_uri(
-            scopes=[
-                "esi-wallet.read_character_wallet.v1",
-                "esi-industry.read_character_mining.v1",
-                "esi-characters.read_blueprints.v1",
-                "esi-markets.structure_markets.v1",
-                "publicData",
-                "esi-skills.read_skills.v1",
-            ],
-            state=token,
-        )
-    )
+    # Get authorization URL from Preston
+    scopes = [
+        "esi-wallet.read_character_wallet.v1",
+        "esi-industry.read_character_mining.v1",
+        "esi-characters.read_blueprints.v1",
+        "esi-markets.structure_markets.v1",
+        "publicData",
+        "esi-skills.read_skills.v1",
+    ]
+    
+    auth_url, state = esi.get_authorize_url(scopes)
+    # Store the state for verification
+    session["oauth_state"] = state
+    session["csrf_token"] = token
+    
+    return redirect(auth_url)
 
 
 @blueprint.route("/sso/callback")
@@ -96,90 +114,113 @@ def callback():
 
     # get the code from the login process
     code = request.args.get("code")
-    token = request.args.get("state")
-    # compare the state with the saved token for CSRF check
+    state = request.args.get("state")
+    
+    # Verify OAuth state to prevent CSRF
+    oauth_state = session.pop("oauth_state", "")
+    csrf_token = session.pop("csrf_token", "")
     sess_token = session.pop("token", "")
+    
+    # Clear any potentially corrupted session tokens
+    session.pop("token", None)
 
-    if token != str(sess_token):
-        return "Login EVE Online SSO failed: Session Token Mismatch", 403
+    if state != oauth_state:
+        return "Login EVE Online SSO failed: OAuth State Mismatch", 403
 
-    if sess_token == "" or token == None:
-        return "Login EVE Online SSO failed: Session Token is Empty", 403
+    if not code or not state:
+        return "Login EVE Online SSO failed: Missing code or state", 403
 
-    # try to get tokens
+    # try to get tokens using Preston
     try:
-        auth_response = esi.esisecurity.auth(code)
-    except APIException as e:
-        return "Login EVE Online SSO failed: %s" % e, 403
+        auth_response = esi.exchange_authorization_code(code, state)
+    except Exception as e:
+        return f"Login EVE Online SSO failed: {e}", 403
 
-    # we get the character informations
-    cdata = esi.esisecurity.verify()
+    # get the character information from the access token
+    try:
+        cdata = esi.get_character_info(auth_response['access_token'])
+    except Exception as e:
+        return f"Failed to get character info: {e}", 403
 
-    # if sess_token is None or token is None or token != sess_token:
-    #     return "Login EVE Online SSO failed: Session Token Mismatch", 403
+    # Extract character ID from Preston character info
+    # Preston returns character info in a different format than esipy
+    character_id_str = cdata.get("CharacterID")
+    if not character_id_str:
+        return f"Failed to get character ID from SSO response: {cdata}", 403
+    
+    characterID = int(character_id_str)
+    character_name = cdata.get("CharacterName", "")
+    character_owner_hash = cdata.get("CharacterOwnerHash", "")
+
+    db = g.db
+    
     if current_user.is_authenticated:
-        token = token.encode()
-        decMessage = cipher_suite.decrypt(token)
-        json_data = json.loads(decMessage)
-        master_character_id = json_data["salt"]
+        # Adding additional character to existing user
+        if csrf_token:
+            try:
+                cipher_suite = get_cipher_suite()
+                token_bytes = csrf_token.encode()
+                decMessage = cipher_suite.decrypt(token_bytes)
+                json_data = json.loads(decMessage)
+                master_character_id = json_data["salt"]
+            except Exception as e:
+                # If decryption fails (old token), use current user as master
+                logger.warning(f"Failed to decrypt CSRF token: {e}, using current user as master")
+                master_character_id = current_user.character_id
+        else:
+            master_character_id = current_user.character_id
 
-        # This is a logged out user, check in database, if the user exists
-        characterID = cdata["sub"].split(":")[2]
+        # Check if character already exists
         try:
-            character = Characters.query.filter(
+            character = db.query(Characters).filter(
                 Characters.character_id == characterID,
             ).one()
-
         except NoResultFound:
             character = Characters()
             character.character_id = characterID
             character.master_character_id = master_character_id
 
-        character.character_owner_hash = cdata["owner"]
-        character.character_name = cdata["name"]
+        character.character_owner_hash = character_owner_hash
+        character.character_name = character_name
         character.sso_is_valid = True
         character.update_token(auth_response)
 
-        db = get_db()
-        # now the character is ready, so update/create it and log the character
+        # Save character
         try:
-            db.session.merge(character)
-            db.session.commit()
-
-        except BaseException:
-            db.session.rollback()
-            return "Cannot add the user - uid: %d" % characterID
+            db.merge(character)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            return f"Cannot add the character - uid: {characterID}, error: {e}", 500
 
         return redirect(url_for("home_blueprint.index"))
 
     else:
-        # This is a logged out user, check in database, if the user exists
-        characterID = cdata["sub"].split(":")[2]
+        # New user login
         try:
-            user = Users.query.filter(
+            user = db.query(Users).filter(
                 Users.character_id == characterID,
             ).one()
-
         except NoResultFound:
             user = Users()
             user.character_id = characterID
 
-        user.character_owner_hash = cdata["owner"]
-        user.character_name = cdata["name"]
+        user.character_owner_hash = character_owner_hash
+        user.character_name = character_name
         user.update_token(auth_response)
 
-        # now the user is ready, so update/create it and log the user
+        # Save user and login
         try:
-            db.session.merge(user)
-            db.session.commit()
+            db.merge(user)
+            db.commit()
 
             login_user(user)
             session.permanent = True
 
-        except BaseException:
-            db.session.rollback()
+        except Exception as e:
+            db.rollback()
             logout_user()
-            return "Cannot login the user - uid: %d" % characterID
+            return f"Cannot login the user - uid: {characterID}, error: {e}", 500
 
         return redirect(url_for("home_blueprint.index"))
 
@@ -193,7 +234,8 @@ def login():
         password = request.form["password"]
 
         # Locate user
-        user = Users.query.filter_by(username=username).first()
+        db = g.db
+        user = db.query(Users).filter_by(username=username).first()
 
         # Check the password
         if user and verify_pass(password, user.password):
@@ -221,7 +263,8 @@ def register():
         email = request.form["email"]
 
         # Check usename exists
-        user = Users.query.filter_by(username=username).first()
+        db = g.db
+        user = db.query(Users).filter_by(username=username).first()
         if user:
             return render_template(
                 "accounts/register.html",
@@ -232,7 +275,7 @@ def register():
             )
 
         # Check email exists
-        user = Users.query.filter_by(email=email).first()
+        user = db.query(Users).filter_by(email=email).first()
         if user:
             return render_template(
                 "accounts/register.html",
@@ -244,8 +287,8 @@ def register():
 
         # else we can create the user
         user = Users(**request.form)
-        db.session.add(user)
-        db.session.commit()
+        db.add(user)
+        db.commit()
 
         return render_template(
             "accounts/register.html",
@@ -282,14 +325,15 @@ def discord_callback():
     user = discord_client.fetch_user()
 
     if user:
-        user_data = Users.query.filter(
+        db = g.db
+        user_data = db.query(Users).filter(
             Users.character_id == current_user.character_id,
         ).one()
 
         user_data.discord_user_id = user.id
 
-        db.session.merge(user_data)
-        db.session.commit()
+        db.merge(user_data)
+        db.commit()
     else:
         print("user not found")
     welcome_user(user)
